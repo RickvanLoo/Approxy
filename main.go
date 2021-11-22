@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/RickvanLoo/badmath/mult"
 )
 
 func main() {
 	fmt.Println("Hello, world.")
 
-	mult := New_uAM(8)
+	mult := mult.New_uAM(2)
 	mult.print()
 	mult.VHDLtoFile("output.vhd")
 }
