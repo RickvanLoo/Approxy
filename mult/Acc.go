@@ -16,7 +16,7 @@ type UnsignedAccurateMultiplyer struct {
 	LUT     [][]uint
 }
 
-func New_uAM(size uint) *UnsignedAccurateMultiplyer {
+func NewUnsignedAcc(size uint) *UnsignedAccurateMultiplyer {
 	m := new(UnsignedAccurateMultiplyer)
 	m.Bitsize = size
 	m.Name = "uAcc" + strconv.Itoa(int(size)) + "bitMult"
@@ -37,13 +37,17 @@ func New_uAM(size uint) *UnsignedAccurateMultiplyer {
 	return m
 }
 
-func (m *UnsignedAccurateMultiplyer) print() {
+func (m *UnsignedAccurateMultiplyer) Print() {
 	fmt.Printf("%+v\n", m)
 }
 
 //returnVal, returns output for two inputs
-func (m *UnsignedAccurateMultiplyer) returnVal(x, y uint) uint {
+func (m *UnsignedAccurateMultiplyer) ReturnVal(x, y uint) uint {
 	return m.LUT[x][y]
+}
+
+func (m *UnsignedAccurateMultiplyer) changeVal(x, y, val uint) {
+	m.LUT[x][y] = val
 }
 
 //convertindex converts integer to binary, adds trailing zeroes for input-vectors, used for VHDL Template
@@ -61,10 +65,12 @@ func (m *UnsignedAccurateMultiplyer) convertval(value interface{}) string {
 }
 
 //Outputs VHDL code for generated multiplier to path file
-func (m *UnsignedAccurateMultiplyer) VHDLtoFile(path string) {
+func (m *UnsignedAccurateMultiplyer) VHDLtoFile(folder string, name string) {
 	funcMap := template.FuncMap{"indexconv": m.convertindex, "valconv": m.convertval}
 	templatepath := "template/multbehav.vhd"
 	templatename := "multbehav.vhd"
+
+	path := folder + "/" + name
 
 	t, err := template.New(templatename).Funcs(funcMap).ParseFiles(templatepath)
 	if err != nil {
