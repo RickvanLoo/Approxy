@@ -13,6 +13,7 @@ type VivadoTCL struct {
 	Top             string
 	OOC             bool
 	WriteCheckpoint bool
+	Placement       bool
 	Utilization     bool
 }
 
@@ -24,6 +25,7 @@ func CreateVivadoTCL(folder string, name string, top string) {
 	TCL.Top = top
 	TCL.WriteCheckpoint = true
 	TCL.Utilization = true
+	TCL.Placement = true
 
 	templatepath := "template/vivado.tcl"
 	templatename := "vivado.tcl"
