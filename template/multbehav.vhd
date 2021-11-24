@@ -21,8 +21,12 @@ begin
                     when "{{$itemindex | indexconv}}" =>
                         prod <= "{{$val | valconv}}";
                     {{- end}}
+                    when others =>
+                        prod <= (others => 'X');
                 end case;
             {{- end}}
+            when others =>
+                prod <= (others => 'X');
 		end case;
 		end process;
 

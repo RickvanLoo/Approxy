@@ -1,11 +1,13 @@
 package mult
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"math"
 	"os"
 	"strconv"
+	"strings"
 	"text/template"
 )
 
@@ -90,4 +92,33 @@ func (m *UnsignedAccurateMultiplyer) VHDLtoFile(folder string, name string) {
 		log.Print("execute: ", err)
 		return
 	}
+}
+
+func (m *UnsignedAccurateMultiplyer) GenerateOutput(folder string, name string) {
+	fmtstr := "%0" + strconv.Itoa(int(m.Bitsize)) + "b %0" + strconv.Itoa(int(m.Bitsize)) + "b %0" + strconv.Itoa(int(m.Osize)) + "b\n"
+	path := folder + "/" + name
+
+	file, err := os.Create(path)
+	if err != nil {
+		log.Println(err)
+	}
+
+	writer := bufio.NewWriter(file)
+
+	for x, row := range m.LUT {
+		for y, z := range row {
+			//Remove newline from last output to not mess up XSIM
+			if (x == (len(m.LUT) - 1)) && (y == (len(row) - 1)) {
+				fmtstr = strings.TrimSuffix(fmtstr, "\n")
+			}
+
+			_, err = fmt.Fprintf(writer, fmtstr, x, y, z)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+	}
+
+	writer.Flush()
+
 }

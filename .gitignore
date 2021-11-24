@@ -19,4 +19,8 @@ output
 *.jou
 *.dcp
 *.rpt
+*.pb
 .Xil
+xsim.dir
+*_xsimlog
+*.wdb
