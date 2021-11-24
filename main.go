@@ -28,12 +28,21 @@ func CreatePath(path string) {
 
 func main() {
 	//ClearLogs()
-	fmt.Println("Hello, world.")
+	fmt.Println("badmath...")
 
 	OutputPath = "output"
 	ClearPath(OutputPath)
 	CreatePath(OutputPath)
 
+	M1 := mult.M1()
+	M1.Mult.Print()
+	M1.Mult.VHDLtoFile(OutputPath, "M1.vhd")
+	Scaler := mult.CreateScaler(M1.Mult, 31440, OutputPath)
+	CreateVivadoTCL(OutputPath, "main.tcl", Scaler.EntityName)
+	ExecuteVivadoTCL(OutputPath, "main.tcl")
+}
+
+func M1M2M3M4() {
 	M1 := mult.M1()
 	M1.Mult.Print()
 	M2 := mult.M2()
@@ -71,5 +80,4 @@ func main() {
 	ExecuteVivadoTCL(OutputPath, "main1.tcl")
 	ExecuteVivadoTCL(OutputPath, "main2.tcl")
 	ExecuteVivadoTCL(OutputPath, "main3.tcl")
-
 }
