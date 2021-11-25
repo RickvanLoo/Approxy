@@ -8,24 +8,28 @@ import (
 )
 
 type VivadoTCL struct {
+	FolderPath string
+	TopName    string
+	FileName   string
+	Settings   *VivadoTCLSettings
+}
+
+type VivadoTCLSettings struct {
 	PartName        string
-	FolderName      string
-	TopName         string
 	OOC             bool
+	NO_DSP          bool
 	WriteCheckpoint bool
 	Placement       bool
 	Utilization     bool
 }
 
-func CreateVivadoTCL(FolderPath string, FileName string, TopName string) {
+func CreateVivadoTCL(FolderPath string, FileName string, TopName string, Settings *VivadoTCLSettings) *VivadoTCL {
 	TCL := new(VivadoTCL)
-	TCL.PartName = "Xc7z030fbg676-3"
-	TCL.OOC = true
-	TCL.FolderName = FolderPath
+	TCL.FolderPath = FolderPath
 	TCL.TopName = TopName
-	TCL.WriteCheckpoint = true
-	TCL.Utilization = true
-	TCL.Placement = true
+	TCL.FileName = FileName
+
+	TCL.Settings = Settings
 
 	templatepath := "template/vivado.tcl"
 	templatename := "vivado.tcl"
@@ -33,26 +37,28 @@ func CreateVivadoTCL(FolderPath string, FileName string, TopName string) {
 	t, err := template.New(templatename).ParseFiles(templatepath)
 	if err != nil {
 		log.Print(err)
-		return
+		return TCL
 	}
 
 	f, err := os.Create(FolderPath + "/" + FileName)
 
 	if err != nil {
 		log.Println("create file: ", err)
-		return
+		return TCL
 	}
 
 	err = t.ExecuteTemplate(f, templatename, TCL)
 	if err != nil {
 		log.Print("execute: ", err)
-		return
+		return TCL
 	}
+
+	return TCL
 }
 
-func ExecuteVivadoTCL(FolderPath string, FileName string) {
-	cmd := exec.Command("vivado", "-mode", "batch", "-source", FileName)
-	cmd.Dir = FolderPath
+func (tcl *VivadoTCL) Exec() {
+	cmd := exec.Command("vivado", "-mode", "batch", "-source", tcl.FileName)
+	cmd.Dir = tcl.FolderPath
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()

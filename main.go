@@ -10,6 +10,7 @@ import (
 )
 
 var OutputPath string
+var VivadoSettings *Viv.VivadoTCLSettings
 
 func ClearPath(path string) {
 	err := os.RemoveAll(path)
@@ -35,8 +36,17 @@ func main() {
 	ClearPath(OutputPath)
 	CreatePath(OutputPath)
 
-	M1M2M3M4()
+	VivadoSettings = new(Viv.VivadoTCLSettings)
+	VivadoSettings.NO_DSP = true
+	VivadoSettings.OOC = true
+	VivadoSettings.PartName = "Xc7z030fbg676-3"
+	VivadoSettings.Placement = true
+	VivadoSettings.Utilization = true
+	VivadoSettings.WriteCheckpoint = true
 
+	acc16 := VHDL.UAM_To_VHDL("Acc16", 16, OutputPath, "Acc16.vhd")
+	tcl := Viv.CreateVivadoTCL(OutputPath, "main1.tcl", acc16.EntityName, VivadoSettings)
+	tcl.Exec()
 }
 
 func ScaleM1() {
@@ -44,8 +54,8 @@ func ScaleM1() {
 	M1.LUT2D.Print()
 	M1.LUT2D.VHDLtoFile(OutputPath, "M1.vhd")
 	Scaler := VHDL.CreateScaler(M1.LUT2D, 100, OutputPath)
-	Viv.CreateVivadoTCL(OutputPath, "main.tcl", Scaler.EntityName)
-	Viv.ExecuteVivadoTCL(OutputPath, "main.tcl")
+	tcl := Viv.CreateVivadoTCL(OutputPath, "main.tcl", Scaler.EntityName, VivadoSettings)
+	tcl.Exec()
 }
 
 func M1M2M3M4() {
@@ -78,14 +88,14 @@ func M1M2M3M4() {
 	XSIM3.Exec(OutputPath)
 	XSIM4.Exec(OutputPath)
 
-	Viv.CreateVivadoTCL(OutputPath, "main1.tcl", M1.LUT2D.EntityName)
-	Viv.CreateVivadoTCL(OutputPath, "main2.tcl", M2.LUT2D.EntityName)
-	Viv.CreateVivadoTCL(OutputPath, "main3.tcl", M3.LUT2D.EntityName)
-	Viv.CreateVivadoTCL(OutputPath, "main4.tcl", M4.LUT2D.EntityName)
+	tcl1 := Viv.CreateVivadoTCL(OutputPath, "main1.tcl", M1.LUT2D.EntityName, VivadoSettings)
+	tcl2 := Viv.CreateVivadoTCL(OutputPath, "main2.tcl", M2.LUT2D.EntityName, VivadoSettings)
+	tcl3 := Viv.CreateVivadoTCL(OutputPath, "main3.tcl", M3.LUT2D.EntityName, VivadoSettings)
+	tcl4 := Viv.CreateVivadoTCL(OutputPath, "main4.tcl", M4.LUT2D.EntityName, VivadoSettings)
 
-	Viv.ExecuteVivadoTCL(OutputPath, "main1.tcl")
-	Viv.ExecuteVivadoTCL(OutputPath, "main2.tcl")
-	Viv.ExecuteVivadoTCL(OutputPath, "main3.tcl")
-	Viv.ExecuteVivadoTCL(OutputPath, "main4.tcl")
+	tcl1.Exec()
+	tcl2.Exec()
+	tcl3.Exec()
+	tcl4.Exec()
 
 }
