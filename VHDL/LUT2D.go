@@ -1,78 +1,56 @@
-package mult
+package VHDL
 
 import (
 	"bufio"
 	"fmt"
 	"log"
-	"math"
 	"os"
 	"strconv"
 	"strings"
 	"text/template"
 )
 
-type UnsignedAccurateMultiplyer struct {
-	Name    string
-	Bitsize uint
-	Osize   uint
-	LUT     [][]uint
+type LUT2D struct {
+	EntityName string
+	BitSize    uint
+	OutputSize uint
+	LUT        [][]uint
 }
 
-func NewUnsignedAcc(size uint) *UnsignedAccurateMultiplyer {
-	m := new(UnsignedAccurateMultiplyer)
-	m.Bitsize = size
-	m.Name = "uAcc" + strconv.Itoa(int(size)) + "bitMult"
-	m.Osize = 2 * m.Bitsize
-	LUTSize := int(math.Pow(2, float64(size)))
-
-	var LUT [][]uint
-	for x := 0; x < LUTSize; x++ {
-		var row []uint
-		for y := 0; y < LUTSize; y++ {
-			row = append(row, uint(x*y))
-		}
-		LUT = append(LUT, row)
-	}
-
-	m.LUT = LUT
-
-	return m
-}
-
-func (m *UnsignedAccurateMultiplyer) Print() {
+func (m *LUT2D) Print() {
 	fmt.Printf("%+v\n", m)
 }
 
 //returnVal, returns output for two inputs
-func (m *UnsignedAccurateMultiplyer) ReturnVal(x, y uint) uint {
-	return m.LUT[x][y]
+func (m *LUT2D) ReturnVal(a, b uint) uint {
+	return m.LUT[a][b]
 }
 
-func (m *UnsignedAccurateMultiplyer) changeVal(x, y, val uint) {
-	m.LUT[x][y] = val
+func (m *LUT2D) changeVal(a, b, prod uint) {
+	m.LUT[a][b] = prod
 }
 
 //convertindex converts integer to binary, adds trailing zeroes for input-vectors, used for VHDL Template
-func (m *UnsignedAccurateMultiplyer) convertindex(value interface{}) string {
+func (m *LUT2D) convertindex(value interface{}) string {
 	var format string
-	format = "%0" + strconv.Itoa(int(m.Bitsize)) + "b"
+	format = "%0" + strconv.Itoa(int(m.BitSize)) + "b"
 	return fmt.Sprintf(format, value)
 }
 
 //convertval converts integer to binary, adds trailing zeroes for output-vectors, used for VHDL Template
-func (m *UnsignedAccurateMultiplyer) convertval(value interface{}) string {
+func (m *LUT2D) convertval(value interface{}) string {
 	var format string
-	format = "%0" + strconv.Itoa(int(m.Osize)) + "b"
+	format = "%0" + strconv.Itoa(int(m.OutputSize)) + "b"
 	return fmt.Sprintf(format, value)
 }
 
 //Outputs VHDL code for generated multiplier to path file
-func (m *UnsignedAccurateMultiplyer) VHDLtoFile(folder string, name string) {
+func (m *LUT2D) VHDLtoFile(FolderPath string, FileName string) {
 	funcMap := template.FuncMap{"indexconv": m.convertindex, "valconv": m.convertval}
 	templatepath := "template/multbehav.vhd"
 	templatename := "multbehav.vhd"
 
-	path := folder + "/" + name
+	path := FolderPath + "/" + FileName
 
 	t, err := template.New(templatename).Funcs(funcMap).ParseFiles(templatepath)
 	if err != nil {
@@ -94,9 +72,9 @@ func (m *UnsignedAccurateMultiplyer) VHDLtoFile(folder string, name string) {
 	}
 }
 
-func (m *UnsignedAccurateMultiplyer) GenerateOutput(folder string, name string) {
-	fmtstr := "%0" + strconv.Itoa(int(m.Bitsize)) + "b %0" + strconv.Itoa(int(m.Bitsize)) + "b %0" + strconv.Itoa(int(m.Osize)) + "b\n"
-	path := folder + "/" + name
+func (m *LUT2D) GenerateOutput(FolderPath string, FileName string) {
+	fmtstr := "%0" + strconv.Itoa(int(m.BitSize)) + "b %0" + strconv.Itoa(int(m.BitSize)) + "b %0" + strconv.Itoa(int(m.OutputSize)) + "b\n"
+	path := FolderPath + "/" + FileName
 
 	file, err := os.Create(path)
 	if err != nil {

@@ -1,4 +1,4 @@
-package mult
+package VHDL
 
 import (
 	"log"
@@ -7,26 +7,26 @@ import (
 )
 
 type Scaler struct {
-	Item       *UnsignedAccurateMultiplyer
-	ItemName   string
+	LUT        *LUT2D
+	LUTName    string
 	EntityName string
 	BitSize    uint
 	ScaleN     uint
 }
 
-func CreateScaler(m *UnsignedAccurateMultiplyer, N uint, folder string) *Scaler {
+func CreateScaler(m *LUT2D, N uint, FolderPath string) *Scaler {
 	scl := new(Scaler)
-	scl.Item = m
-	scl.ItemName = scl.Item.Name
-	scl.BitSize = scl.Item.Bitsize
-	scl.EntityName = scl.ItemName + "_scaler"
+	scl.LUT = m
+	scl.LUTName = scl.LUT.EntityName
+	scl.BitSize = scl.LUT.BitSize
+	scl.EntityName = scl.LUTName + "_scaler"
 	scl.ScaleN = N
 
 	templatepath := "template/scaler.vhd"
 	templatename := "scaler.vhd"
-	name := scl.ItemName + "_scaler.vhd"
+	name := scl.LUTName + "_scaler.vhd"
 
-	path := folder + "/" + name
+	path := FolderPath + "/" + name
 
 	t, err := template.New(templatename).ParseFiles(templatepath)
 	if err != nil {

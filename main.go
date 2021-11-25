@@ -5,7 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/RickvanLoo/badmath/mult"
+	"github.com/RickvanLoo/badmath/VHDL"
+	Viv "github.com/RickvanLoo/badmath/Vivado"
 )
 
 var OutputPath string
@@ -34,50 +35,57 @@ func main() {
 	ClearPath(OutputPath)
 	CreatePath(OutputPath)
 
-	M1 := mult.M1()
-	M1.Mult.Print()
-	M1.Mult.VHDLtoFile(OutputPath, "M1.vhd")
-	Scaler := mult.CreateScaler(M1.Mult, 31440, OutputPath)
-	CreateVivadoTCL(OutputPath, "main.tcl", Scaler.EntityName)
-	ExecuteVivadoTCL(OutputPath, "main.tcl")
+	M1M2M3M4()
+
+}
+
+func ScaleM1() {
+	M1 := VHDL.M1()
+	M1.LUT2D.Print()
+	M1.LUT2D.VHDLtoFile(OutputPath, "M1.vhd")
+	Scaler := VHDL.CreateScaler(M1.LUT2D, 100, OutputPath)
+	Viv.CreateVivadoTCL(OutputPath, "main.tcl", Scaler.EntityName)
+	Viv.ExecuteVivadoTCL(OutputPath, "main.tcl")
 }
 
 func M1M2M3M4() {
-	M1 := mult.M1()
-	M1.Mult.Print()
-	M2 := mult.M2()
-	M2.Mult.Print()
-	M3 := mult.M3()
-	M3.Mult.Print()
-	M4 := mult.M4()
-	M4.Mult.Print()
+	M1 := VHDL.M1()
+	M1.LUT2D.Print()
+	M2 := VHDL.M2()
+	M2.LUT2D.Print()
+	M3 := VHDL.M3()
+	M3.LUT2D.Print()
+	M4 := VHDL.M4()
+	M4.LUT2D.Print()
 
-	M1.Mult.VHDLtoFile(OutputPath, "m1.vhd")
-	M2.Mult.VHDLtoFile(OutputPath, "m2.vhd")
-	M3.Mult.VHDLtoFile(OutputPath, "m3.vhd")
-	M4.Mult.VHDLtoFile(OutputPath, "m4.vhd")
+	M1.LUT2D.VHDLtoFile(OutputPath, "m1.vhd")
+	M2.LUT2D.VHDLtoFile(OutputPath, "m2.vhd")
+	M3.LUT2D.VHDLtoFile(OutputPath, "m3.vhd")
+	M4.LUT2D.VHDLtoFile(OutputPath, "m4.vhd")
 
-	M1.Mult.GenerateOutput(OutputPath, "testb1.txt")
-	M2.Mult.GenerateOutput(OutputPath, "testb2.txt")
-	M3.Mult.GenerateOutput(OutputPath, "testb3.txt")
-	M4.Mult.GenerateOutput(OutputPath, "testb4.txt")
+	M1.LUT2D.GenerateOutput(OutputPath, "testb1.txt")
+	M2.LUT2D.GenerateOutput(OutputPath, "testb2.txt")
+	M3.LUT2D.GenerateOutput(OutputPath, "testb3.txt")
+	M4.LUT2D.GenerateOutput(OutputPath, "testb4.txt")
 
-	XSIM1 := CreateXSIM(OutputPath, "m1.vhd", "testb1.txt", "topsim1.vhd", M1.Mult)
-	XSIM2 := CreateXSIM(OutputPath, "m2.vhd", "testb2.txt", "topsim2.vhd", M2.Mult)
-	XSIM3 := CreateXSIM(OutputPath, "m3.vhd", "testb3.txt", "topsim3.vhd", M3.Mult)
-	XSIM4 := CreateXSIM(OutputPath, "m4.vhd", "testb4.txt", "topsim4.vhd", M4.Mult)
+	XSIM1 := Viv.CreateXSIM(OutputPath, "m1.vhd", "testb1.txt", "topsim1.vhd", M1.LUT2D.EntityName, M1.LUT2D.BitSize)
+	XSIM2 := Viv.CreateXSIM(OutputPath, "m2.vhd", "testb2.txt", "topsim2.vhd", M2.LUT2D.EntityName, M2.LUT2D.BitSize)
+	XSIM3 := Viv.CreateXSIM(OutputPath, "m3.vhd", "testb3.txt", "topsim3.vhd", M3.LUT2D.EntityName, M3.LUT2D.BitSize)
+	XSIM4 := Viv.CreateXSIM(OutputPath, "m4.vhd", "testb4.txt", "topsim4.vhd", M4.LUT2D.EntityName, M4.LUT2D.BitSize)
 
 	XSIM1.Exec(OutputPath)
 	XSIM2.Exec(OutputPath)
 	XSIM3.Exec(OutputPath)
 	XSIM4.Exec(OutputPath)
 
-	CreateVivadoTCL(OutputPath, "main1.tcl", M1.Mult.Name)
-	CreateVivadoTCL(OutputPath, "main2.tcl", M2.Mult.Name)
-	CreateVivadoTCL(OutputPath, "main3.tcl", M3.Mult.Name)
-	CreateVivadoTCL(OutputPath, "main4.tcl", M4.Mult.Name)
+	Viv.CreateVivadoTCL(OutputPath, "main1.tcl", M1.LUT2D.EntityName)
+	Viv.CreateVivadoTCL(OutputPath, "main2.tcl", M2.LUT2D.EntityName)
+	Viv.CreateVivadoTCL(OutputPath, "main3.tcl", M3.LUT2D.EntityName)
+	Viv.CreateVivadoTCL(OutputPath, "main4.tcl", M4.LUT2D.EntityName)
 
-	ExecuteVivadoTCL(OutputPath, "main1.tcl")
-	ExecuteVivadoTCL(OutputPath, "main2.tcl")
-	ExecuteVivadoTCL(OutputPath, "main3.tcl")
+	Viv.ExecuteVivadoTCL(OutputPath, "main1.tcl")
+	Viv.ExecuteVivadoTCL(OutputPath, "main2.tcl")
+	Viv.ExecuteVivadoTCL(OutputPath, "main3.tcl")
+	Viv.ExecuteVivadoTCL(OutputPath, "main4.tcl")
+
 }

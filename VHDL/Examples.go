@@ -1,8 +1,8 @@
-package mult
+package VHDL
 
 func M1() *UnsignedApproxMultiplyer {
 	m := NewUnsignedApprox(2)
-	m.Mult.Name = "M1"
+	m.LUT2D.EntityName = "M1"
 	e7 := Modification{3, 3, 7}
 	m.AddModication(e7)
 	m.ExecModifications()
@@ -11,7 +11,7 @@ func M1() *UnsignedApproxMultiplyer {
 
 func M2() *UnsignedApproxMultiplyer {
 	m := NewUnsignedApprox(2)
-	m.Mult.Name = "M2"
+	m.LUT2D.EntityName = "M2"
 	e0 := Modification{1, 1, 0}
 	e1 := Modification{1, 3, 2}
 	e2 := Modification{3, 1, 2}
@@ -24,7 +24,7 @@ func M2() *UnsignedApproxMultiplyer {
 
 func M3() *UnsignedApproxMultiplyer {
 	m := NewUnsignedApprox(2)
-	m.Mult.Name = "M3"
+	m.LUT2D.EntityName = "M3"
 	e11 := Modification{3, 3, 11}
 	m.AddModication(e11)
 	m.ExecModifications()
@@ -33,7 +33,7 @@ func M3() *UnsignedApproxMultiplyer {
 
 func M4() *UnsignedApproxMultiplyer {
 	m := NewUnsignedApprox(2)
-	m.Mult.Name = "M3"
+	m.LUT2D.EntityName = "M4"
 	e5 := Modification{3, 3, 5}
 	m.AddModication(e5)
 	m.ExecModifications()

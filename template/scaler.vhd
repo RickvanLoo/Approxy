@@ -24,7 +24,7 @@ architecture Behavioral of {{.EntityName}} is
 begin
 
 scale_add: for I in 0 to scale_int-1 generate
-mult: entity work.{{.ItemName}} port map(a=>a(I), b=>b(I),prod=>prod(I));
+mult: entity work.{{.LUTName}} port map(a=>a(I), b=>b(I),prod=>prod(I));
 end generate scale_add;
 
 

@@ -1,15 +1,15 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity {{.Name}} is
-generic (word_size: integer:={{.Bitsize}}); 
+entity {{.EntityName}} is
+generic (word_size: integer:={{.BitSize}}); 
 Port ( 
 A : in  STD_LOGIC_VECTOR (word_size-1 downto 0);
 B : in  STD_LOGIC_VECTOR (word_size-1 downto 0);
 prod: out STD_LOGIC_VECTOR (word_size * 2 - 1 downto 0));
-end {{.Name}};
+end {{.EntityName}};
 
-architecture Behavioral of {{.Name}} is
+architecture Behavioral of {{.EntityName}} is
 begin
 	process(A,B) is
 	begin
