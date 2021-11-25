@@ -72,7 +72,7 @@ func (m *LUT2D) VHDLtoFile(FolderPath string, FileName string) {
 	}
 }
 
-func (m *LUT2D) GenerateOutput(FolderPath string, FileName string) {
+func (m *LUT2D) GenerateTestData(FolderPath string, FileName string) {
 	fmtstr := "%0" + strconv.Itoa(int(m.BitSize)) + "b %0" + strconv.Itoa(int(m.BitSize)) + "b %0" + strconv.Itoa(int(m.OutputSize)) + "b\n"
 	path := FolderPath + "/" + FileName
 

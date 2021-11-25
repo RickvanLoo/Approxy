@@ -6,13 +6,15 @@ import (
 	"text/template"
 )
 
-type UnsignedAccurateMultiplyer struct {
+//UnsingedNumericAccurateMultiplyer defines a multiplyer based upon 'accuratebehav.vhd', this is a BitSize A*B=prod multiplyer, using the IEEE Numeric lib
+type UnsignedNumericAccurateMultiplyer struct {
 	EntityName string
 	BitSize    uint
 }
 
-func UAM_To_VHDL(EntityName string, BitSize uint, FolderPath string, FileName string) *UnsignedAccurateMultiplyer {
-	m := new(UnsignedAccurateMultiplyer)
+//Creates a VHDL file of an UnsignedNumericAccurateMultiplyer.
+func UNAM_VHDL(EntityName string, BitSize uint, FolderPath string, FileName string) *UnsignedNumericAccurateMultiplyer {
+	m := new(UnsignedNumericAccurateMultiplyer)
 	m.EntityName = EntityName
 	m.BitSize = BitSize
 
@@ -41,4 +43,11 @@ func UAM_To_VHDL(EntityName string, BitSize uint, FolderPath string, FileName st
 	}
 
 	return m
+}
+
+//GenerateTestData uses the function from New2DUnsignedAcc, since their behaviour is identical.
+func (m *UnsignedNumericAccurateMultiplyer) GenerateTestData(FolderPath string, FileName string) {
+	Accurate2D := New2DUnsignedAcc(m.BitSize)
+	Accurate2D.EntityName = m.EntityName
+	Accurate2D.GenerateTestData(FolderPath, FileName)
 }

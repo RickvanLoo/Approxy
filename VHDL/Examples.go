@@ -1,5 +1,6 @@
 package VHDL
 
+///M1-M4 are 2-bit Unsigned Approximate Multiplayers defined by Gillani et al.
 func M1() *UnsignedApproxMultiplyer {
 	m := NewUnsignedApprox(2)
 	m.LUT2D.EntityName = "M1"
