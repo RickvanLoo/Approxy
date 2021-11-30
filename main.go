@@ -5,8 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/RickvanLoo/badmath/VHDL"
-	Viv "github.com/RickvanLoo/badmath/Vivado"
+	VHDL "badmath/VHDL"
+
+	Viv "badmath/Vivado"
 )
 
 var OutputPath string
