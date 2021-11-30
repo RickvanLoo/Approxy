@@ -44,6 +44,17 @@ func main() {
 	VivadoSettings.Utilization = true
 	VivadoSettings.WriteCheckpoint = true
 
+	o1 := VHDL.New2DUnsignedAcc(2)
+	o2 := VHDL.New2DUnsignedAcc(2)
+	o3 := VHDL.New2DUnsignedAcc(2)
+	o4 := VHDL.New2DUnsignedAcc(2)
+	RecLutArray := [4]*VHDL.LUT2D{o1, o2, o3, o4}
+	rec4 := VHDL.NewRecursive4(RecLutArray)
+	out := rec4.ReturnVal(3, 3)
+	fmt.Println(out)
+}
+
+func Accurate() {
 	acc8 := VHDL.UNAM_VHDL("Acc8", 8, OutputPath, "Acc8.vhd")
 	acc8.GenerateTestData(OutputPath, "testAcc8.txt")
 	xsim := Viv.CreateXSIM(OutputPath, "Acc8.vhd", "testAcc8.txt", "topsim.vhd", acc8.EntityName, acc8.BitSize)

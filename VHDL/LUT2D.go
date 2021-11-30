@@ -32,15 +32,13 @@ func (m *LUT2D) changeVal(a, b, prod uint) {
 
 //convertindex converts integer to binary, adds trailing zeroes for input-vectors, used for VHDL Template
 func (m *LUT2D) convertindex(value interface{}) string {
-	var format string
-	format = "%0" + strconv.Itoa(int(m.BitSize)) + "b"
+	format := "%0" + strconv.Itoa(int(m.BitSize)) + "b"
 	return fmt.Sprintf(format, value)
 }
 
 //convertval converts integer to binary, adds trailing zeroes for output-vectors, used for VHDL Template
 func (m *LUT2D) convertval(value interface{}) string {
-	var format string
-	format = "%0" + strconv.Itoa(int(m.OutputSize)) + "b"
+	format := "%0" + strconv.Itoa(int(m.OutputSize)) + "b"
 	return fmt.Sprintf(format, value)
 }
 
