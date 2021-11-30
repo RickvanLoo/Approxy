@@ -24,3 +24,4 @@ output
 xsim.dir
 *_xsimlog
 *.wdb
+*.str

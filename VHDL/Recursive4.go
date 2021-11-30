@@ -1,5 +1,16 @@
 package VHDL
 
+import (
+	"bufio"
+	"fmt"
+	"log"
+	"math"
+	"os"
+	"strconv"
+	"strings"
+	"text/template"
+)
+
 //LUTArray[0] = AH*BH
 //LUTArray[1] = AH*BL
 //LUTArray[2] = AL*BH
@@ -14,9 +25,13 @@ type Recursive4 struct {
 func NewRecursive4(LUTArray [4]*LUT2D) *Recursive4 {
 	r4 := new(Recursive4)
 	r4.BitSize = 4
-	r4.BitSize = 8
+	r4.OutputSize = 8
 	r4.EntityName = "Recursive4"
 	r4.LUTArray = LUTArray
+	r4.LUTArray[0].EntityName = "AH_BH"
+	r4.LUTArray[1].EntityName = "AH_BL"
+	r4.LUTArray[2].EntityName = "AL_BH"
+	r4.LUTArray[3].EntityName = "AL_BL"
 
 	return r4
 }
@@ -53,4 +68,68 @@ func (r4 *Recursive4) ReturnVal(a uint, b uint) uint {
 	output := ALBL + (ALBH << 2) + (AHBL << 2) + (AHBH << 4)
 
 	return output
+}
+
+func (r4 *Recursive4) GenerateTestData(FolderPath string, FileName string) {
+	fmtstr := "%0" + strconv.Itoa(int(r4.BitSize)) + "b %0" + strconv.Itoa(int(r4.BitSize)) + "b %0" + strconv.Itoa(int(r4.OutputSize)) + "b\n"
+	path := FolderPath + "/" + FileName
+
+	file, err := os.Create(path)
+	if err != nil {
+		log.Println(err)
+	}
+
+	writer := bufio.NewWriter(file)
+
+	maxval := int(math.Exp2(4))
+
+	for a := 0; a < maxval; a++ {
+		for b := 0; b < maxval; b++ {
+
+			if (a == 15) && (b == 15) {
+				fmtstr = strings.TrimSuffix(fmtstr, "\n")
+			}
+
+			out := r4.ReturnVal(uint(a), uint(b))
+
+			_, err = fmt.Fprintf(writer, fmtstr, a, b, out)
+			if err != nil {
+				log.Println(err)
+			}
+
+		}
+	}
+
+	writer.Flush()
+
+}
+
+func (r4 *Recursive4) VHDLtoFile(FolderPath string, FileName string) {
+	for _, mult := range r4.LUTArray {
+		mult.VHDLtoFile(FolderPath, mult.EntityName+".vhd")
+	}
+
+	templatepath := "template/rec4behav.vhd"
+	templatename := "rec4behav.vhd"
+
+	path := FolderPath + "/" + FileName
+
+	t, err := template.New(templatename).ParseFiles(templatepath)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	f, err := os.Create(path)
+
+	if err != nil {
+		log.Println("create file: ", err)
+		return
+	}
+
+	err = t.ExecuteTemplate(f, templatename, r4)
+	if err != nil {
+		log.Print("execute: ", err)
+		return
+	}
 }

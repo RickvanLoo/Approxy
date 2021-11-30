@@ -51,8 +51,13 @@ func main() {
 	o4 := VHDL.New2DUnsignedAcc(2)
 	RecLutArray := [4]*VHDL.LUT2D{o1, o2, o3, o4}
 	rec4 := VHDL.NewRecursive4(RecLutArray)
-	out := rec4.ReturnVal(3, 3)
-	fmt.Println(out)
+
+	rec4.GenerateTestData(OutputPath, "testRec4.txt")
+	rec4.VHDLtoFile(OutputPath, "rec4.vhd")
+	xsim := Viv.CreateXSIM(OutputPath, "*.vhd", "testRec4.txt", "topsim.vhd", rec4.EntityName, rec4.BitSize)
+	xsim.Exec()
+	//tcl := Viv.CreateVivadoTCL(OutputPath, "main1.tcl", rec4.EntityName, VivadoSettings)
+	//tcl.Exec()
 }
 
 func Accurate() {
