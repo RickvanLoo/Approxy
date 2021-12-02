@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -124,4 +125,36 @@ func (m *LUT2D) ReturnData() *EntityData {
 	d.VHDLFile = m.VHDLFile
 	d.TestFile = m.TestFile
 	return d
+}
+
+func (m *LUT2D) Overflow() bool {
+	maxval := int(math.Exp2(float64(m.BitSize)))
+	overflowval := int(math.Exp2(float64(m.OutputSize)))
+
+	for a := 0; a < maxval; a++ {
+		for b := 0; b < maxval; b++ {
+			if m.ReturnVal(uint(a), uint(b)) > uint(overflowval)-1 { //double check this with _test.go
+				log.Printf("WARNING: Overflow for %d*%d=%d>%d\n", a, b, m.ReturnVal(uint(a), uint(b)), overflowval-1)
+				log.Printf("Accurate: %d*%d=%d\n", a, b, a*b)
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func (m *LUT2D) MeanAbsoluteError() float64 {
+	maxval := int(math.Exp2(float64(m.BitSize)))
+	accum := float64(0)
+	for a := 1; a < maxval; a++ {
+		for b := 1; b < maxval; b++ {
+			accResult := float64(a * b)
+			r4Result := m.ReturnVal(uint(a), uint(b))
+			accum += math.Abs(float64(r4Result) - accResult)
+		}
+	}
+
+	return float64(1.0/math.Exp2(float64(m.OutputSize))) * accum
+
 }

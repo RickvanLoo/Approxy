@@ -59,12 +59,14 @@ func main() {
 
 	rec4.GenerateTestData(OutputPath)
 	rec4.GenerateVHDL(OutputPath)
+	fmt.Println(rec4.Overflow())
+	fmt.Println(rec4.MeanAbsoluteError())
 	// xsim := Viv.CreateXSIM(OutputPath, "SimRec4", rec4.GenerateVHDLEntityArray())
 	// xsim.Exec()
-	rec4scaler := VHDL.New2DScaler(rec4, 50)
-	rec4scaler.GenerateVHDL(OutputPath)
-	tcl := Viv.CreateVivadoTCL(OutputPath, "main1.tcl", rec4scaler.EntityName, VivadoSettings)
-	tcl.Exec()
+	// rec4scaler := VHDL.New2DScaler(rec4, 50)
+	// rec4scaler.GenerateVHDL(OutputPath)
+	// tcl := Viv.CreateVivadoTCL(OutputPath, "main1.tcl", rec4scaler.EntityName, VivadoSettings)
+	// tcl.Exec()
 }
 
 func Accurate() {

@@ -15,9 +15,10 @@ type VHDLEntity interface {
 	GenerateTestData(string)
 }
 
-type Multiplyer interface {
+type UnsignedMultiplyer interface {
+	ReturnVal(uint, uint) uint
 	Overflow() bool
-	MeanErrorRate() float64
+	MeanAbsoluteError() float64
 }
 
 //EntityData encapsulates basic data for a VHDL structure
