@@ -16,10 +16,15 @@ architecture Behavioral of {{.EntityName}} is
     signal factor1, factor2, factor3, factor4 : unsigned(7 downto 0) := (others => '0');
 begin
 
-AH_BH: entity work.AH_BH port map(a=>AH, b=>BH,prod=>AH_BH_OUT(3 downto 0));
-AH_BL: entity work.AH_BL port map(a=>AH, b=>BL,prod=>AH_BL_OUT(3 downto 0));
-AL_BH: entity work.AL_BH port map(a=>AL, b=>BH,prod=>AL_BH_OUT(3 downto 0));
-AL_BL: entity work.AL_BL port map(a=>AL, b=>BL,prod=>AL_BL_OUT(3 downto 0));
+AH_BH: entity work.{{ (index .LUTArray 0).EntityName }} port map(a=>AH, b=>BH,prod=>AH_BH_OUT(3 downto 0));
+AH_BL: entity work.{{ (index .LUTArray 1).EntityName }} port map(a=>AH, b=>BL,prod=>AH_BL_OUT(3 downto 0));
+AL_BH: entity work.{{ (index .LUTArray 2).EntityName }} port map(a=>AL, b=>BH,prod=>AL_BH_OUT(3 downto 0));
+AL_BL: entity work.{{ (index .LUTArray 3).EntityName }} port map(a=>AL, b=>BL,prod=>AL_BL_OUT(3 downto 0));
+
+-- //LUTArray[0] = AH*BH
+-- //LUTArray[1] = AH*BL
+-- //LUTArray[2] = AL*BH
+-- //LUTArray[3] = AL*BL
 
 AH <= A(3 downto 2);
 AL <= A(1 downto 0);
