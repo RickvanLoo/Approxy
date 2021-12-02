@@ -45,24 +45,26 @@ func main() {
 	VivadoSettings.Utilization = true
 	VivadoSettings.WriteCheckpoint = true
 
-	// o1 := VHDL.New2DUnsignedAcc(2)
-	// o2 := VHDL.New2DUnsignedAcc(2)
-	// o3 := VHDL.New2DUnsignedAcc(2)
-	// o4 := VHDL.New2DUnsignedAcc(2)
+	// o1 := VHDL.New2DUnsignedAcc("o1", 2)
+	// o2 := VHDL.New2DUnsignedAcc("o2", 2)
+	// o3 := VHDL.New2DUnsignedAcc("o3", 2)
+	// o4 := VHDL.New2DUnsignedAcc("o4", 2)
 
-	o1 := VHDL.M1()
-	o2 := VHDL.M1()
-	o3 := VHDL.M1()
-	o4 := VHDL.M1()
-	RecLutArray := [4]*VHDL.LUT2D{o1.LUT2D, o2.LUT2D, o3.LUT2D, o4.LUT2D}
+	o1 := VHDL.M1().LUT2D
+	o2 := VHDL.M1().LUT2D
+	o3 := VHDL.M1().LUT2D
+	o4 := VHDL.M1().LUT2D
+	RecLutArray := [4]*VHDL.LUT2D{o1, o2, o3, o4}
 	rec4 := VHDL.NewRecursive4("rec4", RecLutArray)
 
 	rec4.GenerateTestData(OutputPath)
 	rec4.GenerateVHDL(OutputPath)
-	xsim := Viv.CreateXSIM(OutputPath, "SimRec4", rec4.GenerateVHDLEntityArray())
-	xsim.Exec()
-	// tcl := Viv.CreateVivadoTCL(OutputPath, "main1.tcl", rec4.EntityName, VivadoSettings)
-	// tcl.Exec()
+	// xsim := Viv.CreateXSIM(OutputPath, "SimRec4", rec4.GenerateVHDLEntityArray())
+	// xsim.Exec()
+	rec4scaler := VHDL.New2DScaler(rec4, 50)
+	rec4scaler.GenerateVHDL(OutputPath)
+	tcl := Viv.CreateVivadoTCL(OutputPath, "main1.tcl", rec4scaler.EntityName, VivadoSettings)
+	tcl.Exec()
 }
 
 func Accurate() {
@@ -79,7 +81,7 @@ func ScaleM1() {
 	M1 := VHDL.M1()
 	M1.LUT2D.Print()
 	M1.LUT2D.GenerateVHDL(OutputPath)
-	Scaler := VHDL.New2DScaler(M1.LUT2D, 100, OutputPath)
+	Scaler := VHDL.New2DScaler(M1.LUT2D, 100)
 	tcl := Viv.CreateVivadoTCL(OutputPath, "main.tcl", Scaler.EntityName, VivadoSettings)
 	tcl.Exec()
 }

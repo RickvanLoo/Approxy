@@ -3,7 +3,7 @@ package VHDL
 import "log"
 
 type Scaler struct {
-	LUT        *LUT2D
+	Entity     VHDLEntity
 	LUTName    string
 	EntityName string
 	BitSize    uint
@@ -11,11 +11,11 @@ type Scaler struct {
 	VHDLFile   string
 }
 
-func New2DScaler(m *LUT2D, N uint, FolderPath string) *Scaler {
+func New2DScaler(Entity VHDLEntity, N uint) *Scaler {
 	scl := new(Scaler)
-	scl.LUT = m
-	scl.LUTName = scl.LUT.EntityName
-	scl.BitSize = scl.LUT.BitSize
+	scl.Entity = Entity
+	scl.LUTName = scl.Entity.ReturnData().EntityName
+	scl.BitSize = scl.Entity.ReturnData().BitSize
 	scl.EntityName = scl.LUTName + "_scaler"
 	scl.ScaleN = N
 	scl.VHDLFile = scl.LUTName + "_scaler.vhd"

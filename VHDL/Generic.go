@@ -7,12 +7,20 @@ import (
 )
 
 // Generic functions for badmath/VHDL
+
+//VHDLEntity describes an interface for a testable and synthesizable VHDL structure
 type VHDLEntity interface {
 	ReturnData() *EntityData
 	GenerateVHDL(string)
 	GenerateTestData(string)
 }
 
+type Multiplyer interface {
+	Overflow() bool
+	MeanErrorRate() float64
+}
+
+//EntityData encapsulates basic data for a VHDL structure
 type EntityData struct {
 	EntityName string
 	BitSize    uint
