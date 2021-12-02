@@ -8,7 +8,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"text/template"
 )
 
 //LUTArray[0] = AH*BH
@@ -20,18 +19,17 @@ type Recursive4 struct {
 	BitSize    uint      //Default to 4
 	OutputSize uint      //Default to 8
 	LUTArray   [4]*LUT2D //Size of 4
+	VHDLFile   string
+	TestFile   string
 }
 
-func NewRecursive4(LUTArray [4]*LUT2D) *Recursive4 {
+func NewRecursive4(EntityName string, LUTArray [4]*LUT2D) *Recursive4 {
 	r4 := new(Recursive4)
 	r4.BitSize = 4
 	r4.OutputSize = 8
-	r4.EntityName = "Recursive4"
+	r4.EntityName = EntityName
+	r4.VHDLFile, r4.TestFile = FileNameGen(r4.EntityName)
 	r4.LUTArray = LUTArray
-	r4.LUTArray[0].EntityName = "AH_BH"
-	r4.LUTArray[1].EntityName = "AH_BL"
-	r4.LUTArray[2].EntityName = "AL_BH"
-	r4.LUTArray[3].EntityName = "AL_BL"
 
 	return r4
 }
@@ -70,9 +68,9 @@ func (r4 *Recursive4) ReturnVal(a uint, b uint) uint {
 	return output
 }
 
-func (r4 *Recursive4) GenerateTestData(FolderPath string, FileName string) {
+func (r4 *Recursive4) GenerateTestData(FolderPath string) {
 	fmtstr := "%0" + strconv.Itoa(int(r4.BitSize)) + "b %0" + strconv.Itoa(int(r4.BitSize)) + "b %0" + strconv.Itoa(int(r4.OutputSize)) + "b\n"
-	path := FolderPath + "/" + FileName
+	path := FolderPath + "/" + r4.TestFile
 
 	file, err := os.Create(path)
 	if err != nil {
@@ -104,32 +102,11 @@ func (r4 *Recursive4) GenerateTestData(FolderPath string, FileName string) {
 
 }
 
-func (r4 *Recursive4) VHDLtoFile(FolderPath string, FileName string) {
+func (r4 *Recursive4) VHDLtoFile(FolderPath string) {
 	for _, mult := range r4.LUTArray {
-		mult.VHDLtoFile(FolderPath, mult.EntityName+".vhd")
+		mult.VHDLtoFile(FolderPath)
 	}
 
-	templatepath := "template/rec4behav.vhd"
-	templatename := "rec4behav.vhd"
+	CreateVHDLFile(FolderPath, r4.VHDLFile, "rec4behav.vhd", r4)
 
-	path := FolderPath + "/" + FileName
-
-	t, err := template.New(templatename).ParseFiles(templatepath)
-	if err != nil {
-		log.Print(err)
-		return
-	}
-
-	f, err := os.Create(path)
-
-	if err != nil {
-		log.Println("create file: ", err)
-		return
-	}
-
-	err = t.ExecuteTemplate(f, templatename, r4)
-	if err != nil {
-		log.Print("execute: ", err)
-		return
-	}
 }

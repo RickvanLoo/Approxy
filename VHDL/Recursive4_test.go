@@ -6,12 +6,12 @@ import (
 )
 
 func TestRecursive4(t *testing.T) {
-	o1 := New2DUnsignedAcc(2)
-	o2 := New2DUnsignedAcc(2)
-	o3 := New2DUnsignedAcc(2)
-	o4 := New2DUnsignedAcc(2)
+	o1 := New2DUnsignedAcc("o1", 2)
+	o2 := New2DUnsignedAcc("o2", 2)
+	o3 := New2DUnsignedAcc("o3", 2)
+	o4 := New2DUnsignedAcc("o4", 2)
 	RecLutArray := [4]*LUT2D{o1, o2, o3, o4}
-	rec4 := NewRecursive4(RecLutArray)
+	rec4 := NewRecursive4("testRec4", RecLutArray)
 
 	maxval := int(math.Exp2(4))
 

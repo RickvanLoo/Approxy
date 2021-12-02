@@ -45,24 +45,29 @@ func main() {
 	VivadoSettings.Utilization = true
 	VivadoSettings.WriteCheckpoint = true
 
-	o1 := VHDL.New2DUnsignedAcc(2)
-	o2 := VHDL.New2DUnsignedAcc(2)
-	o3 := VHDL.New2DUnsignedAcc(2)
-	o4 := VHDL.New2DUnsignedAcc(2)
-	RecLutArray := [4]*VHDL.LUT2D{o1, o2, o3, o4}
-	rec4 := VHDL.NewRecursive4(RecLutArray)
+	// o1 := VHDL.New2DUnsignedAcc(2)
+	// o2 := VHDL.New2DUnsignedAcc(2)
+	// o3 := VHDL.New2DUnsignedAcc(2)
+	// o4 := VHDL.New2DUnsignedAcc(2)
 
-	rec4.GenerateTestData(OutputPath, "testRec4.txt")
-	rec4.VHDLtoFile(OutputPath, "rec4.vhd")
-	xsim := Viv.CreateXSIM(OutputPath, "*.vhd", "testRec4.txt", "topsim.vhd", rec4.EntityName, rec4.BitSize)
-	xsim.Exec()
-	//tcl := Viv.CreateVivadoTCL(OutputPath, "main1.tcl", rec4.EntityName, VivadoSettings)
-	//tcl.Exec()
+	o1 := VHDL.M1()
+	o2 := VHDL.M1()
+	o3 := VHDL.M1()
+	o4 := VHDL.M1()
+	RecLutArray := [4]*VHDL.LUT2D{o1.LUT2D, o2.LUT2D, o3.LUT2D, o4.LUT2D}
+	rec4 := VHDL.NewRecursive4("rec4", RecLutArray)
+
+	rec4.GenerateTestData(OutputPath)
+	rec4.VHDLtoFile(OutputPath)
+	// xsim := Viv.CreateXSIM(OutputPath, "*.vhd", "testRec4.txt", "topsim.vhd", rec4.EntityName, rec4.BitSize)
+	// xsim.Exec()
+	tcl := Viv.CreateVivadoTCL(OutputPath, "main1.tcl", rec4.EntityName, VivadoSettings)
+	tcl.Exec()
 }
 
 func Accurate() {
-	acc8 := VHDL.UNAM_VHDL("Acc8", 8, OutputPath, "Acc8.vhd")
-	acc8.GenerateTestData(OutputPath, "testAcc8.txt")
+	acc8 := VHDL.AccurateMultToFile("Acc8", 8, OutputPath)
+	acc8.GenerateTestData(OutputPath)
 	xsim := Viv.CreateXSIM(OutputPath, "Acc8.vhd", "testAcc8.txt", "topsim.vhd", acc8.EntityName, acc8.BitSize)
 	xsim.Exec()
 	tcl := Viv.CreateVivadoTCL(OutputPath, "main1.tcl", acc8.EntityName, VivadoSettings)
@@ -72,8 +77,8 @@ func Accurate() {
 func ScaleM1() {
 	M1 := VHDL.M1()
 	M1.LUT2D.Print()
-	M1.LUT2D.VHDLtoFile(OutputPath, "M1.vhd")
-	Scaler := VHDL.CreateScaler(M1.LUT2D, 100, OutputPath)
+	M1.LUT2D.VHDLtoFile(OutputPath)
+	Scaler := VHDL.CreateScalerVHDL(M1.LUT2D, 100, OutputPath)
 	tcl := Viv.CreateVivadoTCL(OutputPath, "main.tcl", Scaler.EntityName, VivadoSettings)
 	tcl.Exec()
 }
@@ -88,15 +93,15 @@ func M1M2M3M4() {
 	M4 := VHDL.M4()
 	M4.LUT2D.Print()
 
-	M1.LUT2D.VHDLtoFile(OutputPath, "m1.vhd")
-	M2.LUT2D.VHDLtoFile(OutputPath, "m2.vhd")
-	M3.LUT2D.VHDLtoFile(OutputPath, "m3.vhd")
-	M4.LUT2D.VHDLtoFile(OutputPath, "m4.vhd")
+	M1.LUT2D.VHDLtoFile(OutputPath)
+	M2.LUT2D.VHDLtoFile(OutputPath)
+	M3.LUT2D.VHDLtoFile(OutputPath)
+	M4.LUT2D.VHDLtoFile(OutputPath)
 
-	M1.LUT2D.GenerateTestData(OutputPath, "testb1.txt")
-	M2.LUT2D.GenerateTestData(OutputPath, "testb2.txt")
-	M3.LUT2D.GenerateTestData(OutputPath, "testb3.txt")
-	M4.LUT2D.GenerateTestData(OutputPath, "testb4.txt")
+	M1.LUT2D.GenerateTestData(OutputPath)
+	M2.LUT2D.GenerateTestData(OutputPath)
+	M3.LUT2D.GenerateTestData(OutputPath)
+	M4.LUT2D.GenerateTestData(OutputPath)
 
 	XSIM1 := Viv.CreateXSIM(OutputPath, "m1.vhd", "testb1.txt", "topsim1.vhd", M1.LUT2D.EntityName, M1.LUT2D.BitSize)
 	XSIM2 := Viv.CreateXSIM(OutputPath, "m2.vhd", "testb2.txt", "topsim2.vhd", M2.LUT2D.EntityName, M2.LUT2D.BitSize)

@@ -17,11 +17,9 @@ type Modification struct {
 }
 
 //New2DUnsignedAcc creates a 2D LUT structure, containing the LUT of an accurate Bitsize multiplyer.
-func New2DUnsignedAcc(BitSize uint) *LUT2D {
-	m := new(LUT2D)
-	m.BitSize = BitSize
-	m.EntityName = "uAcc" + strconv.Itoa(int(BitSize)) + "bitMult"
-	m.OutputSize = 2 * m.BitSize
+func New2DUnsignedAcc(EntityName string, BitSize uint) *LUT2D {
+	m := New2DLUT(EntityName, BitSize)
+
 	LUTSize := int(math.Pow(2, float64(BitSize)))
 
 	var LUT [][]uint
@@ -41,9 +39,9 @@ func New2DUnsignedAcc(BitSize uint) *LUT2D {
 //NewUnsignedApprox creates a UnsignedApproxMultiplayer based upon a 2D LUT structure
 //Using New2DUnsignedAcc to create an accurate multiplyer, but adds the option to add modification
 //Modification are used to change values within the 2D LUT
-func NewUnsignedApprox(BitSize uint) *UnsignedApproxMultiplyer {
+func NewUnsignedApprox(EntityName string, BitSize uint) *UnsignedApproxMultiplyer {
 	m := new(UnsignedApproxMultiplyer)
-	m.LUT2D = New2DUnsignedAcc(BitSize)
+	m.LUT2D = New2DUnsignedAcc(EntityName, BitSize)
 	m.LUT2D.EntityName = "uApprox" + strconv.Itoa(int(BitSize)) + "bitMult"
 	return m
 }

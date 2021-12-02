@@ -15,6 +15,8 @@ type LUT2D struct {
 	BitSize    uint
 	OutputSize uint
 	LUT        [][]uint
+	VHDLFile   string
+	TestFile   string
 }
 
 func (m *LUT2D) Print() {
@@ -42,13 +44,23 @@ func (m *LUT2D) convertval(value interface{}) string {
 	return fmt.Sprintf(format, value)
 }
 
+func New2DLUT(EntityName string, BitSize uint) *LUT2D {
+	m := new(LUT2D)
+	m.BitSize = BitSize
+	m.EntityName = EntityName
+	m.OutputSize = 2 * m.BitSize
+	m.VHDLFile, m.TestFile = FileNameGen(m.EntityName)
+	return m
+}
+
 //Outputs VHDL code for generated multiplier to path file
-func (m *LUT2D) VHDLtoFile(FolderPath string, FileName string) {
+//TODO: Make VHDLtoFile call the Generic function
+func (m *LUT2D) VHDLtoFile(FolderPath string) {
 	funcMap := template.FuncMap{"indexconv": m.convertindex, "valconv": m.convertval}
 	templatepath := "template/multbehav.vhd"
 	templatename := "multbehav.vhd"
 
-	path := FolderPath + "/" + FileName
+	path := FolderPath + "/" + m.VHDLFile
 
 	t, err := template.New(templatename).Funcs(funcMap).ParseFiles(templatepath)
 	if err != nil {
@@ -70,9 +82,9 @@ func (m *LUT2D) VHDLtoFile(FolderPath string, FileName string) {
 	}
 }
 
-func (m *LUT2D) GenerateTestData(FolderPath string, FileName string) {
+func (m *LUT2D) GenerateTestData(FolderPath string) {
 	fmtstr := "%0" + strconv.Itoa(int(m.BitSize)) + "b %0" + strconv.Itoa(int(m.BitSize)) + "b %0" + strconv.Itoa(int(m.OutputSize)) + "b\n"
-	path := FolderPath + "/" + FileName
+	path := FolderPath + "/" + m.TestFile
 
 	file, err := os.Create(path)
 	if err != nil {
