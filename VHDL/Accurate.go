@@ -1,6 +1,7 @@
 package VHDL
 
-//UnsingedNumericAccurateMultiplyer defines a multiplyer based upon 'accuratebehav.vhd', this is a BitSize A*B=prod multiplyer, using the IEEE Numeric lib
+//UnsignedNumericAccurateMultiplyer defines a multiplyer based upon 'accuratebehav.vhd', this is a BitSize A*B=prod multiplyer, using the IEEE Numeric lib
+//The struct is implemented as a VHDLEntity Interface
 type UnsignedNumericAccurateMultiplyer struct {
 	EntityName string
 	BitSize    uint
@@ -9,15 +10,17 @@ type UnsignedNumericAccurateMultiplyer struct {
 }
 
 //Creates a VHDL file of an UnsignedNumericAccurateMultiplyer.
-func AccurateMultToFile(EntityName string, BitSize uint, FolderPath string) *UnsignedNumericAccurateMultiplyer {
+func NewAccurateNumMultiplyer(EntityName string, BitSize uint, FolderPath string) *UnsignedNumericAccurateMultiplyer {
 	m := new(UnsignedNumericAccurateMultiplyer)
 	m.EntityName = EntityName
 	m.BitSize = BitSize
 	m.VHDLFile, m.TestFile = FileNameGen(m.EntityName)
 
-	CreateVHDLFile(FolderPath, m.VHDLFile, "accuratebehav.vhd", m)
-
 	return m
+}
+
+func (m *UnsignedNumericAccurateMultiplyer) GenerateVHDL(FolderPath string) {
+	CreateFile(FolderPath, m.VHDLFile, "accuratebehav.vhd", m)
 }
 
 //GenerateTestData uses the function from New2DUnsignedAcc, since their behaviour is identical.
@@ -25,4 +28,17 @@ func (m *UnsignedNumericAccurateMultiplyer) GenerateTestData(FolderPath string) 
 	Accurate2D := New2DUnsignedAcc(m.EntityName, m.BitSize)
 	Accurate2D.TestFile = m.TestFile
 	Accurate2D.GenerateTestData(FolderPath)
+}
+
+func (m *UnsignedNumericAccurateMultiplyer) ReturnData() *EntityData {
+	// EntityName string
+	// BitSize    uint
+	// VHDLFile   string
+	// TestFile   string
+	d := new(EntityData)
+	d.EntityName = m.EntityName
+	d.BitSize = m.BitSize
+	d.VHDLFile = m.VHDLFile
+	d.TestFile = m.TestFile
+	return d
 }

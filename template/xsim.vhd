@@ -4,7 +4,7 @@ use std.textio.all;
 use ieee.std_logic_textio.all; 
 
 entity sim is
-generic (word_size: integer:={{.Bitsize}}); 
+generic (word_size: integer:={{.BitSize}}); 
 end sim;
 
 architecture Behavioral of sim is
@@ -23,7 +23,7 @@ testbench : process
     variable val_col3 : STD_LOGIC_VECTOR (word_size * 2 - 1 downto 0); -- to save col3 value of 2 bit
     variable val_SPACE : character;  -- for spaces between data in file
     begin
-        file_open(input_buf, "{{.TestData}}",  read_mode); 
+        file_open(input_buf, "{{.TestFile}}",  read_mode); 
         while not endfile(input_buf) loop
           readline(input_buf, read_col_from_input_buf);
           read(read_col_from_input_buf, val_col1);

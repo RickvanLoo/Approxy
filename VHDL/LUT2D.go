@@ -10,6 +10,8 @@ import (
 	"text/template"
 )
 
+//LUT2D defines a 2D LUT structure.
+//Interface == VHDLEntity
 type LUT2D struct {
 	EntityName string
 	BitSize    uint
@@ -55,7 +57,7 @@ func New2DLUT(EntityName string, BitSize uint) *LUT2D {
 
 //Outputs VHDL code for generated multiplier to path file
 //TODO: Make VHDLtoFile call the Generic function
-func (m *LUT2D) VHDLtoFile(FolderPath string) {
+func (m *LUT2D) GenerateVHDL(FolderPath string) {
 	funcMap := template.FuncMap{"indexconv": m.convertindex, "valconv": m.convertval}
 	templatepath := "template/multbehav.vhd"
 	templatename := "multbehav.vhd"
@@ -109,4 +111,17 @@ func (m *LUT2D) GenerateTestData(FolderPath string) {
 
 	writer.Flush()
 
+}
+
+func (m *LUT2D) ReturnData() *EntityData {
+	// EntityName string
+	// BitSize    uint
+	// VHDLFile   string
+	// TestFile   string
+	d := new(EntityData)
+	d.EntityName = m.EntityName
+	d.BitSize = m.BitSize
+	d.VHDLFile = m.VHDLFile
+	d.TestFile = m.TestFile
+	return d
 }

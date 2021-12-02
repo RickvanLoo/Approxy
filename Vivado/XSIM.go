@@ -1,72 +1,57 @@
 package Vivado
 
 import (
+	"badmath/VHDL"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
-	"text/template"
 )
 
 type XSIM struct {
 	SimFile       string
 	TopFile       string
-	TestData      string
+	TestFile      string
 	TopEntityName string
 	FolderPath    string
-	Bitsize       uint
+	VHDLEntities  []VHDL.VHDLEntity
+	BitSize       uint
 }
 
-func CreateXSIM(FolderPath string, TopFile string, TestData string, SimName string, TopEntityName string, BitSize uint) *XSIM {
+//Creates an XSIM on bases of an array of VHDLEntities
+//TopEntity at index[0]!
+func CreateXSIM(FolderPath string, SimName string, VHDLEntities []VHDL.VHDLEntity) *XSIM {
 	XSIM := new(XSIM)
-	XSIM.SimFile = SimName
-	XSIM.TopFile = TopFile
-	XSIM.TestData = TestData
-	XSIM.TopEntityName = TopEntityName
-	XSIM.Bitsize = BitSize
+	XSIM.SimFile = SimName + ".vhd"
+	XSIM.TopFile = VHDLEntities[0].ReturnData().VHDLFile
+	XSIM.TestFile = VHDLEntities[0].ReturnData().TestFile
+	XSIM.TopEntityName = VHDLEntities[0].ReturnData().EntityName
+	XSIM.BitSize = VHDLEntities[0].ReturnData().BitSize
 	XSIM.FolderPath = FolderPath
+	XSIM.VHDLEntities = VHDLEntities
 
-	templatepath := "template/xsim.vhd"
-	templatename := "xsim.vhd"
-
-	t, err := template.New(templatename).ParseFiles(templatepath)
-	if err != nil {
-		log.Print(err)
-		return XSIM
-	}
-
-	f, err := os.Create(XSIM.FolderPath + "/" + XSIM.SimFile)
-
-	if err != nil {
-		log.Println("create file: ", err)
-		return XSIM
-	}
-
-	err = t.ExecuteTemplate(f, templatename, XSIM)
-	if err != nil {
-		log.Print("execute: ", err)
-		return XSIM
-	}
-
+	VHDL.CreateFile(FolderPath, XSIM.SimFile, "xsim.vhd", XSIM)
 	return XSIM
 }
 
 func (x *XSIM) Exec() {
 	//This is ugly as hell, but it works, and is readable
-	// loadBehav := exec.Command("xvhdl", x.TopFile)
-	// loadBehav.Dir = x.FolderPath
-	// loadBehav.Stdout = os.Stdout
-	// loadBehav.Stderr = os.Stderr
 
-	// loadSim := exec.Command("xvhdl", x.SimFile)
-	// loadSim.Dir = x.FolderPath
-	// loadSim.Stdout = os.Stdout
-	// loadSim.Stderr = os.Stderr
+	for i := len(x.VHDLEntities) - 1; i >= 0; i-- {
+		loadBehav := exec.Command("xvhdl", x.VHDLEntities[i].ReturnData().VHDLFile)
+		loadBehav.Dir = x.FolderPath
+		loadBehav.Stdout = os.Stdout
+		loadBehav.Stderr = os.Stderr
+		err := loadBehav.Run()
+		if err != nil {
+			log.Println(err)
+		}
+	}
 
-	loadAll := exec.Command("xvhdl", "-f", "*.vhd")
-	loadAll.Dir = x.FolderPath
-	loadAll.Stdout = os.Stdout
-	loadAll.Stderr = os.Stderr
+	loadSim := exec.Command("xvhdl", x.SimFile)
+	loadSim.Dir = x.FolderPath
+	loadSim.Stdout = os.Stdout
+	loadSim.Stderr = os.Stderr
 
 	xelab := exec.Command("xelab", "-debug", "typical", "sim", "-s", x.TopEntityName+"top_sim")
 	xelab.Dir = x.FolderPath
@@ -79,15 +64,7 @@ func (x *XSIM) Exec() {
 	xsim.Stdout = os.Stdout
 	xsim.Stdin = strings.NewReader("run all\n")
 
-	// err := loadBehav.Run()
-	// if err != nil {
-	// 	log.Println(err)
-	// }
-	// err = loadSim.Run()
-	// if err != nil {
-	// 	log.Println(err)
-	// }
-	err := loadAll.Run()
+	err := loadSim.Run()
 	if err != nil {
 		log.Println(err)
 	}

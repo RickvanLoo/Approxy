@@ -102,11 +102,36 @@ func (r4 *Recursive4) GenerateTestData(FolderPath string) {
 
 }
 
-func (r4 *Recursive4) VHDLtoFile(FolderPath string) {
+func (r4 *Recursive4) GenerateVHDL(FolderPath string) {
 	for _, mult := range r4.LUTArray {
-		mult.VHDLtoFile(FolderPath)
+		mult.GenerateVHDL(FolderPath)
 	}
 
-	CreateVHDLFile(FolderPath, r4.VHDLFile, "rec4behav.vhd", r4)
+	CreateFile(FolderPath, r4.VHDLFile, "rec4behav.vhd", r4)
+}
 
+func (r4 *Recursive4) ReturnData() *EntityData {
+	// EntityName string
+	// BitSize    uint
+	// VHDLFile   string
+	// TestFile   string
+	d := new(EntityData)
+	d.EntityName = r4.EntityName
+	d.BitSize = r4.BitSize
+	d.VHDLFile = r4.VHDLFile
+	d.TestFile = r4.TestFile
+	return d
+}
+
+func (r4 *Recursive4) GenerateVHDLEntityArray() []VHDLEntity {
+
+	var out []VHDLEntity
+
+	out = append(out, r4)
+
+	for _, mult := range r4.LUTArray {
+		out = append(out, mult)
+	}
+
+	return out
 }

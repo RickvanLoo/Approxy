@@ -7,9 +7,21 @@ import (
 )
 
 // Generic functions for badmath/VHDL
+type VHDLEntity interface {
+	ReturnData() *EntityData
+	GenerateVHDL(string)
+	GenerateTestData(string)
+}
+
+type EntityData struct {
+	EntityName string
+	BitSize    uint
+	VHDLFile   string
+	TestFile   string
+}
 
 //TODO: Add funcmap support
-func CreateVHDLFile(FolderPath string, FileName string, TemplateFile string, Data interface{}) {
+func CreateFile(FolderPath string, FileName string, TemplateFile string, Data interface{}) {
 	TemplatePath := "template/" + TemplateFile
 
 	path := FolderPath + "/" + FileName

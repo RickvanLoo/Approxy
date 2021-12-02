@@ -2,7 +2,6 @@ package VHDL
 
 import (
 	"math"
-	"strconv"
 )
 
 type UnsignedApproxMultiplyer struct {
@@ -42,7 +41,6 @@ func New2DUnsignedAcc(EntityName string, BitSize uint) *LUT2D {
 func NewUnsignedApprox(EntityName string, BitSize uint) *UnsignedApproxMultiplyer {
 	m := new(UnsignedApproxMultiplyer)
 	m.LUT2D = New2DUnsignedAcc(EntityName, BitSize)
-	m.LUT2D.EntityName = "uApprox" + strconv.Itoa(int(BitSize)) + "bitMult"
 	return m
 }
 

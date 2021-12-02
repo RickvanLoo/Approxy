@@ -1,10 +1,10 @@
 package Vivado
 
 import (
+	"badmath/VHDL"
 	"log"
 	"os"
 	"os/exec"
-	"text/template"
 )
 
 type VivadoTCL struct {
@@ -31,27 +31,7 @@ func CreateVivadoTCL(FolderPath string, FileName string, TopName string, Setting
 
 	TCL.Settings = Settings
 
-	templatepath := "template/vivado.tcl"
-	templatename := "vivado.tcl"
-
-	t, err := template.New(templatename).ParseFiles(templatepath)
-	if err != nil {
-		log.Print(err)
-		return TCL
-	}
-
-	f, err := os.Create(FolderPath + "/" + FileName)
-
-	if err != nil {
-		log.Println("create file: ", err)
-		return TCL
-	}
-
-	err = t.ExecuteTemplate(f, templatename, TCL)
-	if err != nil {
-		log.Print("execute: ", err)
-		return TCL
-	}
+	VHDL.CreateFile(FolderPath, TCL.FileName, "vivado.tcl", TCL)
 
 	return TCL
 }
