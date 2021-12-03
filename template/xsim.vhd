@@ -39,7 +39,7 @@ testbench : process
 
           wait for 20 ns;  --  to display results for 20 ns
           
-          assert(output = test) report "Error found!" severity FAILURE;
+          assert(output = test) report "!!ERROR!!PATTERN!!" severity FAILURE;
         end loop;
 
         file_close(input_buf);      
