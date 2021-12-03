@@ -1,6 +1,9 @@
 package VHDL
 
-import "log"
+import (
+	"log"
+	"strconv"
+)
 
 type Scaler struct {
 	Entity     VHDLEntity
@@ -42,4 +45,9 @@ func (scl *Scaler) ReturnData() *EntityData {
 	d.VHDLFile = scl.VHDLFile
 	d.TestFile = "" //Not Supported!
 	return d
+}
+
+func (scl *Scaler) String() string {
+	str := scl.EntityName + " N=" + strconv.Itoa(int(scl.ScaleN)) + " -> " + scl.Entity.String()
+	return str
 }

@@ -42,3 +42,7 @@ func (m *UnsignedNumericAccurateMultiplyer) ReturnData() *EntityData {
 	d.TestFile = m.TestFile
 	return d
 }
+
+func (m *UnsignedNumericAccurateMultiplyer) String() string {
+	return m.EntityName
+}

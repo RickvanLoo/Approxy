@@ -158,3 +158,7 @@ func (m *LUT2D) MeanAbsoluteError() float64 {
 	return float64(1.0/math.Exp2(float64(m.OutputSize))) * accum
 
 }
+
+func (m *LUT2D) String() string {
+	return m.EntityName
+}

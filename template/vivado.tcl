@@ -4,5 +4,5 @@ synth_design {{if .Settings.OOC}}-mode out_of_context{{end}} {{if .Settings.NO_D
 {{if .Settings.WriteCheckpoint}}write_checkpoint -force {{.TopName}}_postsynth.dcp{{end}}
 {{if .Settings.Placement}}place_design{{end}}
 {{if and .Settings.Placement .Settings.WriteCheckpoint}}write_checkpoint -force {{.TopName}}_postplace.dcp{{end}}
-{{if .Settings.Utilization}}report_utilization -file {{.TopName}}_post_place_ult.rpt{{end}}
+{{if .Settings.Utilization}}report_utilization -hierarchical -file {{.TopName}}_post_place_ult.rpt{{end}}
 close_project

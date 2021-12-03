@@ -23,10 +23,10 @@ type VivadoTCLSettings struct {
 	Utilization     bool
 }
 
-func CreateVivadoTCL(FolderPath string, FileName string, TopName string, Settings *VivadoTCLSettings) *VivadoTCL {
+func CreateVivadoTCL(FolderPath string, FileName string, Entity VHDL.VHDLEntity, Settings *VivadoTCLSettings) *VivadoTCL {
 	TCL := new(VivadoTCL)
 	TCL.FolderPath = FolderPath
-	TCL.TopName = TopName
+	TCL.TopName = Entity.ReturnData().EntityName
 	TCL.FileName = FileName
 
 	TCL.Settings = Settings

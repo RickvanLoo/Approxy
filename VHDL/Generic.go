@@ -13,6 +13,7 @@ type VHDLEntity interface {
 	ReturnData() *EntityData
 	GenerateVHDL(string)
 	GenerateTestData(string)
+	String() string //MSB -> LSB
 }
 
 type UnsignedMultiplyer interface {
