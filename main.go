@@ -13,6 +13,11 @@ import (
 var OutputPath string
 var VivadoSettings *Viv.VivadoTCLSettings
 var Results []*Result
+var M1 *VHDL.LUT2D
+var M2 *VHDL.LUT2D
+var M3 *VHDL.LUT2D
+var M4 *VHDL.LUT2D
+var Acc *VHDL.LUT2D
 
 func ClearPath(path string) {
 	err := os.RemoveAll(path)
@@ -51,23 +56,52 @@ func main() {
 	//o3 = AL*BH
 	//o4 = AL*BL
 
-	// o1 := VHDL.New2DUnsignedAcc("Acc", 2)
-	// o2 := VHDL.New2DUnsignedAcc("Acc", 2)
-	// o3 := VHDL.New2DUnsignedAcc("Acc", 2)
-	// o4 := VHDL.New2DUnsignedAcc("Acc", 2)
+	// m1 := VHDL.M1().LUT2D
+	// m2 := VHDL.M2().LUT2D
+	// m3 := VHDL.M3().LUT2D
+	// m4 := VHDL.M4().LUT2D
+	// acc := VHDL.New2DUnsignedAcc("Acc", 2)
 
-	// o1 := VHDL.M4().LUT2D
-	// o2 := VHDL.M4().LUT2D
-	// o3 := VHDL.M4().LUT2D
-	// o4 := VHDL.M4().LUT2D
+	M1 = VHDL.M1().LUT2D                  //1
+	M2 = VHDL.M2().LUT2D                  //2
+	M3 = VHDL.M3().LUT2D                  //3
+	M4 = VHDL.M4().LUT2D                  //4
+	Acc = VHDL.New2DUnsignedAcc("Acc", 2) //5
 
-	o1 := VHDL.New2DUnsignedAcc("Acc", 2)
-	o2 := VHDL.M4().LUT2D
-	o3 := VHDL.M1().LUT2D
-	o4 := VHDL.New2DUnsignedAcc("Acc", 2)
+	options := []int{1, 2, 3, 4, 5}
+	Cartesian4 := cartN(options, options, options, options)
 
-	RecLutArray := [4]*VHDL.LUT2D{o1, o2, o3, o4}
-	rec4 := VHDL.NewRecursive4("rec4", RecLutArray)
+	m := make(map[int]*VHDL.LUT2D)
+	m[1] = M1
+	m[2] = M2
+	m[3] = M3
+	m[4] = M4
+	m[5] = Acc
+
+	var resultStrings []string
+
+	file, err := os.Create("output/FinalResults.txt")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for i := 400; i < len(Cartesian4); i++ {
+		array := [4]*VHDL.LUT2D{m[Cartesian4[i][0]], m[Cartesian4[i][1]], m[Cartesian4[i][2]], m[Cartesian4[i][3]]}
+		id_array := fmt.Sprintf("%d,", i)
+		resultstring := id_array + rec4scalerRun(array) + "\n"
+		file.WriteString(resultstring)
+		resultStrings = append(resultStrings, resultstring)
+	}
+
+	for _, value := range resultStrings {
+		fmt.Println(value)
+	}
+
+	file.Close()
+}
+
+func rec4scalerRun(array [4]*VHDL.LUT2D) string {
+	rec4 := VHDL.NewRecursive4("rec4", array)
 
 	rec4.GenerateTestData(OutputPath)
 	rec4.GenerateVHDL(OutputPath)
@@ -75,6 +109,7 @@ func main() {
 	xsim.Exec()
 	err := Viv.ParseXSIMReport(OutputPath, rec4)
 	if err != nil {
+		log.Println(rec4.Overflow())
 		log.Fatalln(err)
 	}
 	rec4scaler := VHDL.New2DScaler(rec4, 100)
@@ -85,6 +120,8 @@ func main() {
 
 	Result := NewResult(rec4scaler, util, rec4.Overflow(), rec4.MeanAbsoluteError())
 	Result.PrettyPrint()
+	log.Println(Result.String())
 	Results = append(Results, Result)
 
+	return Result.String()
 }

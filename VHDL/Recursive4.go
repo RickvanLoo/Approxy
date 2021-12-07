@@ -15,12 +15,13 @@ import (
 //LUTArray[2] = AL*BH
 //LUTArray[3] = AL*BL
 type Recursive4 struct {
-	EntityName string
-	BitSize    uint      //Default to 4
-	OutputSize uint      //Default to 8
-	LUTArray   [4]*LUT2D //Size of 4
-	VHDLFile   string
-	TestFile   string
+	EntityName    string
+	BitSize       uint      //Default to 4
+	OutputSize    uint      //Default to 8
+	LUTArray      [4]*LUT2D //Size of 4
+	VHDLFile      string
+	TestFile      string
+	OverflowError bool
 }
 
 func NewRecursive4(EntityName string, LUTArray [4]*LUT2D) *Recursive4 {
@@ -30,6 +31,7 @@ func NewRecursive4(EntityName string, LUTArray [4]*LUT2D) *Recursive4 {
 	r4.EntityName = EntityName
 	r4.VHDLFile, r4.TestFile = FileNameGen(r4.EntityName)
 	r4.LUTArray = LUTArray
+	r4.OverflowError = false
 
 	return r4
 }
@@ -64,8 +66,17 @@ func (r4 *Recursive4) ReturnVal(a uint, b uint) uint {
 	ALBL := ALBL_LUT.ReturnVal(AL, BL)
 
 	output := ALBL + (ALBH << 2) + (AHBL << 2) + (AHBH << 4)
-
+	//Next function masks the output in 8-bit, like VHDL/Vivado would do.
+	//Overflow check is best effort, but if generating the whole output-space, we can fully determine overflow
+	output, overflowcheck := OverflowCheck8bit(output)
+	r4.flagOverflow(overflowcheck)
 	return output
+}
+
+func (r4 *Recursive4) flagOverflow(input bool) {
+	if input {
+		r4.OverflowError = true
+	}
 }
 
 func (r4 *Recursive4) GenerateTestData(FolderPath string) {
@@ -137,20 +148,21 @@ func (r4 *Recursive4) GenerateVHDLEntityArray() []VHDLEntity {
 }
 
 func (r4 *Recursive4) Overflow() bool {
-	maxval := int(math.Exp2(4))
-	overflowval := int(math.Exp2(8))
+	// maxval := int(math.Exp2(4))
+	// overflowval := int(math.Exp2(8))
 
-	for a := 0; a < maxval; a++ {
-		for b := 0; b < maxval; b++ {
-			if r4.ReturnVal(uint(a), uint(b)) > uint(overflowval)-1 { //double check this with _test.go
-				log.Printf("WARNING: Overflow for %d*%d=%d>%d\n", a, b, r4.ReturnVal(uint(a), uint(b)), overflowval-1)
-				log.Printf("Accurate: %d*%d=%d\n", a, b, a*b)
-				return true
-			}
-		}
-	}
+	// for a := 0; a < maxval; a++ {
+	// 	for b := 0; b < maxval; b++ {
+	// 		if r4.ReturnVal(uint(a), uint(b)) > uint(overflowval)-1 { //double check this with _test.go
+	// 			log.Printf("WARNING: Overflow for %d*%d=%d>%d\n", a, b, r4.ReturnVal(uint(a), uint(b)), overflowval-1)
+	// 			log.Printf("Accurate: %d*%d=%d\n", a, b, a*b)
+	// 			return true
+	// 		}
+	// 	}
+	// }
 
-	return false
+	// return false
+	return r4.OverflowError
 }
 
 func (r4 *Recursive4) MeanAbsoluteError() float64 {

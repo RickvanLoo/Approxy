@@ -61,3 +61,12 @@ func FileNameGen(EntityName string) (VHDLFile string, TestFile string) {
 	TestFile = "test_" + EntityName + ".txt"
 	return VHDLFile, TestFile
 }
+
+func OverflowCheck8bit(input uint) (output uint, overflow bool) {
+	OverflowMask := byte(0b11111111)
+	byte_input := byte(input)
+	byte_output := byte_input & OverflowMask
+	output = uint(byte_output)
+	booloutput := !(output == input)
+	return output, booloutput
+}

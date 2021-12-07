@@ -3,13 +3,17 @@ package main
 import (
 	"badmath/VHDL"
 	"badmath/Vivado"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"os"
+	"strconv"
 	"text/tabwriter"
 )
 
 type Result struct {
 	EntityString string
+	EntityHash   string
 	Utilization  *Vivado.Utilization
 	Overflow     bool
 	MAE          float64
@@ -19,10 +23,17 @@ type Result struct {
 func NewResult(Entity VHDL.VHDLEntity, Utilization *Vivado.Utilization, Overflow bool, MAE float64) *Result {
 	R := new(Result)
 	R.EntityString = Entity.String()
+	R.EntityHash = toHash(R.EntityString)
 	R.Utilization = Utilization
 	R.Overflow = Overflow
 	R.MAE = MAE
 	return R
+}
+
+//Only for identifier purposes, do not use this for crypto purposes
+func toHash(EntityString string) string {
+	hash := md5.Sum([]byte(EntityString))
+	return hex.EncodeToString(hash[:])
 }
 
 func (r *Result) PrettyPrint() {
@@ -37,6 +48,7 @@ func (r *Result) PrettyPrint() {
 	fmt.Fprintln(writer, "BADMATH - RESULT REPORT")
 	fmt.Fprintln(writer, topbottomstr)
 	fmt.Fprintln(writer, "TopEntity:\t"+r.EntityString)
+	fmt.Fprintln(writer, "MD5 Hash:\t"+r.EntityHash)
 	fmt.Fprintf(writer, "Overflow: %t\tMAE: %f\n", r.Overflow, r.MAE)
 	fmt.Fprintf(writer, "Total LUTs\tLogic LUTs\tLUTRAMs\tSRLs\tFFs\tRAMB36\tRAMB18\tDSP Blocks\n")
 	fmt.Fprintf(writer, "%d\t", r.Utilization.TotalLUT)
@@ -49,4 +61,8 @@ func (r *Result) PrettyPrint() {
 	fmt.Fprintf(writer, "%d\n", r.Utilization.DSP)
 	fmt.Fprintln(writer, topbottomstr)
 	writer.Flush()
+}
+
+func (r *Result) String() string {
+	return r.EntityHash + "," + r.EntityString + "," + strconv.Itoa(r.Utilization.TotalLUT) + "," + fmt.Sprintf("%f", r.MAE) + "," + fmt.Sprintf("%t", r.Overflow)
 }
