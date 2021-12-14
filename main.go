@@ -56,12 +56,71 @@ func main() {
 	//o3 = AL*BH
 	//o4 = AL*BL
 
-	// m1 := VHDL.M1().LUT2D
-	// m2 := VHDL.M2().LUT2D
-	// m3 := VHDL.M3().LUT2D
-	// m4 := VHDL.M4().LUT2D
-	// acc := VHDL.New2DUnsignedAcc("Acc", 2)
+	m1 := VHDL.M1().LUT2D
+	m2 := VHDL.M2().LUT2D
+	//3 := VHDL.M3().LUT2D
+	//m4 := VHDL.M4().LUT2D
+	acc := VHDL.New2DUnsignedAcc("Acc", 2)
 
+	//rec4multirun()
+	//Accurate4bit()
+
+	//[M1,Acc,M2,M1] BIG
+	//[M1,M1,M1,M1] SMALL
+
+	bigrec4 := VHDL.NewRecursive4("BigRec4", [4]*VHDL.LUT2D{m1, acc, m2, m1})
+	smallrec4 := VHDL.NewRecursive4("SmallRec4", [4]*VHDL.LUT2D{m1, m1, m1, m1})
+
+	bigrec4.GenerateTestData(OutputPath)
+	bigrec4.GenerateVHDL(OutputPath)
+	smallrec4.GenerateTestData(OutputPath)
+	smallrec4.GenerateVHDL(OutputPath)
+
+	xsimbigrec := Viv.CreateXSIM(OutputPath, "BigSim", bigrec4.GenerateVHDLEntityArray())
+	xsimsmallrec := Viv.CreateXSIM(OutputPath, "SmallSim", smallrec4.GenerateVHDLEntityArray())
+	xsimbigrec.Exec()
+	xsimsmallrec.Exec()
+
+	err := Viv.ParseXSIMReport(OutputPath, smallrec4)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = Viv.ParseXSIMReport(OutputPath, bigrec4)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	//Scale
+
+	bigscale := VHDL.New2DScaler(bigrec4, 100)
+	smallscale := VHDL.New2DScaler(smallrec4, 100)
+
+	bigscale.GenerateVHDL(OutputPath)
+	smallscale.GenerateVHDL(OutputPath)
+
+	tclbig := Viv.CreateVivadoTCL(OutputPath, "big.tcl", bigscale, VivadoSettings)
+	tclsmall := Viv.CreateVivadoTCL(OutputPath, "small.tcl", smallscale, VivadoSettings)
+	tclbig.Exec()
+	tclsmall.Exec()
+
+}
+
+func Accurate4bit() {
+	acc4 := VHDL.NewAccurateNumMultiplyer("Acc4", 4, OutputPath)
+	acc4.GenerateVHDL(OutputPath)
+	acc4.GenerateTestData(OutputPath)
+
+	accscaler := VHDL.New2DScaler(acc4, 100)
+	accscaler.GenerateVHDL(OutputPath)
+	tcl := Viv.CreateVivadoTCL(OutputPath, "main1.tcl", accscaler, VivadoSettings)
+	tcl.Exec()
+	util := Viv.ParseUtilizationReport(OutputPath, accscaler)
+
+	fmt.Printf("%+v\n", util)
+}
+
+func rec4multirun() {
 	M1 = VHDL.M1().LUT2D                  //1
 	M2 = VHDL.M2().LUT2D                  //2
 	M3 = VHDL.M3().LUT2D                  //3
