@@ -21,6 +21,7 @@ type VivadoTCLSettings struct {
 	WriteCheckpoint bool
 	Placement       bool
 	Utilization     bool
+	Hierarchical    bool //Note: Setting this to false, might possibly break utilization report parsing
 }
 
 func CreateVivadoTCL(FolderPath string, FileName string, Entity VHDL.VHDLEntity, Settings *VivadoTCLSettings) *VivadoTCL {

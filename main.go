@@ -50,6 +50,7 @@ func main() {
 	VivadoSettings.Placement = true
 	VivadoSettings.Utilization = true
 	VivadoSettings.WriteCheckpoint = true
+	VivadoSettings.Hierarchical = false
 
 	//o1 = AH*BH
 	//o2 = AH*BL
@@ -57,52 +58,22 @@ func main() {
 	//o4 = AL*BL
 
 	m1 := VHDL.M1().LUT2D
-	m2 := VHDL.M2().LUT2D
-	//3 := VHDL.M3().LUT2D
-	//m4 := VHDL.M4().LUT2D
-	acc := VHDL.New2DUnsignedAcc("Acc", 2)
+	// m2 := VHDL.M2().LUT2D
+	// m3 := VHDL.M3().LUT2D
+	// m4 := VHDL.M4().LUT2D
+	//acc := VHDL.New2DUnsignedAcc("Acc", 2)
 
-	//rec4multirun()
-	//Accurate4bit()
+	rec4 := VHDL.NewRecursive4("BigRec4", [4]*VHDL.LUT2D{m1, m1, m1, m1})
+	rec4.GenerateTestData(OutputPath)
+	rec4.GenerateVHDL(OutputPath)
 
-	//[M1,Acc,M2,M1] BIG
-	//[M1,M1,M1,M1] SMALL
+	mac_rec4 := VHDL.NewMAC(rec4)
 
-	bigrec4 := VHDL.NewRecursive4("BigRec4", [4]*VHDL.LUT2D{m1, acc, m2, m1})
-	smallrec4 := VHDL.NewRecursive4("SmallRec4", [4]*VHDL.LUT2D{m1, m1, m1, m1})
+	corr := VHDL.NewCorrelator("Corr", [4]*VHDL.MAC{mac_rec4, mac_rec4, mac_rec4, mac_rec4})
+	corr.GenerateVHDL(OutputPath)
 
-	bigrec4.GenerateTestData(OutputPath)
-	bigrec4.GenerateVHDL(OutputPath)
-	smallrec4.GenerateTestData(OutputPath)
-	smallrec4.GenerateVHDL(OutputPath)
-
-	xsimbigrec := Viv.CreateXSIM(OutputPath, "BigSim", bigrec4.GenerateVHDLEntityArray())
-	xsimsmallrec := Viv.CreateXSIM(OutputPath, "SmallSim", smallrec4.GenerateVHDLEntityArray())
-	xsimbigrec.Exec()
-	xsimsmallrec.Exec()
-
-	err := Viv.ParseXSIMReport(OutputPath, smallrec4)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	err = Viv.ParseXSIMReport(OutputPath, bigrec4)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	//Scale
-
-	bigscale := VHDL.New2DScaler(bigrec4, 100)
-	smallscale := VHDL.New2DScaler(smallrec4, 100)
-
-	bigscale.GenerateVHDL(OutputPath)
-	smallscale.GenerateVHDL(OutputPath)
-
-	tclbig := Viv.CreateVivadoTCL(OutputPath, "big.tcl", bigscale, VivadoSettings)
-	tclsmall := Viv.CreateVivadoTCL(OutputPath, "small.tcl", smallscale, VivadoSettings)
-	tclbig.Exec()
-	tclsmall.Exec()
+	VivadoProject := Viv.CreateVivadoTCL(OutputPath, "main.tcl", corr, VivadoSettings)
+	VivadoProject.Exec()
 
 }
 
