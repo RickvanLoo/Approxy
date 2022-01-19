@@ -70,3 +70,12 @@ func OverflowCheck8bit(input uint) (output uint, overflow bool) {
 	booloutput := !(output == input)
 	return output, booloutput
 }
+
+func OverflowCheck16bit(input uint) (output uint, overflow bool) {
+	OverflowMask := uint16(65535)
+	uint16_input := uint16(input)
+	uint16_output := uint16_input & OverflowMask
+	output = uint(uint16_output)
+	booloutput := !(output == input)
+	return output, booloutput
+}

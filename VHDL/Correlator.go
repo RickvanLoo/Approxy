@@ -15,6 +15,8 @@ type Correlator struct {
 	TestFile   string
 }
 
+//TODO : Make it the same as Rec4, where GenerateVHDL generates the preceding VHDL files as well.
+
 func NewCorrelator(EntityName string, MACArray [4]*MAC) *Correlator {
 	corr := new(Correlator)
 	corr.EntityName = EntityName

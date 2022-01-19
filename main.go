@@ -58,22 +58,58 @@ func main() {
 	//o4 = AL*BL
 
 	m1 := VHDL.M1().LUT2D
-	// m2 := VHDL.M2().LUT2D
-	// m3 := VHDL.M3().LUT2D
-	// m4 := VHDL.M4().LUT2D
-	//acc := VHDL.New2DUnsignedAcc("Acc", 2)
+	m2 := VHDL.M2().LUT2D
+	m3 := VHDL.M3().LUT2D
+	m4 := VHDL.M4().LUT2D
 
-	rec4 := VHDL.NewRecursive4("BigRec4", [4]*VHDL.LUT2D{m1, m1, m1, m1})
-	rec4.GenerateTestData(OutputPath)
+	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]*VHDL.LUT2D{m1, m2, m3, m4})
+	rec8 := VHDL.NewRecursive8("ApproxRec8", [4]*VHDL.Recursive4{rec4, rec4, rec4, rec4})
+	rec8.GenerateTestData(OutputPath)
+	rec8.GenerateVHDL(OutputPath)
+
+	test := Viv.CreateXSIM(OutputPath, "rec8Test", rec8.GenerateVHDLEntityArray())
+	test.Exec()
+
+	rec8scaler := VHDL.New2DScaler(rec8, 100)
+	rec8scaler.GenerateVHDL(OutputPath)
+
+	synth := Viv.CreateVivadoTCL(OutputPath, "main.tcl", rec8scaler, VivadoSettings)
+	synth.Exec()
+
+}
+
+func Improvcheck() {
+	m1 := VHDL.M1().LUT2D
+	m2 := VHDL.M2().LUT2D
+	// m3 := VHDL.M3().LUT2D
+	m4 := VHDL.M4().LUT2D
+	acc := VHDL.New2DUnsignedAcc("Acc", 2)
+
+	acc_perfect := VHDL.NewAccurateNumMultiplyer("AccPerfect", 4, OutputPath)
+	acc_perfect.GenerateVHDL(OutputPath)
+	mac_acc_perfect := VHDL.NewMAC(acc_perfect)
+	mac_acc_perfect.GenerateVHDL(OutputPath)
+
+	corrAcc := VHDL.NewCorrelator("CorrAccurate", [4]*VHDL.MAC{mac_acc_perfect, mac_acc_perfect, mac_acc_perfect, mac_acc_perfect})
+	corrAcc.GenerateVHDL(OutputPath)
+
+	//[Acc,M4,M2,M1] = small
+
+	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]*VHDL.LUT2D{acc, m4, m2, m1})
 	rec4.GenerateVHDL(OutputPath)
 
 	mac_rec4 := VHDL.NewMAC(rec4)
 
-	corr := VHDL.NewCorrelator("Corr", [4]*VHDL.MAC{mac_rec4, mac_rec4, mac_rec4, mac_rec4})
+	corr := VHDL.NewCorrelator("CorrApprox", [4]*VHDL.MAC{mac_rec4, mac_rec4, mac_rec4, mac_rec4})
 	corr.GenerateVHDL(OutputPath)
+
+	VivadoProjectAccurate := Viv.CreateVivadoTCL(OutputPath, "approx.tcl", corrAcc, VivadoSettings)
+	VivadoProjectAccurate.Exec()
 
 	VivadoProject := Viv.CreateVivadoTCL(OutputPath, "main.tcl", corr, VivadoSettings)
 	VivadoProject.Exec()
+
+	///CHECK IF IMPROVEMENT
 
 }
 

@@ -11,6 +11,8 @@ type MAC struct {
 	TestFile   string
 }
 
+//TODO : Make it the same as Rec4, where GenerateVHDL generates the preceding VHDL files as well.
+
 func NewMAC(Multiplier VHDLEntity) *MAC {
 	mac := new(MAC)
 	mac.Multiplier = Multiplier.ReturnData()
