@@ -14,6 +14,7 @@ func TestRecursive8(t *testing.T) {
 	rec4 := NewRecursive4("testRec4", RecLutArray)
 	rec4array := [4]*Recursive4{rec4, rec4, rec4, rec4}
 	rec8 := NewRecursive8("testRec8", rec4array)
+	pass := true
 
 	maxval := int(math.Exp2(8))
 
@@ -25,11 +26,14 @@ func TestRecursive8(t *testing.T) {
 
 			if out != uint(test) {
 				t.Errorf("!!ERROR!!: %d * %d != %d!!", a, b, out)
-			} else {
-				t.Logf("PASS: %d * %d == %d", a, b, out)
+				pass = false
 			}
 
 		}
+	}
+
+	if pass {
+		t.Logf("PASS ALL: No Errors detected for Rec8")
 	}
 }
 

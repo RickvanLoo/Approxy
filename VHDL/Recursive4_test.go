@@ -12,6 +12,7 @@ func TestRecursive4(t *testing.T) {
 	o4 := New2DUnsignedAcc("o4", 2)
 	RecLutArray := [4]*LUT2D{o1, o2, o3, o4}
 	rec4 := NewRecursive4("testRec4", RecLutArray)
+	pass := true
 
 	maxval := int(math.Exp2(4))
 
@@ -23,11 +24,13 @@ func TestRecursive4(t *testing.T) {
 
 			if out != uint(test) {
 				t.Errorf("!!ERROR!!: %d * %d != %d!!", a, b, out)
-			} else {
-				t.Logf("PASS: %d * %d == %d", a, b, out)
+				pass = false
 			}
-
 		}
+	}
+
+	if pass {
+		t.Logf("PASS ALL: No Errors detected for Rec4")
 	}
 }
 
