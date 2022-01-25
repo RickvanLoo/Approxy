@@ -182,9 +182,9 @@ func (r4 *Recursive4) MeanAbsoluteError() float64 {
 
 func (r4 *Recursive4) String() string {
 	//AHBH -> AHBL -> ALBH -> ALAL
-	str := r4.EntityName + " -> [" + r4.LUTArray[0].EntityName + ","
-	str += r4.LUTArray[1].EntityName + ","
-	str += r4.LUTArray[2].EntityName + ","
+	str := r4.EntityName + " -> [" + r4.LUTArray[0].EntityName + ";"
+	str += r4.LUTArray[1].EntityName + ";"
+	str += r4.LUTArray[2].EntityName + ";"
 	str += r4.LUTArray[3].EntityName + "]"
 	return str
 }

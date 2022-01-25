@@ -146,9 +146,9 @@ func (r8 *Recursive8) GenerateTestData(FolderPath string) {
 
 func (r8 *Recursive8) String() string {
 	//AHBH -> AHBL -> ALBH -> ALAL
-	str := r8.EntityName + " -> [" + r8.Rec4Array[0].EntityName + ","
-	str += r8.Rec4Array[0].EntityName + ","
-	str += r8.Rec4Array[0].EntityName + ","
+	str := r8.EntityName + " -> [" + r8.Rec4Array[0].EntityName + ";"
+	str += r8.Rec4Array[0].EntityName + ";"
+	str += r8.Rec4Array[0].EntityName + ";"
 	str += r8.Rec4Array[0].EntityName + "]"
 	return str
 }

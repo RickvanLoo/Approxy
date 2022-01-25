@@ -50,9 +50,9 @@ func (corr *Correlator) GenerateTestData(FolderPath string) {
 }
 
 func (corr *Correlator) String() string {
-	str := corr.EntityName + " -> [" + corr.MACArray[0].EntityName + ","
-	str += corr.MACArray[1].EntityName + ","
-	str += corr.MACArray[2].EntityName + ","
+	str := corr.EntityName + " -> [" + corr.MACArray[0].EntityName + ";"
+	str += corr.MACArray[1].EntityName + ";"
+	str += corr.MACArray[2].EntityName + ";"
 	str += corr.MACArray[3].EntityName + "]"
 	return str
 }
