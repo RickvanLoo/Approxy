@@ -6,12 +6,13 @@ import (
 )
 
 type MAC struct {
-	EntityName string
-	BitSize    uint
-	OutputSize uint
-	Multiplier VHDLEntityMultiplier
-	VHDLFile   string
-	TestFile   string
+	EntityName   string
+	BitSize      uint
+	OutputSize   uint
+	Multiplier   VHDLEntityMultiplier
+	VHDLFile     string
+	TestFile     string
+	CurrentValue uint
 }
 
 //TODO : Make it the same as Rec4, where GenerateVHDL generates the preceding VHDL files as well.
@@ -23,6 +24,7 @@ func NewMAC(Multiplier VHDLEntityMultiplier, T int) *MAC {
 	mac.EntityName = "MAC_" + MultiplierData.EntityName
 	mac.BitSize = MultiplierData.BitSize
 	mac.VHDLFile, mac.TestFile = FileNameGen(mac.EntityName)
+	mac.CurrentValue = 0
 
 	mac.TestFile = MultiplierData.TestFile // Fix because MAC does not have testing
 
@@ -65,6 +67,17 @@ func (mac *MAC) GenerateTestData(FolderPath string) {
 
 func (mac *MAC) String() string {
 	return "MAC -> " + mac.Multiplier.ReturnData().EntityName
+}
+
+func (mac *MAC) ReturnVal(a uint, b uint) uint {
+	c := mac.Multiplier.ReturnVal(a, b)
+	mac.CurrentValue = mac.CurrentValue + c
+	mac.CurrentValue, _ = OverflowCheckGeneric(mac.CurrentValue, mac.OutputSize)
+	return mac.CurrentValue
+}
+
+func (mac *MAC) ResetVal() {
+	mac.CurrentValue = 0
 }
 
 // ReturnData() *EntityData
