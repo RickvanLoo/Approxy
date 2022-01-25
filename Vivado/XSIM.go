@@ -29,7 +29,7 @@ func CreateXSIM(FolderPath string, SimName string, VHDLEntities []VHDL.VHDLEntit
 	XSIM.BitSize = VHDLEntities[0].ReturnData().BitSize
 	XSIM.FolderPath = FolderPath
 	XSIM.VHDLEntities = VHDLEntities
-	XSIM.removeDuplicate()
+	//XSIM.removeDuplicate()
 
 	return XSIM
 }

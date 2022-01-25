@@ -104,3 +104,19 @@ func OverflowCheckGeneric(input uint, n uint) (output uint, overflow bool) {
 	booloutput := !(output == input)
 	return output, booloutput
 }
+
+func RemoveDuplicate(Array []VHDLEntity) []VHDLEntity {
+	VHDLEntityMap := make(map[string]VHDLEntity)
+
+	for _, Entity := range Array {
+		VHDLEntityMap[Entity.ReturnData().EntityName] = Entity
+	}
+
+	var v []VHDLEntity
+
+	for _, Entity := range VHDLEntityMap {
+		v = append(v, Entity)
+	}
+
+	return v
+}

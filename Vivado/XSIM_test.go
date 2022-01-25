@@ -104,4 +104,14 @@ func TestXSIMDuplicate7(t *testing.T) {
 	if topEntityName != "ApproxRec8" {
 		t.Errorf("Expected ApproxRec8, got %s", topEntityName)
 	}
+
+	secEntityName := xsim.VHDLEntities[1].ReturnData().EntityName
+	if (secEntityName != "ApproxRec4_1") || (secEntityName != "ApproxRec4_2") {
+		t.Errorf("Expected ApproxRec4_1 or ApproxRec4_2, got %s", topEntityName)
+	}
+
+	trdEntityName := xsim.VHDLEntities[2].ReturnData().EntityName
+	if (trdEntityName != "ApproxRec4_1") || (trdEntityName != "ApproxRec4_2") {
+		t.Errorf("Expected ApproxRec4_1 or ApproxRec4_2, got %s", topEntityName)
+	}
 }

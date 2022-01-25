@@ -138,11 +138,13 @@ func (r4 *Recursive4) GenerateVHDLEntityArray() []VHDLEntity {
 
 	var out []VHDLEntity
 
-	out = append(out, r4)
+	//out = append(out, r4)
 
 	for _, mult := range r4.LUTArray {
 		out = append(out, mult)
 	}
+
+	out = append([]VHDLEntity{r4}, out...)
 
 	return out
 }
