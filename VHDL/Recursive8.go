@@ -156,12 +156,20 @@ func (r8 *Recursive8) String() string {
 func (r8 *Recursive8) GenerateVHDLEntityArray() []VHDLEntity {
 
 	var out []VHDLEntity
-
-	out = append(out, r8)
+	var LUT2DArray []VHDLEntity
+	var REC4Array []VHDLEntity
 
 	for _, rec4 := range r8.Rec4Array {
-		out = append(out, rec4.GenerateVHDLEntityArray()...)
+		REC4Array = append(REC4Array, rec4.GenerateVHDLEntityArray()[0])
+		LUT2DArray = append(LUT2DArray, rec4.GenerateVHDLEntityArray()[1:]...)
 	}
+
+	REC4Array = RemoveDuplicate(REC4Array)
+	LUT2DArray = RemoveDuplicate(LUT2DArray)
+
+	out = append(out, r8)
+	out = append(out, REC4Array...)
+	out = append(out, LUT2DArray...)
 
 	return out
 }

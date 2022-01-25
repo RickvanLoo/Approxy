@@ -80,19 +80,3 @@ func (x *XSIM) Exec() {
 		log.Println(err)
 	}
 }
-
-func (x *XSIM) removeDuplicate() {
-	VHDLEntityMap := make(map[string]VHDL.VHDLEntity)
-
-	for _, Entity := range x.VHDLEntities {
-		VHDLEntityMap[Entity.ReturnData().EntityName] = Entity
-	}
-
-	var v []VHDL.VHDLEntity
-
-	for _, Entity := range VHDLEntityMap {
-		v = append(v, Entity)
-	}
-
-	x.VHDLEntities = v
-}
