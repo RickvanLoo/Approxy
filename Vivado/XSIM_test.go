@@ -15,6 +15,12 @@ func TestXSIMDuplicate2(t *testing.T) {
 	if length_vhdlentityXSIM != 2 {
 		t.Errorf("Duplication Issue!, l=%d, expect=2", length_vhdlentityXSIM)
 	}
+
+	topEntityName := xsim.VHDLEntities[0].ReturnData().EntityName
+	if topEntityName != "ApproxRec4" {
+		t.Errorf("Expected ApproxRec4, got %s", topEntityName)
+	}
+
 }
 
 func TestXSIMDuplicate3(t *testing.T) {
@@ -28,6 +34,11 @@ func TestXSIMDuplicate3(t *testing.T) {
 
 	if length_vhdlentityXSIM != 3 {
 		t.Errorf("Duplication Issue!, l=%d, expect=3", length_vhdlentityXSIM)
+	}
+
+	topEntityName := xsim.VHDLEntities[0].ReturnData().EntityName
+	if topEntityName != "ApproxRec4" {
+		t.Errorf("Expected ApproxRec4, got %s", topEntityName)
 	}
 }
 
@@ -44,6 +55,11 @@ func TestXSIMDuplicate4(t *testing.T) {
 	if length_vhdlentityXSIM != 4 {
 		t.Errorf("Duplication Issue!, l=%d, expect=4", length_vhdlentityXSIM)
 	}
+
+	topEntityName := xsim.VHDLEntities[0].ReturnData().EntityName
+	if topEntityName != "ApproxRec4" {
+		t.Errorf("Expected ApproxRec4, got %s", topEntityName)
+	}
 }
 
 func TestXSIMDuplicate5(t *testing.T) {
@@ -59,6 +75,11 @@ func TestXSIMDuplicate5(t *testing.T) {
 
 	if length_vhdlentityXSIM != 5 {
 		t.Errorf("Duplication Issue!, l=%d, expect=5", length_vhdlentityXSIM)
+	}
+
+	topEntityName := xsim.VHDLEntities[0].ReturnData().EntityName
+	if topEntityName != "ApproxRec4" {
+		t.Errorf("Expected ApproxRec4, got %s", topEntityName)
 	}
 }
 
@@ -77,5 +98,10 @@ func TestXSIMDuplicate7(t *testing.T) {
 
 	if length_vhdlentityXSIM != 7 {
 		t.Errorf("Duplication Issue!, l=%d, expect=7", length_vhdlentityXSIM)
+	}
+
+	topEntityName := xsim.VHDLEntities[0].ReturnData().EntityName
+	if topEntityName != "ApproxRec8" {
+		t.Errorf("Expected ApproxRec8, got %s", topEntityName)
 	}
 }
