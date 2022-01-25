@@ -58,3 +58,25 @@ func TestRecursive8Overflow(t *testing.T) {
 		t.Logf("PASS: Overflow detected for known Overflow Configuration")
 	}
 }
+
+func TestOutputArrayRec8(t *testing.T) {
+	o1 := New2DUnsignedAcc("o1", 2)
+	o2 := New2DUnsignedAcc("o2", 2)
+	o3 := New2DUnsignedAcc("o3", 2)
+	o4 := New2DUnsignedAcc("o4", 2)
+	RecLutArray := [4]*LUT2D{o1, o2, o3, o4}
+	rec4 := NewRecursive4("testRec4", RecLutArray)
+	rec8 := NewRecursive8("testRec8", [4]*Recursive4{rec4, rec4, rec4, rec4})
+
+	output := rec8.GenerateVHDLEntityArray()
+
+	top := output[0].ReturnData().EntityName
+	if top != "testRec8" {
+		t.Errorf("Expected for 0: testRec8")
+	}
+
+	second := output[1].ReturnData().EntityName
+	if second != "testRec4" {
+		t.Errorf("Expected for 1: testRec4")
+	}
+}
