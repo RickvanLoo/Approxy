@@ -29,12 +29,14 @@ func CreateXSIM(FolderPath string, SimName string, VHDLEntities []VHDL.VHDLEntit
 	XSIM.BitSize = VHDLEntities[0].ReturnData().BitSize
 	XSIM.FolderPath = FolderPath
 	XSIM.VHDLEntities = VHDLEntities
+	XSIM.removeDuplicate()
 
-	VHDL.CreateFile(FolderPath, XSIM.SimFile, "xsim.vhd", XSIM)
 	return XSIM
 }
 
 func (x *XSIM) Exec() {
+	VHDL.CreateFile(x.FolderPath, x.SimFile, "xsim.vhd", x)
+
 	//This is ugly as hell, but it works, and is readable
 
 	for i := len(x.VHDLEntities) - 1; i >= 0; i-- {
@@ -77,4 +79,20 @@ func (x *XSIM) Exec() {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func (x *XSIM) removeDuplicate() {
+	VHDLEntityMap := make(map[string]VHDL.VHDLEntity)
+
+	for _, Entity := range x.VHDLEntities {
+		VHDLEntityMap[Entity.ReturnData().EntityName] = Entity
+	}
+
+	var v []VHDL.VHDLEntity
+
+	for _, Entity := range VHDLEntityMap {
+		v = append(v, Entity)
+	}
+
+	x.VHDLEntities = v
 }

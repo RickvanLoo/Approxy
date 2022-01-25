@@ -165,3 +165,12 @@ func (r8 *Recursive8) GenerateVHDLEntityArray() []VHDLEntity {
 
 	return out
 }
+
+func (r8 *Recursive8) Overflow() bool {
+	return r8.OverflowError
+}
+
+func (r8 *Recursive8) MeanAbsoluteError() float64 {
+	log.Println("Warnning, MAE Rec8 not implemented")
+	return 0
+}

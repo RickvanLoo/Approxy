@@ -3,17 +3,17 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity {{.EntityName}} is
-generic (word_size: integer:={{.BitSize}}); 
+generic (word_size: integer:={{.BitSize}}; output_size: integer:={{.OutputSize}}); 
 Port (
 clk : in std_logic;
 rst : in std_logic;
 A : in  STD_LOGIC_VECTOR (word_size-1 downto 0);
 B : in  STD_LOGIC_VECTOR (word_size-1 downto 0);
-prod: out STD_LOGIC_VECTOR (word_size * 2 - 1 downto 0));
+prod: out STD_LOGIC_VECTOR (output_size-1 downto 0));
 end {{.EntityName}};
 
 architecture Behavioral of {{.EntityName}} is
-    signal acc : unsigned(word_size * 2 - 1 downto 0) := (others => '0');
+    signal acc : unsigned(output_size-1 downto 0) := (others => '0');
     signal mult_output : std_logic_vector(word_size * 2 - 1 downto 0) := (others => '0');
 begin
 

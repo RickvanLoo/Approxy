@@ -2,11 +2,17 @@ package VHDL
 
 import (
 	"log"
+	"math/big"
 	"os"
 	"text/template"
 )
 
 // Generic functions for badmath/VHDL
+
+type VHDLEntityMultiplier interface {
+	VHDLEntity
+	Multiplier
+}
 
 //VHDLEntity describes an interface for a testable and synthesizable VHDL structure
 type VHDLEntity interface {
@@ -16,7 +22,7 @@ type VHDLEntity interface {
 	String() string //MSB -> LSB
 }
 
-type UnsignedMultiplyer interface {
+type Multiplier interface {
 	ReturnVal(uint, uint) uint
 	Overflow() bool
 	MeanAbsoluteError() float64
@@ -63,19 +69,38 @@ func FileNameGen(EntityName string) (VHDLFile string, TestFile string) {
 }
 
 func OverflowCheck8bit(input uint) (output uint, overflow bool) {
-	OverflowMask := byte(0b11111111)
-	byte_input := byte(input)
-	byte_output := byte_input & OverflowMask
-	output = uint(byte_output)
-	booloutput := !(output == input)
-	return output, booloutput
+	// OverflowMask := byte(0b11111111)
+	// byte_input := byte(input)
+	// byte_output := byte_input & OverflowMask
+	// output = uint(byte_output)
+	// booloutput := !(output == input)
+	// return output, booloutput
+	return OverflowCheckGeneric(input, 8)
 }
 
 func OverflowCheck16bit(input uint) (output uint, overflow bool) {
-	OverflowMask := uint16(65535)
-	uint16_input := uint16(input)
-	uint16_output := uint16_input & OverflowMask
-	output = uint(uint16_output)
+	// OverflowMask := uint16(65535)
+	// uint16_input := uint16(input)
+	// uint16_output := uint16_input & OverflowMask
+	// output = uint(uint16_output)
+	// booloutput := !(output == input)
+	// return output, booloutput
+	return OverflowCheckGeneric(input, 16)
+}
+
+func OverflowCheckGeneric(input uint, n uint) (output uint, overflow bool) {
+	if n > 64 {
+		log.Fatalln("OverflowCheckGeneric not specified for numbers above 64-bit")
+	}
+
+	var expo big.Int
+	expo.Exp(big.NewInt(2), big.NewInt(int64(n)), big.NewInt(0))
+	Maxnumber := expo.Uint64()
+
+	OverflowMask := uint64(Maxnumber - 1)
+	uint64_input := uint64(input)
+	uint64_output := uint64_input & OverflowMask
+	output = uint(uint64_output)
 	booloutput := !(output == input)
 	return output, booloutput
 }
