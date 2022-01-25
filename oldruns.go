@@ -6,7 +6,7 @@ import (
 )
 
 func Accurate() {
-	acc8 := VHDL.NewAccurateNumMultiplyer("Acc8", 8, OutputPath)
+	acc8 := VHDL.NewAccurateNumMultiplyer("Acc8", 8)
 	acc8.GenerateVHDL(OutputPath)
 	acc8.GenerateTestData(OutputPath)
 	// xsim := Viv.CreateXSIM(OutputPath, "Acc8.vhd", "testAcc8.txt", "topsim.vhd", acc8.EntityName, acc8.BitSize)

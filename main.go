@@ -109,7 +109,7 @@ func main() {
 // }
 
 func Accurate4bit() {
-	acc4 := VHDL.NewAccurateNumMultiplyer("Acc4", 4, OutputPath)
+	acc4 := VHDL.NewAccurateNumMultiplyer("Acc4", 4)
 	acc4.GenerateVHDL(OutputPath)
 	acc4.GenerateTestData(OutputPath)
 

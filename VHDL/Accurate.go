@@ -10,7 +10,7 @@ type UnsignedNumericAccurateMultiplyer struct {
 }
 
 //Creates a VHDL file of an UnsignedNumericAccurateMultiplyer.
-func NewAccurateNumMultiplyer(EntityName string, BitSize uint, FolderPath string) *UnsignedNumericAccurateMultiplyer {
+func NewAccurateNumMultiplyer(EntityName string, BitSize uint) *UnsignedNumericAccurateMultiplyer {
 	m := new(UnsignedNumericAccurateMultiplyer)
 	m.EntityName = EntityName
 	m.BitSize = BitSize
