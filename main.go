@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	VHDL "badmath/VHDL"
 
@@ -58,33 +57,41 @@ func main() {
 	//o3 = AL*BH
 	//o4 = AL*BL
 
-	start := time.Now()
+	//start := time.Now()
 
 	m1 := VHDL.M1().LUT2D
-	// m2 := VHDL.M2().LUT2D
+	m2 := VHDL.M2().LUT2D
 	// m3 := VHDL.M3().LUT2D
-	// m4 := VHDL.M4().LUT2D
+	m4 := VHDL.M4().LUT2D
 	acc := VHDL.New2DUnsignedAcc("Acc", 2)
 
-	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]*VHDL.LUT2D{m1, acc, m1, acc})
+	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]*VHDL.LUT2D{acc, m4, m2, m1})
 	rec8 := VHDL.NewRecursive8("ApproxRec8", [4]*VHDL.Recursive4{rec4, rec4, rec4, rec4})
 	mac := VHDL.NewMAC(rec8, 10)
 	mac.GenerateVHDL(OutputPath)
 	mac.GenerateTestData(OutputPath)
 
-	xsim := Viv.CreateXSIM(OutputPath, "xsimseq", mac.GenerateVHDLEntityArray())
+	xsim := Viv.CreateXSIM(OutputPath, "xsimseqApprox", mac.GenerateVHDLEntityArray())
 	xsim.SetTemplateSequential(mac.OutputSize)
 	xsim.Exec()
 
-	corr := VHDL.NewCorrelator("ApproxCorr", [4]*VHDL.MAC{mac, mac, mac, mac})
-	corr.GenerateVHDL(OutputPath)
-	corr.GenerateTestData(OutputPath)
+	corrapprox := VHDL.NewCorrelator("ApproxCorr", [4]*VHDL.MAC{mac, mac, mac, mac})
+	corrapprox.GenerateVHDL(OutputPath)
 
-	synth := Viv.CreateVivadoTCL(OutputPath, "main.tcl", corr, VivadoSettings)
-	synth.Exec()
+	accmac := VHDL.NewUnsignedAccurateMAC(8, 10)
+	accmac.GenerateVHDL(OutputPath)
+	accmac.GenerateTestData(OutputPath)
 
-	elapsed := time.Since(start)
-	log.Printf("XSIM MAC + Synth CORR took: %s", elapsed)
+	xsim2 := Viv.CreateXSIM(OutputPath, "xsimAccurate", accmac.GenerateVHDLEntityArray())
+	xsim2.SetTemplateSequential(accmac.OutputSize)
+	xsim2.Exec()
+
+	//TOFIX: corrAccurate := VHDL.NewCorrelator("AccurateCorr", [4]*VHDL.MAC{accmac, accmac, accmac, accmac})
+
+	synth1 := Viv.CreateVivadoTCL(OutputPath, "approx.tcl", mac, VivadoSettings)
+	synth2 := Viv.CreateVivadoTCL(OutputPath, "accurate.tcl", accmac, VivadoSettings)
+	synth1.Exec()
+	synth2.Exec()
 
 }
 

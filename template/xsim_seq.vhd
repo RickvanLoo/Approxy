@@ -54,7 +54,7 @@ testbench : process
 
           wait for 20 ns;
           
-          assert(output = test) report "!!ERROR!!PATTERN!!" severity FAILURE;
+          assert(output = test) report "!!ERROR!!PATTERN!!" severity ERROR;
         end loop;
 
         file_close(input_buf);      

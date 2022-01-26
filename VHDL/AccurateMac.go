@@ -10,11 +10,10 @@ import (
 	"strings"
 )
 
-type MAC struct {
+type UnsignedNumericAccurateMAC struct {
 	EntityName   string
 	BitSize      uint
 	OutputSize   uint
-	Multiplier   VHDLEntityMultiplier
 	VHDLFile     string
 	TestFile     string
 	CurrentValue uint
@@ -22,20 +21,16 @@ type MAC struct {
 	MaximumValue uint
 }
 
-//TODO : Make it the same as Rec4, where GenerateVHDL generates the preceding VHDL files as well.
-
-func NewMAC(Multiplier VHDLEntityMultiplier, T uint) *MAC {
-	mac := new(MAC)
-	mac.Multiplier = Multiplier
-	MultiplierData := mac.Multiplier.ReturnData()
-	mac.EntityName = "MAC_" + MultiplierData.EntityName
-	mac.BitSize = MultiplierData.BitSize
+func NewUnsignedAccurateMAC(BitSize uint, T uint) *UnsignedNumericAccurateMAC {
+	mac := new(UnsignedNumericAccurateMAC)
+	mac.EntityName = "UAMAC_" + strconv.Itoa(int(BitSize)) + "b" + strconv.Itoa(int(T)) + "T"
+	mac.BitSize = BitSize
 	mac.VHDLFile, mac.TestFile = FileNameGen(mac.EntityName)
 	mac.CurrentValue = 0
 	mac.T = T
 
 	maxinput := int(math.Exp2(float64(mac.BitSize)))
-	maxval := int(Multiplier.ReturnVal(uint(maxinput-1), uint(maxinput-1)))
+	maxval := (maxinput - 1) * (maxinput - 1)
 
 	bitvalue := math.Log2(float64(maxval * int(T)))
 	mac.OutputSize = uint(math.Ceil(bitvalue))
@@ -44,7 +39,7 @@ func NewMAC(Multiplier VHDLEntityMultiplier, T uint) *MAC {
 	return mac
 }
 
-func (mac *MAC) ReturnData() *EntityData {
+func (mac *UnsignedNumericAccurateMAC) ReturnData() *EntityData {
 	d := new(EntityData)
 	d.BitSize = mac.BitSize
 	d.EntityName = mac.EntityName
@@ -54,12 +49,11 @@ func (mac *MAC) ReturnData() *EntityData {
 	return d
 }
 
-func (mac *MAC) GenerateVHDL(FolderPath string) {
-	mac.Multiplier.GenerateVHDL(FolderPath)
-	CreateFile(FolderPath, mac.VHDLFile, "macbehav.vhd", mac)
+func (mac *UnsignedNumericAccurateMAC) GenerateVHDL(FolderPath string) {
+	CreateFile(FolderPath, mac.VHDLFile, "macaccurate.vhd", mac)
 }
 
-func (mac *MAC) GenerateTestData(FolderPath string) {
+func (mac *UnsignedNumericAccurateMAC) GenerateTestData(FolderPath string) {
 	fmtstr := "%0" + strconv.Itoa(int(mac.BitSize)) + "b %0" + strconv.Itoa(int(mac.BitSize)) + "b %0" + strconv.Itoa(int(mac.OutputSize)) + "b\n"
 	path := FolderPath + "/" + mac.TestFile
 
@@ -88,48 +82,28 @@ func (mac *MAC) GenerateTestData(FolderPath string) {
 			log.Println(err)
 		}
 	}
-
-	// for a := 0; a < maxval; a++ {
-	// 	for b := 0; b < maxval; b++ {
-
-	// 		if (a == 255) && (b == 255) {
-	// 			fmtstr = strings.TrimSuffix(fmtstr, "\n")
-	// 		}
-
-	// 		out := mac.ReturnVal(uint(a), uint(b))
-
-	// 		_, err = fmt.Fprintf(writer, fmtstr, a, b, out)
-	// 		if err != nil {
-	// 			log.Println(err)
-	// 		}
-
-	// 	}
-	// }
-
 	writer.Flush()
 
 }
 
-func (mac *MAC) String() string {
-	return "MAC -> " + mac.Multiplier.ReturnData().EntityName
+func (mac *UnsignedNumericAccurateMAC) String() string {
+	return mac.EntityName
 }
 
-func (mac *MAC) ReturnVal(a uint, b uint) uint {
-	c := mac.Multiplier.ReturnVal(a, b)
+func (mac *UnsignedNumericAccurateMAC) ReturnVal(a uint, b uint) uint {
+	c := a * b
 	mac.CurrentValue = mac.CurrentValue + c
 	mac.CurrentValue, _ = OverflowCheckGeneric(mac.CurrentValue, mac.OutputSize)
 	return mac.CurrentValue
 }
 
-func (mac *MAC) ResetVal() {
+func (mac *UnsignedNumericAccurateMAC) ResetVal() {
 	mac.CurrentValue = 0
 }
 
-func (mac *MAC) GenerateVHDLEntityArray() []VHDLEntity {
+func (mac *UnsignedNumericAccurateMAC) GenerateVHDLEntityArray() []VHDLEntity {
 	//fix me
 	var out []VHDLEntity
-
-	out = mac.Multiplier.GenerateVHDLEntityArray()
 
 	out = append([]VHDLEntity{mac}, out...)
 
