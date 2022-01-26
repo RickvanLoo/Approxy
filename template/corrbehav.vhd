@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use ieee.numeric_std.all;
 
 entity {{.EntityName}} is
-generic (word_size: integer:={{.BitSize}}); 
+generic (word_size: integer:={{.BitSize}}; output_size: integer:={{.OutputSize}}); 
 Port ( 
 --Generic
 clk : in std_logic;
@@ -19,12 +19,12 @@ dImYImS : in STD_LOGIC_VECTOR (word_size-1 downto 0);
 dReYImS : in STD_LOGIC_VECTOR (word_size-1 downto 0);
 dImyReS : in STD_LOGIC_VECTOR (word_size-1 downto 0);
 --Output
-Real: out STD_LOGIC_VECTOR (word_size * 3 - 1 downto 0);
-Img: out STD_LOGIC_VECTOR (word_size * 3 - 1 downto 0));
+Real: out STD_LOGIC_VECTOR (word_size+output_size - 1 downto 0);
+Img: out STD_LOGIC_VECTOR (word_size+output_size - 1 downto 0));
 end {{.EntityName}};
     
 architecture Behavioral of {{.EntityName}} is
-    signal ReYReS, ImYImS, ReYImS, ImYReS :  STD_LOGIC_VECTOR (word_size * 2 - 1 downto 0) := (others => '0');
+    signal ReYReS, ImYImS, ReYImS, ImYReS :  STD_LOGIC_VECTOR (output_size-1 downto 0) := (others => '0');
 begin
 
 ReYReS_mac: entity work.{{ (index .MACArray 0).EntityName }} port map(clk=>clk, rst=>rst, a=>ReY, b=>ReS,prod=>ReYReS);

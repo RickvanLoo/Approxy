@@ -19,6 +19,7 @@ type VHDLEntity interface {
 	ReturnData() *EntityData
 	GenerateVHDL(string)
 	GenerateTestData(string)
+	GenerateVHDLEntityArray() []VHDLEntity
 	String() string //MSB -> LSB
 }
 

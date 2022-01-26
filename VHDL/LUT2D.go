@@ -162,3 +162,9 @@ func (m *LUT2D) MeanAbsoluteError() float64 {
 func (m *LUT2D) String() string {
 	return m.EntityName
 }
+
+func (m *LUT2D) GenerateVHDLEntityArray() []VHDLEntity {
+	var out []VHDLEntity
+	out = append(out, m)
+	return out
+}

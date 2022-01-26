@@ -46,3 +46,9 @@ func (m *UnsignedNumericAccurateMultiplyer) ReturnData() *EntityData {
 func (m *UnsignedNumericAccurateMultiplyer) String() string {
 	return m.EntityName
 }
+
+func (m *UnsignedNumericAccurateMultiplyer) GenerateVHDLEntityArray() []VHDLEntity {
+	var out []VHDLEntity
+	out = append(out, m)
+	return out
+}

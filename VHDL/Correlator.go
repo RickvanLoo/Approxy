@@ -23,7 +23,7 @@ func NewCorrelator(EntityName string, MACArray [4]*MAC) *Correlator {
 	corr.MACArray = MACArray
 	MACData := corr.MACArray[0].ReturnData()
 	corr.BitSize = MACData.BitSize
-	corr.OutputSize = corr.BitSize * 3
+	corr.OutputSize = corr.MACArray[0].OutputSize //Different Outputsize for MACArray not yet supported
 	corr.VHDLFile, corr.TestFile = FileNameGen(corr.EntityName)
 	return corr
 }

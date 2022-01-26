@@ -14,8 +14,10 @@ type XSIM struct {
 	TestFile      string
 	TopEntityName string
 	FolderPath    string
+	TemplateFile  string
 	VHDLEntities  []VHDL.VHDLEntity
 	BitSize       uint
+	OutputSize    uint
 }
 
 //Creates an XSIM on bases of an array of VHDLEntities
@@ -28,14 +30,24 @@ func CreateXSIM(FolderPath string, SimName string, VHDLEntities []VHDL.VHDLEntit
 	XSIM.TopEntityName = VHDLEntities[0].ReturnData().EntityName
 	XSIM.BitSize = VHDLEntities[0].ReturnData().BitSize
 	XSIM.FolderPath = FolderPath
+	XSIM.TemplateFile = "xsim_mult.vhd" //Default option
 	XSIM.VHDLEntities = VHDLEntities
-	//XSIM.removeDuplicate()
+	XSIM.OutputSize = 2 * XSIM.BitSize
 
 	return XSIM
 }
 
+func (x *XSIM) SetTemplateMultiplier() {
+	x.TemplateFile = "xsim_mult.vhd"
+}
+
+func (x *XSIM) SetTemplateSequential(OutputSize uint) {
+	x.TemplateFile = "xsim_seq.vhd"
+	x.OutputSize = OutputSize
+}
+
 func (x *XSIM) Exec() {
-	VHDL.CreateFile(x.FolderPath, x.SimFile, "xsim.vhd", x)
+	VHDL.CreateFile(x.FolderPath, x.SimFile, x.TemplateFile, x)
 
 	//This is ugly as hell, but it works, and is readable
 

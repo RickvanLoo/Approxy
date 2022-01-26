@@ -51,3 +51,11 @@ func (scl *Scaler) String() string {
 	str := scl.EntityName + " N=" + strconv.Itoa(int(scl.ScaleN)) + " -> " + scl.Entity.String()
 	return str
 }
+
+func (scl *Scaler) GenerateVHDLEntityArray() []VHDLEntity {
+	//Not Correct, but Scaler is not XSIM'able anyway
+	log.Println("ERROR: Generating VHDLEntityArray for Scaler not supported. Continuing...")
+	var out []VHDLEntity
+	out = append(out, scl)
+	return out
+}
