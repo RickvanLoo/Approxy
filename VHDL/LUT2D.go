@@ -122,6 +122,7 @@ func (m *LUT2D) ReturnData() *EntityData {
 	d := new(EntityData)
 	d.EntityName = m.EntityName
 	d.BitSize = m.BitSize
+	d.OutputSize = m.OutputSize
 	d.VHDLFile = m.VHDLFile
 	d.TestFile = m.TestFile
 	return d

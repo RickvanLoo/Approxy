@@ -43,6 +43,7 @@ func (mac *UnsignedNumericAccurateMAC) ReturnData() *EntityData {
 	d := new(EntityData)
 	d.BitSize = mac.BitSize
 	d.EntityName = mac.EntityName
+	d.OutputSize = mac.OutputSize
 	d.TestFile = mac.TestFile
 	d.VHDLFile = mac.VHDLFile
 

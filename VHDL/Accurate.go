@@ -38,6 +38,7 @@ func (m *UnsignedNumericAccurateMultiplyer) ReturnData() *EntityData {
 	d := new(EntityData)
 	d.EntityName = m.EntityName
 	d.BitSize = m.BitSize
+	d.OutputSize = 2 * m.BitSize
 	d.VHDLFile = m.VHDLFile
 	d.TestFile = m.TestFile
 	return d

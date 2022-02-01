@@ -10,20 +10,20 @@ type Correlator struct {
 	EntityName string
 	BitSize    uint
 	OutputSize uint
-	MACArray   [4]*MAC //Size of 4
+	MACArray   [4]VHDLEntity //Size of 4
 	VHDLFile   string
 	TestFile   string
 }
 
 //TODO : Make it the same as Rec4, where GenerateVHDL generates the preceding VHDL files as well.
 
-func NewCorrelator(EntityName string, MACArray [4]*MAC) *Correlator {
+func NewCorrelator(EntityName string, MACArray [4]VHDLEntity) *Correlator {
 	corr := new(Correlator)
 	corr.EntityName = EntityName
 	corr.MACArray = MACArray
 	MACData := corr.MACArray[0].ReturnData()
 	corr.BitSize = MACData.BitSize
-	corr.OutputSize = corr.MACArray[0].OutputSize //Different Outputsize for MACArray not yet supported
+	corr.OutputSize = corr.MACArray[0].ReturnData().OutputSize //Different Outputsize for MACArray not yet supported
 	corr.VHDLFile, corr.TestFile = FileNameGen(corr.EntityName)
 	return corr
 }
@@ -50,10 +50,10 @@ func (corr *Correlator) GenerateTestData(FolderPath string) {
 }
 
 func (corr *Correlator) String() string {
-	str := corr.EntityName + " -> [" + corr.MACArray[0].EntityName + ";"
-	str += corr.MACArray[1].EntityName + ";"
-	str += corr.MACArray[2].EntityName + ";"
-	str += corr.MACArray[3].EntityName + "]"
+	str := corr.EntityName + " -> [" + corr.MACArray[0].ReturnData().EntityName + ";"
+	str += corr.MACArray[1].ReturnData().EntityName + ";"
+	str += corr.MACArray[2].ReturnData().EntityName + ";"
+	str += corr.MACArray[3].ReturnData().EntityName + "]"
 	return str
 }
 

@@ -42,6 +42,7 @@ func (scl *Scaler) ReturnData() *EntityData {
 	d := new(EntityData)
 	d.EntityName = scl.EntityName
 	d.BitSize = scl.BitSize
+	d.OutputSize = scl.Entity.ReturnData().OutputSize
 	d.VHDLFile = scl.VHDLFile
 	d.TestFile = "" //Not Supported!
 	return d

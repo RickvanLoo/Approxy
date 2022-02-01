@@ -97,6 +97,7 @@ func (r8 *Recursive8) ReturnData() *EntityData {
 	d := new(EntityData)
 	d.BitSize = r8.BitSize
 	d.EntityName = r8.EntityName
+	d.OutputSize = r8.OutputSize
 	d.TestFile = r8.TestFile
 	d.VHDLFile = r8.VHDLFile
 	return d

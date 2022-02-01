@@ -33,6 +33,7 @@ type Multiplier interface {
 type EntityData struct {
 	EntityName string
 	BitSize    uint
+	OutputSize uint
 	VHDLFile   string
 	TestFile   string
 }

@@ -66,8 +66,8 @@ func main() {
 	acc := VHDL.New2DUnsignedAcc("Acc", 2)
 
 	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]*VHDL.LUT2D{acc, m4, m2, m1})
-	rec8 := VHDL.NewRecursive8("ApproxRec8", [4]*VHDL.Recursive4{rec4, rec4, rec4, rec4})
-	mac := VHDL.NewMAC(rec8, 10)
+	//rec8 := VHDL.NewRecursive8("ApproxRec8", [4]*VHDL.Recursive4{rec4, rec4, rec4, rec4})
+	mac := VHDL.NewMAC(rec4, 10)
 	mac.GenerateVHDL(OutputPath)
 	mac.GenerateTestData(OutputPath)
 
@@ -75,10 +75,10 @@ func main() {
 	xsim.SetTemplateSequential(mac.OutputSize)
 	xsim.Exec()
 
-	corrapprox := VHDL.NewCorrelator("ApproxCorr", [4]*VHDL.MAC{mac, mac, mac, mac})
+	corrapprox := VHDL.NewCorrelator("ApproxCorr", [4]VHDL.VHDLEntity{mac, mac, mac, mac})
 	corrapprox.GenerateVHDL(OutputPath)
 
-	accmac := VHDL.NewUnsignedAccurateMAC(8, 10)
+	accmac := VHDL.NewUnsignedAccurateMAC(4, 10)
 	accmac.GenerateVHDL(OutputPath)
 	accmac.GenerateTestData(OutputPath)
 
@@ -86,10 +86,11 @@ func main() {
 	xsim2.SetTemplateSequential(accmac.OutputSize)
 	xsim2.Exec()
 
-	//TOFIX: corrAccurate := VHDL.NewCorrelator("AccurateCorr", [4]*VHDL.MAC{accmac, accmac, accmac, accmac})
+	corrAccurate := VHDL.NewCorrelator("AccurateCorr", [4]VHDL.VHDLEntity{accmac, accmac, accmac, accmac})
+	corrAccurate.GenerateVHDL(OutputPath)
 
-	synth1 := Viv.CreateVivadoTCL(OutputPath, "approx.tcl", mac, VivadoSettings)
-	synth2 := Viv.CreateVivadoTCL(OutputPath, "accurate.tcl", accmac, VivadoSettings)
+	synth1 := Viv.CreateVivadoTCL(OutputPath, "approx.tcl", corrapprox, VivadoSettings)
+	synth2 := Viv.CreateVivadoTCL(OutputPath, "accurate.tcl", corrAccurate, VivadoSettings)
 	synth1.Exec()
 	synth2.Exec()
 

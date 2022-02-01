@@ -129,6 +129,7 @@ func (r4 *Recursive4) ReturnData() *EntityData {
 	d := new(EntityData)
 	d.EntityName = r4.EntityName
 	d.BitSize = r4.BitSize
+	d.OutputSize = r4.OutputSize
 	d.VHDLFile = r4.VHDLFile
 	d.TestFile = r4.TestFile
 	return d
