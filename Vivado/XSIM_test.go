@@ -7,7 +7,7 @@ import (
 
 func TestXSIMDuplicate2(t *testing.T) {
 	m1 := VHDL.M1().LUT2D
-	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]*VHDL.LUT2D{m1, m1, m1, m1})
+	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]VHDL.VHDLEntityMultiplier{m1, m1, m1, m1})
 
 	xsim := CreateXSIM("Output", "TestName", rec4.GenerateVHDLEntityArray())
 	length_vhdlentityXSIM := len(xsim.VHDLEntities)
@@ -27,7 +27,7 @@ func TestXSIMDuplicate3(t *testing.T) {
 	m1 := VHDL.M1().LUT2D
 	m2 := VHDL.M2().LUT2D
 
-	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]*VHDL.LUT2D{m1, m2, m1, m2})
+	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]VHDL.VHDLEntityMultiplier{m1, m2, m1, m2})
 
 	xsim := CreateXSIM("Output", "TestName", rec4.GenerateVHDLEntityArray())
 	length_vhdlentityXSIM := len(xsim.VHDLEntities)
@@ -47,7 +47,7 @@ func TestXSIMDuplicate4(t *testing.T) {
 	m2 := VHDL.M2().LUT2D
 	m3 := VHDL.M3().LUT2D
 
-	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]*VHDL.LUT2D{m1, m2, m3, m2})
+	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]VHDL.VHDLEntityMultiplier{m1, m2, m3, m2})
 
 	xsim := CreateXSIM("Output", "TestName", rec4.GenerateVHDLEntityArray())
 	length_vhdlentityXSIM := len(xsim.VHDLEntities)
@@ -68,7 +68,7 @@ func TestXSIMDuplicate5(t *testing.T) {
 	m3 := VHDL.M3().LUT2D
 	m4 := VHDL.M4().LUT2D
 
-	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]*VHDL.LUT2D{m1, m2, m3, m4})
+	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]VHDL.VHDLEntityMultiplier{m1, m2, m3, m4})
 
 	xsim := CreateXSIM("Output", "TestName", rec4.GenerateVHDLEntityArray())
 	length_vhdlentityXSIM := len(xsim.VHDLEntities)
@@ -89,9 +89,9 @@ func TestXSIMDuplicate7(t *testing.T) {
 	m3 := VHDL.M3().LUT2D
 	m4 := VHDL.M4().LUT2D
 
-	rec4_1 := VHDL.NewRecursive4("ApproxRec4_1", [4]*VHDL.LUT2D{m1, m2, m3, m4})
-	rec4_2 := VHDL.NewRecursive4("ApproxRec4_2", [4]*VHDL.LUT2D{m4, m3, m2, m1})
-	rec8 := VHDL.NewRecursive8("ApproxRec8", [4]*VHDL.Recursive4{rec4_1, rec4_2, rec4_1, rec4_2})
+	rec4_1 := VHDL.NewRecursive4("ApproxRec4_1", [4]VHDL.VHDLEntityMultiplier{m1, m2, m3, m4})
+	rec4_2 := VHDL.NewRecursive4("ApproxRec4_2", [4]VHDL.VHDLEntityMultiplier{m4, m3, m2, m1})
+	rec8 := VHDL.NewRecursive8("ApproxRec8", [4]VHDL.VHDLEntityMultiplier{rec4_1, rec4_2, rec4_1, rec4_2})
 
 	xsim := CreateXSIM("Output", "TestName", rec8.GenerateVHDLEntityArray())
 	length_vhdlentityXSIM := len(xsim.VHDLEntities)
@@ -122,9 +122,9 @@ func TestXSIMRec8(t *testing.T) {
 	m3 := VHDL.M1().LUT2D
 	m4 := VHDL.M1().LUT2D
 
-	rec4_1 := VHDL.NewRecursive4("ApproxRec4_1", [4]*VHDL.LUT2D{m1, m2, m3, m4})
-	rec4_2 := VHDL.NewRecursive4("ApproxRec4_1", [4]*VHDL.LUT2D{m4, m3, m2, m1})
-	rec8 := VHDL.NewRecursive8("ApproxRec8", [4]*VHDL.Recursive4{rec4_1, rec4_2, rec4_1, rec4_2})
+	rec4_1 := VHDL.NewRecursive4("ApproxRec4_1", [4]VHDL.VHDLEntityMultiplier{m1, m2, m3, m4})
+	rec4_2 := VHDL.NewRecursive4("ApproxRec4_1", [4]VHDL.VHDLEntityMultiplier{m4, m3, m2, m1})
+	rec8 := VHDL.NewRecursive8("ApproxRec8", [4]VHDL.VHDLEntityMultiplier{rec4_1, rec4_2, rec4_1, rec4_2})
 
 	xsim := CreateXSIM("Output", "TestName", rec8.GenerateVHDLEntityArray())
 	length_vhdlentityXSIM := len(xsim.VHDLEntities)

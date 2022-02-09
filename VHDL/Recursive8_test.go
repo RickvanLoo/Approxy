@@ -10,9 +10,9 @@ func TestRecursive8(t *testing.T) {
 	o2 := New2DUnsignedAcc("o2", 2)
 	o3 := New2DUnsignedAcc("o3", 2)
 	o4 := New2DUnsignedAcc("o4", 2)
-	RecLutArray := [4]*LUT2D{o1, o2, o3, o4}
+	RecLutArray := [4]VHDLEntityMultiplier{o1, o2, o3, o4}
 	rec4 := NewRecursive4("testRec4", RecLutArray)
-	rec4array := [4]*Recursive4{rec4, rec4, rec4, rec4}
+	rec4array := [4]VHDLEntityMultiplier{rec4, rec4, rec4, rec4}
 	rec8 := NewRecursive8("testRec8", rec4array)
 	pass := true
 
@@ -39,9 +39,9 @@ func TestRecursive8(t *testing.T) {
 
 func TestRecursive8Overflow(t *testing.T) {
 	m3 := M3().LUT2D
-	RecLutArray := [4]*LUT2D{m3, m3, m3, m3} //Known Overflow Configuration
+	RecLutArray := [4]VHDLEntityMultiplier{m3, m3, m3, m3} //Known Overflow Configuration
 	rec4 := NewRecursive4("testRec4OverFlow", RecLutArray)
-	rec4LutArray := [4]*Recursive4{rec4, rec4, rec4, rec4}
+	rec4LutArray := [4]VHDLEntityMultiplier{rec4, rec4, rec4, rec4}
 	rec8 := NewRecursive8("testRec8Overflow", rec4LutArray)
 
 	maxval := int(math.Exp2(8))
@@ -56,6 +56,11 @@ func TestRecursive8Overflow(t *testing.T) {
 		t.Errorf("!!ERROR!! Overflow malfunction for rec4")
 	} else {
 		t.Logf("PASS: Overflow detected for known Overflow Configuration")
+
+		if !rec8.Overflow() {
+			t.Errorf("!!ERROR!! Non correct overflow bool is returned")
+		}
+
 	}
 }
 
@@ -64,9 +69,9 @@ func TestOutputArrayRec8(t *testing.T) {
 	o2 := New2DUnsignedAcc("o2", 2)
 	o3 := New2DUnsignedAcc("o3", 2)
 	o4 := New2DUnsignedAcc("o4", 2)
-	RecLutArray := [4]*LUT2D{o1, o2, o3, o4}
+	RecLutArray := [4]VHDLEntityMultiplier{o1, o2, o3, o4}
 	rec4 := NewRecursive4("testRec4", RecLutArray)
-	rec8 := NewRecursive8("testRec8", [4]*Recursive4{rec4, rec4, rec4, rec4})
+	rec8 := NewRecursive8("testRec8", [4]VHDLEntityMultiplier{rec4, rec4, rec4, rec4})
 
 	output := rec8.GenerateVHDLEntityArray()
 

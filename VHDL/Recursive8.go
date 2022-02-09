@@ -30,15 +30,15 @@ import (
 
 type Recursive8 struct {
 	EntityName    string
-	BitSize       uint           //Default to 8
-	OutputSize    uint           //Default to 16
-	Rec4Array     [4]*Recursive4 //Size of 4
+	BitSize       uint                    //Default to 8
+	OutputSize    uint                    //Default to 16
+	Rec4Array     [4]VHDLEntityMultiplier //Size of 4
 	VHDLFile      string
 	TestFile      string
 	OverflowError bool
 }
 
-func NewRecursive8(EntityName string, Rec4Array [4]*Recursive4) *Recursive8 {
+func NewRecursive8(EntityName string, Rec4Array [4]VHDLEntityMultiplier) *Recursive8 {
 	r8 := new(Recursive8)
 	r8.BitSize = 8
 	r8.OutputSize = 16
@@ -46,6 +46,16 @@ func NewRecursive8(EntityName string, Rec4Array [4]*Recursive4) *Recursive8 {
 	r8.VHDLFile, r8.TestFile = FileNameGen(r8.EntityName)
 	r8.Rec4Array = Rec4Array
 	r8.OverflowError = false
+
+	for _, mult := range r8.Rec4Array {
+		if mult.ReturnData().BitSize != 4 {
+			log.Println("Created Recursive8 found LUT where Bitsize is not 4")
+		}
+
+		if mult.ReturnData().OutputSize != 8 {
+			log.Println("Created Recursive8 found LUT where OutputSize is not 8")
+		}
+	}
 
 	return r8
 }
@@ -147,10 +157,10 @@ func (r8 *Recursive8) GenerateTestData(FolderPath string) {
 
 func (r8 *Recursive8) String() string {
 	//AHBH -> AHBL -> ALBH -> ALAL
-	str := r8.EntityName + " -> [" + r8.Rec4Array[0].EntityName + ";"
-	str += r8.Rec4Array[0].EntityName + ";"
-	str += r8.Rec4Array[0].EntityName + ";"
-	str += r8.Rec4Array[0].EntityName + "]"
+	str := r8.EntityName + " -> [" + r8.Rec4Array[0].ReturnData().EntityName + ";"
+	str += r8.Rec4Array[1].ReturnData().EntityName + ";"
+	str += r8.Rec4Array[2].ReturnData().EntityName + ";"
+	str += r8.Rec4Array[3].ReturnData().EntityName + "]"
 	return str
 }
 
@@ -180,6 +190,15 @@ func (r8 *Recursive8) Overflow() bool {
 }
 
 func (r8 *Recursive8) MeanAbsoluteError() float64 {
-	log.Println("Warnning, MAE Rec8 not implemented")
-	return 0
+	maxval := int(math.Exp2(8))
+	accum := float64(0)
+	for a := 1; a < maxval; a++ {
+		for b := 1; b < maxval; b++ {
+			accResult := float64(a * b)
+			r4Result := r8.ReturnVal(uint(a), uint(b))
+			accum += math.Abs(float64(r4Result) - accResult)
+		}
+	}
+
+	return float64(1.0/65536.0) * accum
 }

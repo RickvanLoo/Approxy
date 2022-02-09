@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 
 	VHDL "badmath/VHDL"
 
@@ -52,99 +55,110 @@ func main() {
 	VivadoSettings.WriteCheckpoint = true
 	VivadoSettings.Hierarchical = false
 
-	//o1 = AH*BH
-	//o2 = AH*BL
-	//o3 = AL*BH
-	//o4 = AL*BL
+	//Recursive 8 using Recursive 4 using Acc 2D LUT
+	Acc := VHDL.New2DUnsignedAcc("Acc", 2)
+	Rec4Acc := VHDL.NewRecursive4("Rec4Acc", [4]VHDL.VHDLEntityMultiplier{Acc, Acc, Acc, Acc})
+	Rec8Acc := VHDL.NewRecursive8("Rec8Acc", [4]VHDL.VHDLEntityMultiplier{Rec4Acc, Rec4Acc, Rec4Acc, Rec4Acc})
+	Rec8Acc.GenerateVHDL(OutputPath)
+	rec8scaler := VHDL.New2DScaler(Rec8Acc, 1000)
+	rec8scaler.GenerateVHDL(OutputPath)
 
-	//start := time.Now()
+	viv := Viv.CreateVivadoTCL(OutputPath, "rec8acc", rec8scaler, VivadoSettings)
+	viv.Exec()
+	// utilrec8scaler := Viv.ParseUtilizationReport(OutputPath, rec8scaler)
 
-	m1 := VHDL.M1().LUT2D
-	m2 := VHDL.M2().LUT2D
-	// m3 := VHDL.M3().LUT2D
-	m4 := VHDL.M4().LUT2D
-	acc := VHDL.New2DUnsignedAcc("Acc", 2)
+	//Numeric Recursive 8
+	AccNum8 := VHDL.NewAccurateNumMultiplyer("AccNum8", 8)
+	AccNum8.GenerateVHDL(OutputPath)
+	AccNum8Scaler := VHDL.New2DScaler(AccNum8, 1000)
+	AccNum8Scaler.GenerateVHDL(OutputPath)
 
-	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]*VHDL.LUT2D{acc, m4, m2, m1})
-	//rec8 := VHDL.NewRecursive8("ApproxRec8", [4]*VHDL.Recursive4{rec4, rec4, rec4, rec4})
-	mac := VHDL.NewMAC(rec4, 10)
-	mac.GenerateVHDL(OutputPath)
-	mac.GenerateTestData(OutputPath)
+	viv = Viv.CreateVivadoTCL(OutputPath, "AccNum8", AccNum8Scaler, VivadoSettings)
+	viv.Exec()
+	// AccNum8Util := Viv.ParseUtilizationReport(OutputPath, AccNum8Scaler)
 
-	xsim := Viv.CreateXSIM(OutputPath, "xsimseqApprox", mac.GenerateVHDLEntityArray())
-	xsim.SetTemplateSequential(mac.OutputSize)
-	xsim.Exec()
-
-	corrapprox := VHDL.NewCorrelator("ApproxCorr", [4]VHDL.VHDLEntity{mac, mac, mac, mac})
-	corrapprox.GenerateVHDL(OutputPath)
-
-	accmac := VHDL.NewUnsignedAccurateMAC(4, 10)
-	accmac.GenerateVHDL(OutputPath)
-	accmac.GenerateTestData(OutputPath)
-
-	xsim2 := Viv.CreateXSIM(OutputPath, "xsimAccurate", accmac.GenerateVHDLEntityArray())
-	xsim2.SetTemplateSequential(accmac.OutputSize)
-	xsim2.Exec()
-
-	corrAccurate := VHDL.NewCorrelator("AccurateCorr", [4]VHDL.VHDLEntity{accmac, accmac, accmac, accmac})
-	corrAccurate.GenerateVHDL(OutputPath)
-
-	synth1 := Viv.CreateVivadoTCL(OutputPath, "approx.tcl", corrapprox, VivadoSettings)
-	synth2 := Viv.CreateVivadoTCL(OutputPath, "accurate.tcl", corrAccurate, VivadoSettings)
-	synth1.Exec()
-	synth2.Exec()
+	//Results
+	// rec8Result := NewResult(rec8scaler, utilrec8scaler, Rec8Acc.Overflow(), Rec8Acc.MeanAbsoluteError())
+	// rec8Result.PrettyPrint()
+	// AccNum8Result := NewResult(AccNum8Scaler, AccNum8Util, false, 0)
+	// AccNum8Result.PrettyPrint()
 
 }
 
-// func Improvcheck() {
-// 	m1 := VHDL.M1().LUT2D
-// 	m2 := VHDL.M2().LUT2D
-// 	// m3 := VHDL.M3().LUT2D
-// 	m4 := VHDL.M4().LUT2D
-// 	acc := VHDL.New2DUnsignedAcc("Acc", 2)
+func Rec8total() {
+	_, length := ReturnRec8Run(0)
 
-// 	acc_perfect := VHDL.NewAccurateNumMultiplyer("AccPerfect", 4, OutputPath)
-// 	acc_perfect.GenerateVHDL(OutputPath)
-// 	mac_acc_perfect := VHDL.NewMAC(acc_perfect)
-// 	mac_acc_perfect.GenerateVHDL(OutputPath)
+	log.Println(length)
 
-// 	return
+	file, err := os.Create("output/ResultsAll.txt")
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-// 	corrAcc := VHDL.NewCorrelator("CorrAccurate", [4]*VHDL.MAC{mac_acc_perfect, mac_acc_perfect, mac_acc_perfect, mac_acc_perfect})
-// 	corrAcc.GenerateVHDL(OutputPath)
+	defer file.Close()
 
-// 	//[Acc,M4,M2,M1] = small
+	var TotalTime time.Duration
 
-// 	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]*VHDL.LUT2D{acc, m4, m2, m1})
-// 	rec4.GenerateVHDL(OutputPath)
+	TotalTime = 0
 
-// 	mac_rec4 := VHDL.NewMAC(rec4)
+	var Reset = "\033[0m"
 
-// 	corr := VHDL.NewCorrelator("CorrApprox", [4]*VHDL.MAC{mac_rec4, mac_rec4, mac_rec4, mac_rec4})
-// 	corr.GenerateVHDL(OutputPath)
+	var Yellow = "\033[33m"
 
-// 	VivadoProjectAccurate := Viv.CreateVivadoTCL(OutputPath, "approx.tcl", corrAcc, VivadoSettings)
-// 	VivadoProjectAccurate.Exec()
+	for i := 2245; i < length; i++ {
+		start := time.Now()
+		testRec8, _ := ReturnRec8Run(i)
+		result := Rec8Run(testRec8)
+		file.WriteString(result + "\n")
+		elapsed := time.Since(start)
+		TotalTime = TotalTime + elapsed
+		log.Printf(Yellow+"Last run took %s\n"+Reset, elapsed)
+		log.Printf(Yellow+"Total time: %s\n"+Reset, TotalTime)
+	}
 
-// 	VivadoProject := Viv.CreateVivadoTCL(OutputPath, "main.tcl", corr, VivadoSettings)
-// 	VivadoProject.Exec()
+}
 
-// 	///CHECK IF IMPROVEMENT
+func ReturnRec8Run(i int) (*VHDL.Recursive8, int) {
+	M1 = VHDL.M1().LUT2D
+	M2 = VHDL.M2().LUT2D
+	M3 = VHDL.M3().LUT2D
+	M4 = VHDL.M4().LUT2D
+	Acc = VHDL.New2DUnsignedAcc("Acc", 2)
 
-// }
+	//[Acc,M4,M2,M1],1399,1.875000 //1
+	//[Acc,M1,M4,M1],1481,1.625000 //2
+	//[Acc,M1,M1,M1],1494,1.125000 //3
+	//[Acc,M1,M3,M1],1496,1.015625 //4
+	//[Acc,Acc,M1,M1],1499,0.625000 //5
+	//[Acc,M1,Acc,Acc],1598,0.500000 //6
 
-func Accurate4bit() {
-	acc4 := VHDL.NewAccurateNumMultiplyer("Acc4", 4)
-	acc4.GenerateVHDL(OutputPath)
-	acc4.GenerateTestData(OutputPath)
+	options := []int{1, 2, 3, 4, 5, 6, 7}
+	Cartesian4 := cartN(options, options, options, options)
 
-	accscaler := VHDL.New2DScaler(acc4, 100)
-	accscaler.GenerateVHDL(OutputPath)
-	tcl := Viv.CreateVivadoTCL(OutputPath, "main1.tcl", accscaler, VivadoSettings)
-	tcl.Exec()
-	util := Viv.ParseUtilizationReport(OutputPath, accscaler)
+	rec := make(map[int]*VHDL.Recursive4)
+	rec[1] = VHDL.NewRecursive4("RecA421", [4]VHDL.VHDLEntityMultiplier{Acc, M4, M2, M1})
+	rec[2] = VHDL.NewRecursive4("RecA141", [4]VHDL.VHDLEntityMultiplier{Acc, M1, M4, M1})
+	rec[3] = VHDL.NewRecursive4("RecA111", [4]VHDL.VHDLEntityMultiplier{Acc, M1, M1, M1})
+	rec[4] = VHDL.NewRecursive4("RecA131", [4]VHDL.VHDLEntityMultiplier{Acc, M1, M3, M1})
+	rec[5] = VHDL.NewRecursive4("RecAA11", [4]VHDL.VHDLEntityMultiplier{Acc, Acc, M1, M1})
+	rec[6] = VHDL.NewRecursive4("RecA1AA", [4]VHDL.VHDLEntityMultiplier{Acc, M1, Acc, Acc})
+	rec[7] = VHDL.NewRecursive4("RecAAAA", [4]VHDL.VHDLEntityMultiplier{Acc, Acc, Acc, Acc})
 
-	fmt.Printf("%+v\n", util)
+	rec4array := [4]VHDL.VHDLEntityMultiplier{rec[Cartesian4[i][0]], rec[Cartesian4[i][1]], rec[Cartesian4[i][2]], rec[Cartesian4[i][3]]}
+
+	valuesText := []string{}
+
+	for j := range Cartesian4[i] {
+		number := Cartesian4[i][j]
+		text := strconv.Itoa(number)
+		valuesText = append(valuesText, text)
+	}
+
+	result := strings.Join(valuesText, "")
+
+	rec8 := VHDL.NewRecursive8("Rec"+result, rec4array)
+
+	return rec8, len(Cartesian4)
 }
 
 func rec4multirun() {
@@ -172,7 +186,7 @@ func rec4multirun() {
 	}
 
 	for i := 400; i < len(Cartesian4); i++ {
-		array := [4]*VHDL.LUT2D{m[Cartesian4[i][0]], m[Cartesian4[i][1]], m[Cartesian4[i][2]], m[Cartesian4[i][3]]}
+		array := [4]VHDL.VHDLEntityMultiplier{m[Cartesian4[i][0]], m[Cartesian4[i][1]], m[Cartesian4[i][2]], m[Cartesian4[i][3]]}
 		id_array := fmt.Sprintf("%d,", i)
 		resultstring := id_array + rec4scalerRun(array) + "\n"
 		file.WriteString(resultstring)
@@ -186,7 +200,7 @@ func rec4multirun() {
 	file.Close()
 }
 
-func rec4scalerRun(array [4]*VHDL.LUT2D) string {
+func rec4scalerRun(array [4]VHDL.VHDLEntityMultiplier) string {
 	rec4 := VHDL.NewRecursive4("rec4", array)
 
 	rec4.GenerateTestData(OutputPath)
@@ -205,6 +219,31 @@ func rec4scalerRun(array [4]*VHDL.LUT2D) string {
 	util := Viv.ParseUtilizationReport(OutputPath, rec4scaler)
 
 	Result := NewResult(rec4scaler, util, rec4.Overflow(), rec4.MeanAbsoluteError())
+	Result.PrettyPrint()
+	log.Println(Result.String())
+	Results = append(Results, Result)
+
+	return Result.String()
+}
+
+func Rec8Run(rec8 *VHDL.Recursive8) string {
+
+	rec8.GenerateTestData(OutputPath)
+	rec8.GenerateVHDL(OutputPath)
+	xsim := Viv.CreateXSIM(OutputPath, "Sim_"+rec8.EntityName, rec8.GenerateVHDLEntityArray())
+	xsim.Exec()
+	err := Viv.ParseXSIMReport(OutputPath, rec8)
+	if err != nil {
+		log.Println(rec8.Overflow())
+		log.Fatalln(err)
+	}
+	rec8scaler := VHDL.New2DScaler(rec8, 100)
+	rec8scaler.GenerateVHDL(OutputPath)
+	tcl := Viv.CreateVivadoTCL(OutputPath, "main1.tcl", rec8scaler, VivadoSettings)
+	tcl.Exec()
+	util := Viv.ParseUtilizationReport(OutputPath, rec8scaler)
+
+	Result := NewResult(rec8scaler, util, rec8.Overflow(), rec8.MeanAbsoluteError())
 	Result.PrettyPrint()
 	log.Println(Result.String())
 	Results = append(Results, Result)

@@ -14,7 +14,7 @@ type VHDLEntityMultiplier interface {
 	Multiplier
 }
 
-//VHDLEntity describes an interface for a testable and synthesizable VHDL structure
+//VHDLEntity describes an interface for testable and synthesizable VHDL structures
 type VHDLEntity interface {
 	ReturnData() *EntityData
 	GenerateVHDL(string)
@@ -23,6 +23,7 @@ type VHDLEntity interface {
 	String() string //MSB -> LSB
 }
 
+//Multiplier describes an interface for generic Multipliers
 type Multiplier interface {
 	ReturnVal(uint, uint) uint
 	Overflow() bool

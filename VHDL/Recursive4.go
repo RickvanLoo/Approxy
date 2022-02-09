@@ -16,21 +16,32 @@ import (
 //LUTArray[3] = AL*BL
 type Recursive4 struct {
 	EntityName    string
-	BitSize       uint      //Default to 4
-	OutputSize    uint      //Default to 8
-	LUTArray      [4]*LUT2D //Size of 4
+	BitSize       uint                    //Default to 4
+	OutputSize    uint                    //Default to 8
+	LUTArray      [4]VHDLEntityMultiplier //Size of 4
 	VHDLFile      string
 	TestFile      string
 	OverflowError bool
 }
 
-func NewRecursive4(EntityName string, LUTArray [4]*LUT2D) *Recursive4 {
+func NewRecursive4(EntityName string, LUTArray [4]VHDLEntityMultiplier) *Recursive4 {
 	r4 := new(Recursive4)
 	r4.BitSize = 4
 	r4.OutputSize = 8
 	r4.EntityName = EntityName
 	r4.VHDLFile, r4.TestFile = FileNameGen(r4.EntityName)
 	r4.LUTArray = LUTArray
+
+	for _, mult := range r4.LUTArray {
+		if mult.ReturnData().BitSize != 2 {
+			log.Println("Created Recursive4 found LUT where Bitsize is not 2")
+		}
+
+		if mult.ReturnData().OutputSize != 4 {
+			log.Println("Created Recursive4 found LUT where OutputSize is not 4")
+		}
+	}
+
 	r4.OverflowError = false
 
 	return r4
@@ -185,9 +196,9 @@ func (r4 *Recursive4) MeanAbsoluteError() float64 {
 
 func (r4 *Recursive4) String() string {
 	//AHBH -> AHBL -> ALBH -> ALAL
-	str := r4.EntityName + " -> [" + r4.LUTArray[0].EntityName + ";"
-	str += r4.LUTArray[1].EntityName + ";"
-	str += r4.LUTArray[2].EntityName + ";"
-	str += r4.LUTArray[3].EntityName + "]"
+	str := r4.EntityName + " -> [" + r4.LUTArray[0].ReturnData().EntityName + ";"
+	str += r4.LUTArray[1].ReturnData().EntityName + ";"
+	str += r4.LUTArray[2].ReturnData().EntityName + ";"
+	str += r4.LUTArray[3].ReturnData().EntityName + "]"
 	return str
 }
