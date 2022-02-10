@@ -53,3 +53,15 @@ func (m *UnsignedNumericAccurateMultiplyer) GenerateVHDLEntityArray() []VHDLEnti
 	out = append(out, m)
 	return out
 }
+
+func (m *UnsignedNumericAccurateMultiplyer) ReturnVal(a uint, b uint) uint {
+	return a * b
+}
+
+func (m *UnsignedNumericAccurateMultiplyer) Overflow() bool {
+	return false
+}
+
+func (m *UnsignedNumericAccurateMultiplyer) MeanAbsoluteError() float64 {
+	return 0
+}

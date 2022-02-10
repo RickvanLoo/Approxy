@@ -55,33 +55,41 @@ func main() {
 	VivadoSettings.WriteCheckpoint = true
 	VivadoSettings.Hierarchical = false
 
-	//Recursive 8 using Recursive 4 using Acc 2D LUT
-	Acc := VHDL.New2DUnsignedAcc("Acc", 2)
-	Rec4Acc := VHDL.NewRecursive4("Rec4Acc", [4]VHDL.VHDLEntityMultiplier{Acc, Acc, Acc, Acc})
-	Rec8Acc := VHDL.NewRecursive8("Rec8Acc", [4]VHDL.VHDLEntityMultiplier{Rec4Acc, Rec4Acc, Rec4Acc, Rec4Acc})
-	Rec8Acc.GenerateVHDL(OutputPath)
-	rec8scaler := VHDL.New2DScaler(Rec8Acc, 1000)
-	rec8scaler.GenerateVHDL(OutputPath)
+	M1 = VHDL.M1().LUT2D
+	M2 = VHDL.M2().LUT2D
+	M3 = VHDL.M3().LUT2D
+	M4 = VHDL.M4().LUT2D
+	Acc = VHDL.New2DUnsignedAcc("Acc", 2)
 
-	viv := Viv.CreateVivadoTCL(OutputPath, "rec8acc", rec8scaler, VivadoSettings)
+	rec := make(map[int]*VHDL.Recursive4)
+	rec[1] = VHDL.NewRecursive4("RecA421", [4]VHDL.VHDLEntityMultiplier{Acc, M4, M2, M1})
+	rec[2] = VHDL.NewRecursive4("RecA141", [4]VHDL.VHDLEntityMultiplier{Acc, M1, M4, M1})
+	rec[3] = VHDL.NewRecursive4("RecA111", [4]VHDL.VHDLEntityMultiplier{Acc, M1, M1, M1})
+	rec[4] = VHDL.NewRecursive4("RecA131", [4]VHDL.VHDLEntityMultiplier{Acc, M1, M3, M1})
+	rec[5] = VHDL.NewRecursive4("RecAA11", [4]VHDL.VHDLEntityMultiplier{Acc, Acc, M1, M1})
+	rec[6] = VHDL.NewRecursive4("RecA1AA", [4]VHDL.VHDLEntityMultiplier{Acc, M1, Acc, Acc})
+	rec[7] = VHDL.NewRecursive4("RecAAAA", [4]VHDL.VHDLEntityMultiplier{Acc, Acc, Acc, Acc})
+	RecNum := VHDL.NewAccurateNumMultiplyer("RecNUM", 4)
+
+	rec8_1 := VHDL.NewRecursive8("Rec8_1", [4]VHDL.VHDLEntityMultiplier{rec[7], rec[6], rec[7], rec[4]})
+	rec8_1.GenerateVHDL(OutputPath)
+
+	rec8_2 := VHDL.NewRecursive8("Rec8_2", [4]VHDL.VHDLEntityMultiplier{RecNum, rec[6], RecNum, rec[4]})
+	rec8_2.GenerateVHDL(OutputPath)
+
+	rec8_1Scaler := VHDL.New2DScaler(rec8_1, 100)
+	rec8_2Scaler := VHDL.New2DScaler(rec8_2, 100)
+	rec8_1Scaler.GenerateVHDL(OutputPath)
+	rec8_2Scaler.GenerateVHDL(OutputPath)
+
+	viv := Viv.CreateVivadoTCL(OutputPath, "rec8_1.tcl", rec8_1Scaler, VivadoSettings)
 	viv.Exec()
-	// utilrec8scaler := Viv.ParseUtilizationReport(OutputPath, rec8scaler)
 
-	//Numeric Recursive 8
-	AccNum8 := VHDL.NewAccurateNumMultiplyer("AccNum8", 8)
-	AccNum8.GenerateVHDL(OutputPath)
-	AccNum8Scaler := VHDL.New2DScaler(AccNum8, 1000)
-	AccNum8Scaler.GenerateVHDL(OutputPath)
-
-	viv = Viv.CreateVivadoTCL(OutputPath, "AccNum8", AccNum8Scaler, VivadoSettings)
+	viv = Viv.CreateVivadoTCL(OutputPath, "rec8_2.tcl", rec8_2Scaler, VivadoSettings)
 	viv.Exec()
-	// AccNum8Util := Viv.ParseUtilizationReport(OutputPath, AccNum8Scaler)
 
-	//Results
-	// rec8Result := NewResult(rec8scaler, utilrec8scaler, Rec8Acc.Overflow(), Rec8Acc.MeanAbsoluteError())
-	// rec8Result.PrettyPrint()
-	// AccNum8Result := NewResult(AccNum8Scaler, AccNum8Util, false, 0)
-	// AccNum8Result.PrettyPrint()
+	log.Println(rec8_1.MeanAbsoluteError())
+	log.Println(rec8_2.MeanAbsoluteError())
 
 }
 
