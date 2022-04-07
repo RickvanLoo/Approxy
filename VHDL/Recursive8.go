@@ -202,3 +202,18 @@ func (r8 *Recursive8) MeanAbsoluteError() float64 {
 
 	return float64(1.0/65536.0) * accum
 }
+
+func (r8 *Recursive8) AverageRelativeError() float64 {
+	maxval := int(math.Exp2(8))
+	accum := float64(0)
+	for a := 1; a < maxval; a++ {
+		for b := 1; b < maxval; b++ {
+			accResult := float64(a * b)
+			r4Result := r8.ReturnVal(uint(a), uint(b))
+			accum += math.Abs((float64(r4Result) - accResult) / accResult)
+		}
+	}
+
+	return float64(1.0/65536.0) * accum
+
+}

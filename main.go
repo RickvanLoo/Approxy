@@ -15,6 +15,8 @@ import (
 
 var OutputPath string
 var VivadoSettings *Viv.VivadoTCLSettings
+var VivadoDSPSettings *Viv.VivadoTCLSettings
+
 var Results []*Result
 var M1 *VHDL.LUT2D
 var M2 *VHDL.LUT2D
@@ -55,41 +57,34 @@ func main() {
 	VivadoSettings.WriteCheckpoint = true
 	VivadoSettings.Hierarchical = false
 
-	M1 = VHDL.M1().LUT2D
-	M2 = VHDL.M2().LUT2D
-	M3 = VHDL.M3().LUT2D
-	M4 = VHDL.M4().LUT2D
-	Acc = VHDL.New2DUnsignedAcc("Acc", 2)
+	VivadoDSPSettings = new(Viv.VivadoTCLSettings)
+	VivadoDSPSettings.NO_DSP = false
+	VivadoDSPSettings.OOC = true
+	VivadoDSPSettings.PartName = "Xc7z030fbg676-3"
+	VivadoDSPSettings.Placement = true
+	VivadoDSPSettings.Utilization = true
+	VivadoDSPSettings.WriteCheckpoint = true
+	VivadoDSPSettings.Hierarchical = false
 
-	rec := make(map[int]*VHDL.Recursive4)
-	rec[1] = VHDL.NewRecursive4("RecA421", [4]VHDL.VHDLEntityMultiplier{Acc, M4, M2, M1})
-	rec[2] = VHDL.NewRecursive4("RecA141", [4]VHDL.VHDLEntityMultiplier{Acc, M1, M4, M1})
-	rec[3] = VHDL.NewRecursive4("RecA111", [4]VHDL.VHDLEntityMultiplier{Acc, M1, M1, M1})
-	rec[4] = VHDL.NewRecursive4("RecA131", [4]VHDL.VHDLEntityMultiplier{Acc, M1, M3, M1})
-	rec[5] = VHDL.NewRecursive4("RecAA11", [4]VHDL.VHDLEntityMultiplier{Acc, Acc, M1, M1})
-	rec[6] = VHDL.NewRecursive4("RecA1AA", [4]VHDL.VHDLEntityMultiplier{Acc, M1, Acc, Acc})
-	rec[7] = VHDL.NewRecursive4("RecAAAA", [4]VHDL.VHDLEntityMultiplier{Acc, Acc, Acc, Acc})
-	RecNum := VHDL.NewAccurateNumMultiplyer("RecNUM", 4)
+	// M1 = VHDL.M1().LUT2D
+	// M2 = VHDL.M2().LUT2D
+	// M3 = VHDL.M3().LUT2D
+	// M4 = VHDL.M4().LUT2D
+	// Acc = VHDL.New2DUnsignedAcc("Acc", 2)
 
-	rec8_1 := VHDL.NewRecursive8("Rec8_1", [4]VHDL.VHDLEntityMultiplier{rec[7], rec[6], rec[7], rec[4]})
-	rec8_1.GenerateVHDL(OutputPath)
+	for i := 1; i < 65; i++ {
+		name := "Acc" + strconv.Itoa(i)
+		AccM := VHDL.NewAccurateNumMultiplyer(name, uint(i))
+		AccM.GenerateVHDL(OutputPath)
+		tcl := Viv.CreateVivadoTCL(OutputPath, name, AccM, VivadoSettings)
+		tcl.Exec()
 
-	rec8_2 := VHDL.NewRecursive8("Rec8_2", [4]VHDL.VHDLEntityMultiplier{RecNum, rec[6], RecNum, rec[4]})
-	rec8_2.GenerateVHDL(OutputPath)
+		AccMDSP := VHDL.NewAccurateNumMultiplyer(name+"DSP", uint(i))
+		AccMDSP.GenerateVHDL(OutputPath)
 
-	rec8_1Scaler := VHDL.New2DScaler(rec8_1, 100)
-	rec8_2Scaler := VHDL.New2DScaler(rec8_2, 100)
-	rec8_1Scaler.GenerateVHDL(OutputPath)
-	rec8_2Scaler.GenerateVHDL(OutputPath)
-
-	viv := Viv.CreateVivadoTCL(OutputPath, "rec8_1.tcl", rec8_1Scaler, VivadoSettings)
-	viv.Exec()
-
-	viv = Viv.CreateVivadoTCL(OutputPath, "rec8_2.tcl", rec8_2Scaler, VivadoSettings)
-	viv.Exec()
-
-	log.Println(rec8_1.MeanAbsoluteError())
-	log.Println(rec8_2.MeanAbsoluteError())
+		tcldsp := Viv.CreateVivadoTCL(OutputPath, name+"DSP", AccMDSP, VivadoDSPSettings)
+		tcldsp.Exec()
+	}
 
 }
 

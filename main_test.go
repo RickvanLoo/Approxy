@@ -6,8 +6,8 @@ import (
 	"testing"
 )
 
-func startBench() {
-	OutputPath = "output"
+func startBench(b *testing.B) {
+	OutputPath = b.TempDir()
 	ClearPath(OutputPath)
 	CreatePath(OutputPath)
 
@@ -27,8 +27,8 @@ func startBench() {
 	Acc = VHDL.New2DUnsignedAcc("Acc", 2)
 }
 
-func bit2MultN(N uint, b *testing.B) {
-	startBench()
+func run2bit_N(N uint, b *testing.B) {
+	startBench(b)
 	for i := 0; i < b.N; i++ {
 		M1.GenerateVHDL(OutputPath)
 		M1.GenerateTestData(OutputPath)
@@ -49,8 +49,9 @@ func bit2MultN(N uint, b *testing.B) {
 	}
 }
 
-func bit4MultN(N uint, b *testing.B) {
-	startBench()
+func run4bit_N(N uint, b *testing.B) {
+	startBench(b)
+
 	for i := 0; i < b.N; i++ {
 		rec4test := VHDL.NewRecursive4("rec4bench", [4]VHDL.VHDLEntityMultiplier{M1, M1, M1, M1})
 		rec4test.GenerateVHDL(OutputPath)
@@ -74,8 +75,8 @@ func bit4MultN(N uint, b *testing.B) {
 	}
 }
 
-func Benchmark2bit_1(b *testing.B) {
-	startBench()
+func run2bit_1(b *testing.B) {
+	startBench(b)
 	for i := 0; i < b.N; i++ {
 		M1.GenerateVHDL(OutputPath)
 		M1.GenerateTestData(OutputPath)
@@ -94,16 +95,8 @@ func Benchmark2bit_1(b *testing.B) {
 	}
 }
 
-func Benchmark2bit_10(b *testing.B) {
-	bit2MultN(10, b)
-}
-
-func Benchmark2bit_100(b *testing.B) {
-	bit2MultN(100, b)
-}
-
-func Benchmark4bit_1(b *testing.B) {
-	startBench()
+func run4bit_1(b *testing.B) {
+	startBench(b)
 	for i := 0; i < b.N; i++ {
 		rec4test := VHDL.NewRecursive4("rec4bench", [4]VHDL.VHDLEntityMultiplier{M1, M1, M1, M1})
 		rec4test.GenerateVHDL(OutputPath)
@@ -124,10 +117,16 @@ func Benchmark4bit_1(b *testing.B) {
 	}
 }
 
-func Benchmark4bit_10(b *testing.B) {
-	bit4MultN(10, b)
+func Benchmark2bit(b *testing.B) {
+	b.Run("group", func(b *testing.B) {
+		b.Run("N=1", run2bit_1)
+		b.Run("N=10", func(b *testing.B) { run2bit_N(10, b) })
+		b.Run("N=100", func(b *testing.B) { run2bit_N(100, b) })
+	})
 }
 
-func Benchmark4bit_100(b *testing.B) {
-	bit4MultN(100, b)
+func Benchmark4bit(b *testing.B) {
+	b.Run("N=1", run4bit_1)
+	b.Run("N=10", func(b *testing.B) { run4bit_N(10, b) })
+	b.Run("N=100", func(b *testing.B) { run4bit_N(100, b) })
 }

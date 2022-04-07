@@ -162,20 +162,6 @@ func (r4 *Recursive4) GenerateVHDLEntityArray() []VHDLEntity {
 }
 
 func (r4 *Recursive4) Overflow() bool {
-	// maxval := int(math.Exp2(4))
-	// overflowval := int(math.Exp2(8))
-
-	// for a := 0; a < maxval; a++ {
-	// 	for b := 0; b < maxval; b++ {
-	// 		if r4.ReturnVal(uint(a), uint(b)) > uint(overflowval)-1 { //double check this with _test.go
-	// 			log.Printf("WARNING: Overflow for %d*%d=%d>%d\n", a, b, r4.ReturnVal(uint(a), uint(b)), overflowval-1)
-	// 			log.Printf("Accurate: %d*%d=%d\n", a, b, a*b)
-	// 			return true
-	// 		}
-	// 	}
-	// }
-
-	// return false
 	return r4.OverflowError
 }
 
@@ -187,6 +173,21 @@ func (r4 *Recursive4) MeanAbsoluteError() float64 {
 			accResult := float64(a * b)
 			r4Result := r4.ReturnVal(uint(a), uint(b))
 			accum += math.Abs(float64(r4Result) - accResult)
+		}
+	}
+
+	return float64(1.0/256.0) * accum
+
+}
+
+func (r4 *Recursive4) AverageRelativeError() float64 {
+	maxval := int(math.Exp2(4))
+	accum := float64(0)
+	for a := 1; a < maxval; a++ {
+		for b := 1; b < maxval; b++ {
+			accResult := float64(a * b)
+			r4Result := r4.ReturnVal(uint(a), uint(b))
+			accum += math.Abs((float64(r4Result) - accResult) / accResult)
 		}
 	}
 
