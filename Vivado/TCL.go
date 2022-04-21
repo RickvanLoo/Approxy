@@ -20,6 +20,8 @@ type VivadoTCLSettings struct {
 	NO_DSP          bool
 	WriteCheckpoint bool
 	Placement       bool
+	Route           bool
+	Funcsim         bool //Note: Enable to create funcsim VHDL file for post-processing.
 	Utilization     bool
 	Hierarchical    bool //Note: Setting this to false, does break utilization report parsing
 }

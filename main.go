@@ -72,20 +72,30 @@ func main() {
 	// M4 = VHDL.M4().LUT2D
 	// Acc = VHDL.New2DUnsignedAcc("Acc", 2)
 
-	for i := 1; i < 65; i++ {
-		name := "Acc" + strconv.Itoa(i)
-		AccM := VHDL.NewAccurateNumMultiplyer(name, uint(i))
-		AccM.GenerateVHDL(OutputPath)
-		tcl := Viv.CreateVivadoTCL(OutputPath, name, AccM, VivadoSettings)
-		tcl.Exec()
+	// for i := 1; i < 65; i++ {
+	// 	name := "Acc" + strconv.Itoa(i)
+	// 	AccM := VHDL.NewAccurateNumMultiplyer(name, uint(i))
+	// 	AccM.GenerateVHDL(OutputPath)
+	// 	tcl := Viv.CreateVivadoTCL(OutputPath, name, AccM, VivadoSettings)
+	// 	tcl.Exec()
 
-		AccMDSP := VHDL.NewAccurateNumMultiplyer(name+"DSP", uint(i))
-		AccMDSP.GenerateVHDL(OutputPath)
+	// 	AccMDSP := VHDL.NewAccurateNumMultiplyer(name+"DSP", uint(i))
+	// 	AccMDSP.GenerateVHDL(OutputPath)
 
-		tcldsp := Viv.CreateVivadoTCL(OutputPath, name+"DSP", AccMDSP, VivadoDSPSettings)
-		tcldsp.Exec()
-	}
+	// 	tcldsp := Viv.CreateVivadoTCL(OutputPath, name+"DSP", AccMDSP, VivadoDSPSettings)
+	// 	tcldsp.Exec()
+	// }
 
+	name := "Acc"
+	AccM := VHDL.NewAccurateNumMultiplyer(name, 4)
+	AccM.GenerateVHDL(OutputPath)
+	AccM.GenerateTestData(OutputPath)
+
+	syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", AccM, VivadoDSPSettings)
+	syn.Exec()
+
+	test := Viv.CreateXSIM(OutputPath, "acctest", AccM.GenerateVHDLEntityArray())
+	test.Exec()
 }
 
 func Rec8total() {
