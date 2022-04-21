@@ -21,7 +21,7 @@ type VivadoTCLSettings struct {
 	WriteCheckpoint bool
 	Placement       bool
 	Route           bool
-	Funcsim         bool //Note: Enable to create funcsim VHDL file for post-processing.
+	Funcsim         bool //Note: Set to false to disable funcsim VHDL file for post-processing.
 	Utilization     bool
 	Hierarchical    bool //Note: Setting this to false, does break utilization report parsing
 }
@@ -41,6 +41,18 @@ func CreateVivadoTCL(FolderPath string, FileName string, Entity VHDL.VHDLEntity,
 
 func (tcl *VivadoTCL) Exec() {
 	cmd := exec.Command("vivado", "-mode", "batch", "-source", tcl.FileName)
+	cmd.Dir = tcl.FolderPath
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func (tcl *VivadoTCL) ReportPowerPostPlacement() {
+	VHDL.CreateFile(tcl.FolderPath, "power_"+tcl.FileName, "reportpower.tcl", tcl)
+	cmd := exec.Command("vivado", "-mode", "batch", "-source", "power_"+tcl.FileName)
 	cmd.Dir = tcl.FolderPath
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

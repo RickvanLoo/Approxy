@@ -92,3 +92,50 @@ func (x *XSIM) Exec() {
 		log.Println(err)
 	}
 }
+
+func (x *XSIM) Funcsim() {
+	loadTop := exec.Command("xvhdl", x.TopEntityName+"_funcsim.vhd")
+	loadTop.Dir = x.FolderPath
+	loadTop.Stdout = os.Stdout
+	loadTop.Stderr = os.Stderr
+
+	loadSim := exec.Command("xvhdl", x.SimFile)
+	loadSim.Dir = x.FolderPath
+	loadSim.Stdout = os.Stdout
+	loadSim.Stderr = os.Stderr
+
+	xelab := exec.Command("xelab", "-debug", "typical", "-L", "secureip", "-L", "unisims_ver", "sim", "-s", "top_funcsim")
+	xelab.Dir = x.FolderPath
+	xelab.Stdout = os.Stdout
+	xelab.Stderr = os.Stderr
+
+	xsim := exec.Command("xsim", "top_funcsim", "--log", x.TopEntityName+"_funcsimlog")
+	xsim.Dir = x.FolderPath
+	xsim.Stderr = os.Stderr
+	xsim.Stdout = os.Stdout
+	xsimCommand := "open_saif " + x.TopEntityName + "_dump.saif\n"
+	xsimCommand = xsimCommand + "log_saif [ get_objects -r ]\n" //default name of simulation is sim, default name of module is testmod
+	xsimCommand = xsimCommand + "run all\n"
+	xsimCommand = xsimCommand + "close_saif\n"
+	xsim.Stdin = strings.NewReader(xsimCommand)
+
+	err := loadTop.Run()
+	if err != nil {
+		log.Println(err)
+	}
+
+	err = loadSim.Run()
+	if err != nil {
+		log.Println(err)
+	}
+
+	err = xelab.Run()
+	if err != nil {
+		log.Println(err)
+	}
+	err = xsim.Run()
+	if err != nil {
+		log.Println(err)
+	}
+
+}

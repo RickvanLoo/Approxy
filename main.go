@@ -15,7 +15,6 @@ import (
 
 var OutputPath string
 var VivadoSettings *Viv.VivadoTCLSettings
-var VivadoDSPSettings *Viv.VivadoTCLSettings
 
 var Results []*Result
 var M1 *VHDL.LUT2D
@@ -56,21 +55,14 @@ func main() {
 	VivadoSettings.Utilization = true
 	VivadoSettings.WriteCheckpoint = true
 	VivadoSettings.Hierarchical = false
-
-	VivadoDSPSettings = new(Viv.VivadoTCLSettings)
-	VivadoDSPSettings.NO_DSP = false
-	VivadoDSPSettings.OOC = true
-	VivadoDSPSettings.PartName = "Xc7z030fbg676-3"
-	VivadoDSPSettings.Placement = true
-	VivadoDSPSettings.Utilization = true
-	VivadoDSPSettings.WriteCheckpoint = true
-	VivadoDSPSettings.Hierarchical = false
+	VivadoSettings.Route = true
+	VivadoSettings.Funcsim = false
 
 	// M1 = VHDL.M1().LUT2D
 	// M2 = VHDL.M2().LUT2D
 	// M3 = VHDL.M3().LUT2D
 	// M4 = VHDL.M4().LUT2D
-	// Acc = VHDL.New2DUnsignedAcc("Acc", 2)
+	Acc = VHDL.New2DUnsignedAcc("Acc", 2)
 
 	// for i := 1; i < 65; i++ {
 	// 	name := "Acc" + strconv.Itoa(i)
@@ -86,16 +78,27 @@ func main() {
 	// 	tcldsp.Exec()
 	// }
 
-	name := "Acc"
-	AccM := VHDL.NewAccurateNumMultiplyer(name, 4)
+	rec4 := VHDL.NewRecursive4("rec4", [4]VHDL.VHDLEntityMultiplier{Acc, Acc, Acc, Acc})
+	rec8 := VHDL.NewRecursive8("rec8", [4]VHDL.VHDLEntityMultiplier{rec4, rec4, rec4, rec4})
+	AccM := VHDL.NewMAC(rec8, 128)
 	AccM.GenerateVHDL(OutputPath)
 	AccM.GenerateTestData(OutputPath)
+	VivadoSettings.Funcsim = true
 
-	syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", AccM, VivadoDSPSettings)
+	sim := Viv.CreateXSIM(OutputPath, "acctest", AccM.GenerateVHDLEntityArray())
+	sim.SetTemplateSequential(AccM.OutputSize)
+	sim.Exec()
+
+	err := Viv.ParseXSIMReport(OutputPath, AccM)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", AccM, VivadoSettings)
 	syn.Exec()
+	sim.Funcsim()
+	syn.ReportPowerPostPlacement()
 
-	test := Viv.CreateXSIM(OutputPath, "acctest", AccM.GenerateVHDLEntityArray())
-	test.Exec()
 }
 
 func Rec8total() {
