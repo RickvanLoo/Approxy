@@ -1,9 +1,15 @@
 package VHDL
 
 import (
+	"bufio"
+	"fmt"
 	"log"
+	"math"
 	"math/big"
+	"math/rand"
 	"os"
+	"strconv"
+	"strings"
 	"text/template"
 )
 
@@ -39,13 +45,29 @@ type EntityData struct {
 	TestFile   string
 }
 
+//https://stackoverflow.com/questions/22713500/iterating-a-range-of-integers-in-go-templates
+//If it works, it works.
+//N 100 => Iters from 0 to 99(!)
+func N(stop uint) (stream chan uint) {
+	start := uint(0)
+	end := stop - 1
+	stream = make(chan uint)
+	go func() {
+		for i := start; i <= end; i++ {
+			stream <- i
+		}
+		close(stream)
+	}()
+	return
+}
+
 //TODO: Add funcmap support
 func CreateFile(FolderPath string, FileName string, TemplateFile string, Data interface{}) {
 	TemplatePath := "template/" + TemplateFile
 
 	path := FolderPath + "/" + FileName
 
-	t, err := template.New(TemplateFile).ParseFiles(TemplatePath)
+	t, err := template.New(TemplateFile).Funcs(template.FuncMap{"N": N}).ParseFiles(TemplatePath)
 	if err != nil {
 		log.Panic(err)
 		return
@@ -122,4 +144,89 @@ func RemoveDuplicate(Array []VHDLEntity) []VHDLEntity {
 	}
 
 	return v
+}
+
+//For VHDLEntity recreate N random TestData in form A*B=C for Folderpath
+func RandomizeTestData(Mult VHDLEntityMultiplier, FolderPath string, N uint) {
+	BitSize := Mult.ReturnData().BitSize
+	OutputSize := Mult.ReturnData().OutputSize
+	TestFile := Mult.ReturnData().TestFile
+
+	fmtstr := "%0" + strconv.Itoa(int(BitSize)) + "b %0" + strconv.Itoa(int(BitSize)) + "b %0" + strconv.Itoa(int(OutputSize)) + "b\n"
+	path := FolderPath + "/" + TestFile
+
+	file, err := os.Create(path)
+	if err != nil {
+		log.Println(err)
+	}
+
+	writer := bufio.NewWriter(file)
+
+	// maxval := int(math.Exp2(4))
+
+	for i := 0; i < int(N); i++ {
+		if i == int((N - 1)) {
+			fmtstr = strings.TrimSuffix(fmtstr, "\n")
+		}
+
+		A := rand.Intn(int(math.Exp2(float64(BitSize))) - 1)
+		B := rand.Intn(int(math.Exp2(float64(BitSize))) - 1)
+		C := Mult.ReturnVal(uint(A), uint(B))
+
+		_, err = fmt.Fprintf(writer, fmtstr, A, B, C)
+		if err != nil {
+			log.Println(err)
+		}
+
+	}
+
+	writer.Flush()
+
+}
+
+//For VHDLEntity try to create MaxSwitching N TestData in form A*B=C for Folderpath
+func MaxSwitchingTestData(Mult VHDLEntityMultiplier, FolderPath string, N uint) {
+	BitSize := Mult.ReturnData().BitSize
+	OutputSize := Mult.ReturnData().OutputSize
+	TestFile := Mult.ReturnData().TestFile
+
+	fmtstr := "%0" + strconv.Itoa(int(BitSize)) + "b %0" + strconv.Itoa(int(BitSize)) + "b %0" + strconv.Itoa(int(OutputSize)) + "b\n"
+	path := FolderPath + "/" + TestFile
+
+	file, err := os.Create(path)
+	if err != nil {
+		log.Println(err)
+	}
+
+	writer := bufio.NewWriter(file)
+
+	switchbool := false
+	for i := 0; i < int(N); i++ {
+		if i == int((N - 1)) {
+			fmtstr = strings.TrimSuffix(fmtstr, "\n")
+		}
+
+		var A uint
+		var B uint
+		if switchbool {
+			switchbool = !switchbool
+			A = uint(math.Exp2(float64(BitSize))) - 1
+			B = uint(math.Exp2(float64(BitSize))) - 1
+		} else {
+			switchbool = !switchbool
+			A = 0
+			B = 0
+		}
+
+		C := Mult.ReturnVal(uint(A), uint(B))
+
+		_, err = fmt.Fprintf(writer, fmtstr, A, B, C)
+		if err != nil {
+			log.Println(err)
+		}
+
+	}
+
+	writer.Flush()
+
 }

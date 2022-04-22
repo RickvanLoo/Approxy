@@ -18,6 +18,8 @@ type XSIM struct {
 	VHDLEntities  []VHDL.VHDLEntity
 	BitSize       uint
 	OutputSize    uint
+	ScaleN        uint
+	PostSim       bool //For special functionality made for PostSimming
 }
 
 //Creates an XSIM on bases of an array of VHDLEntities
@@ -33,19 +35,37 @@ func CreateXSIM(FolderPath string, SimName string, VHDLEntities []VHDL.VHDLEntit
 	XSIM.TemplateFile = "xsim_mult.vhd" //Default option
 	XSIM.VHDLEntities = VHDLEntities
 	XSIM.OutputSize = 2 * XSIM.BitSize
+	XSIM.ScaleN = 1
+	XSIM.PostSim = false
 
 	return XSIM
 }
 
+//Set TB to Multiplier sweep for single multipliers
 func (x *XSIM) SetTemplateMultiplier() {
 	x.TemplateFile = "xsim_mult.vhd"
 }
 
+//Set TB to Sequential Multiplier testing for MAC
 func (x *XSIM) SetTemplateSequential(OutputSize uint) {
 	x.TemplateFile = "xsim_seq.vhd"
 	x.OutputSize = OutputSize
 }
 
+//Set TB to Multiplier sweep for Scaler
+func (x *XSIM) SetTemplateScaler(N uint) {
+	x.TemplateFile = "xsim_mult_scaler.vhd"
+	x.ScaleN = N
+}
+
+//Recreate TB File, neccesary for PostPlacement sim after behavioural analysis
+//PostSim here is a bool that switches defined pre/post blocks within TB templates
+func (x *XSIM) CreateFile(PostSim bool) {
+	x.PostSim = PostSim
+	VHDL.CreateFile(x.FolderPath, x.SimFile, x.TemplateFile, x)
+}
+
+//Exec() creates the TB file and runs a behavioural analysis
 func (x *XSIM) Exec() {
 	VHDL.CreateFile(x.FolderPath, x.SimFile, x.TemplateFile, x)
 
@@ -93,6 +113,7 @@ func (x *XSIM) Exec() {
 	}
 }
 
+//FuncSim() does not(!) create a TB, but runs a PostPlacement analysis on the current available TB and dumps SAIF
 func (x *XSIM) Funcsim() {
 	loadTop := exec.Command("xvhdl", x.TopEntityName+"_funcsim.vhd")
 	loadTop.Dir = x.FolderPath

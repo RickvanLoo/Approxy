@@ -24,6 +24,7 @@ type VivadoTCLSettings struct {
 	Funcsim         bool //Note: Set to false to disable funcsim VHDL file for post-processing.
 	Utilization     bool
 	Hierarchical    bool //Note: Setting this to false, does break utilization report parsing
+	Clk             bool //WARNING: Set only to TRUE if the design has a clock.
 }
 
 func CreateVivadoTCL(FolderPath string, FileName string, Entity VHDL.VHDLEntity, Settings *VivadoTCLSettings) *VivadoTCL {
