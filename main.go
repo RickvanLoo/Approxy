@@ -87,20 +87,20 @@ func init() {
 
 func main() {
 
-	ErrorRun(100)
+	ErrorRun(100, 1000)
 	//Rec4Run(100)
 }
 
-func ErrorRun(N int) {
-	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "ErrorRun_"+strconv.Itoa(N))
+func ErrorRun(ScaleN int, Nval int) {
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "ErrorRun_"+strconv.Itoa(ScaleN)+"_"+strconv.Itoa(Nval))
 	CurrentRun.ClearData()
-	CurrentRun.AddData("Disc", "Running 100 scaled accurate 8-bit Multipliers to determine power error")
+	CurrentRun.AddData("Disc", "Running "+strconv.Itoa(ScaleN)+" accurate 8-bit Multipliers to determine power error, i="+strconv.Itoa(Nval))
 
 	for i := 0; i < 100; i++ {
 		start := time.Now()
 
 		rec8 := VHDL.NewAccurateNumMultiplyer("recacc8_"+strconv.Itoa(i), 8)
-		AccM := VHDL.New2DScaler(rec8, 100)
+		AccM := VHDL.New2DScaler(rec8, uint(ScaleN))
 
 		if CurrentRun.Exists(AccM.EntityName) {
 			log.Printf(Yellow + "Warning, skipping Entity: " + AccM.EntityName + "\n" + Reset)
@@ -111,7 +111,7 @@ func ErrorRun(N int) {
 		AccM.GenerateTestData(OutputPath)
 
 		sim := Viv.CreateXSIM(OutputPath, AccM.EntityName+"_test", AccM.GenerateVHDLEntityArray())
-		sim.SetTemplateScaler(100)
+		sim.SetTemplateScaler(uint(ScaleN))
 		sim.Exec()
 
 		err := Viv.ParseXSIMReport(OutputPath, AccM)
@@ -122,7 +122,7 @@ func ErrorRun(N int) {
 		syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", AccM, VivadoSettings)
 		syn.Exec()
 		sim.CreateFile(true)
-		VHDL.NormalTestData(AccM, OutputPath, uint(N))
+		VHDL.NormalTestData(AccM, OutputPath, uint(Nval))
 		sim.Funcsim()
 		syn.PowerPostPlacementGeneration()
 
@@ -139,10 +139,10 @@ func ErrorRun(N int) {
 	}
 }
 
-func Rec4Run(N int) {
-	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "Rec4Run")
+func Rec4Run(ScaleN int, Nval int) {
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "Rec4Run_"+strconv.Itoa(ScaleN)+"_"+strconv.Itoa(Nval))
 	CurrentRun.ClearData()
-	CurrentRun.AddData("Disc", "Full Recursive 4-bit run using M1,M2,M3,M4,Acc")
+	CurrentRun.AddData("Disc", "Full Recursive 4-bit run using M1,M2,M3,M4,Acc, N="+strconv.Itoa(ScaleN)+" i="+strconv.Itoa(Nval))
 
 	M1 = VHDL.M1().LUT2D                  //1
 	M2 = VHDL.M2().LUT2D                  //2
@@ -166,7 +166,7 @@ func Rec4Run(N int) {
 		array := [4]VHDL.VHDLEntityMultiplier{m[Cartesian4[i][0]], m[Cartesian4[i][1]], m[Cartesian4[i][2]], m[Cartesian4[i][3]]}
 		Name := "Rec_" + strconv.Itoa(Cartesian4[i][0]) + strconv.Itoa(Cartesian4[i][1]) + strconv.Itoa(Cartesian4[i][2]) + strconv.Itoa(Cartesian4[i][3])
 		rec4 := VHDL.NewRecursive4(Name, array)
-		rec4scaler := VHDL.New2DScaler(rec4, 100)
+		rec4scaler := VHDL.New2DScaler(rec4, uint(ScaleN))
 
 		if CurrentRun.Exists(rec4scaler.EntityName) {
 			log.Printf(Yellow + "Warning, skipping Entity: " + rec4scaler.EntityName + "\n" + Reset)
@@ -177,7 +177,7 @@ func Rec4Run(N int) {
 		rec4scaler.GenerateTestData(OutputPath)
 
 		sim := Viv.CreateXSIM(OutputPath, rec4scaler.EntityName+"_test", rec4scaler.GenerateVHDLEntityArray())
-		sim.SetTemplateScaler(100)
+		sim.SetTemplateScaler(uint(ScaleN))
 		sim.Exec()
 
 		err := Viv.ParseXSIMReport(OutputPath, rec4scaler)
@@ -188,7 +188,7 @@ func Rec4Run(N int) {
 		syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", rec4scaler, VivadoSettings)
 		syn.Exec()
 		sim.CreateFile(true)
-		VHDL.NormalTestData(rec4scaler, OutputPath, uint(N))
+		VHDL.NormalTestData(rec4scaler, OutputPath, uint(Nval))
 		sim.Funcsim()
 		syn.PowerPostPlacementGeneration()
 
