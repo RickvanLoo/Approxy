@@ -67,6 +67,7 @@ func (x *XSIM) CreateFile(PostSim bool) {
 
 //Exec() creates the TB file and runs a behavioural analysis
 func (x *XSIM) Exec() {
+	x.PostSim = false
 	VHDL.CreateFile(x.FolderPath, x.SimFile, x.TemplateFile, x)
 
 	//This is ugly as hell, but it works, and is readable

@@ -7,6 +7,8 @@ import (
 	"log"
 	math_rand "math/rand"
 	"os"
+	"strconv"
+	"time"
 
 	VHDL "badmath/VHDL"
 	Viv "badmath/Vivado"
@@ -14,6 +16,8 @@ import (
 
 var OutputPath string
 var ReportPath string
+var Reset string
+var Yellow string
 
 var VivadoSettings *Viv.VivadoTCLSettings
 
@@ -49,17 +53,14 @@ func init() {
 		panic("cannot seed math/rand package with cryptographically secure random number generator")
 	}
 	math_rand.Seed(int64(binary.LittleEndian.Uint64(b[:])))
-}
 
-func main() {
-	//ClearLogs()
 	fmt.Println("badmath...")
 
 	OutputPath = "output"
 	ReportPath = "report"
-	// ClearPath(OutputPath)
-	// CreatePath(OutputPath)
-	// CreatePath(ReportPath)
+	ClearPath(OutputPath)
+	CreatePath(OutputPath)
+	CreatePath(ReportPath)
 
 	VivadoSettings = new(Viv.VivadoTCLSettings)
 	VivadoSettings.NO_DSP = true
@@ -70,7 +71,7 @@ func main() {
 	VivadoSettings.WriteCheckpoint = true
 	VivadoSettings.Hierarchical = true
 	VivadoSettings.Route = true
-	VivadoSettings.Funcsim = false
+	VivadoSettings.Funcsim = true
 	VivadoSettings.Clk = false //IMPORTANT
 	VivadoSettings.Timing = true
 
@@ -80,44 +81,129 @@ func main() {
 	M4 = VHDL.M4().LUT2D
 	Acc = VHDL.New2DUnsignedAcc("Acc", 2)
 
-	// var Reset = "\033[0m"
+	Reset = "\033[0m"
+	Yellow = "\033[33m"
+}
 
-	// var Yellow = "\033[33m"
+func main() {
 
-	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "TestRun")
+	ErrorRun(100)
+	//Rec4Run(100)
+}
 
-	// start := time.Now()
+func ErrorRun(N int) {
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "ErrorRun_"+strconv.Itoa(N))
+	CurrentRun.ClearData()
+	CurrentRun.AddData("Disc", "Running 100 scaled accurate 8-bit Multipliers to determine power error")
 
-	// rec6 := VHDL.NewRecursive4("rec4_6", [4]VHDL.VHDLEntityMultiplier{Acc, M1, Acc, Acc})
-	// rec1 := VHDL.NewRecursive4("rec4_1", [4]VHDL.VHDLEntityMultiplier{Acc, M4, M2, M1})
+	for i := 0; i < 100; i++ {
+		start := time.Now()
 
-	// rec8 := VHDL.NewRecursive8("rec6111", [4]VHDL.VHDLEntityMultiplier{rec6, rec1, rec1, rec1})
-	rec8 := VHDL.NewAccurateNumMultiplyer("recacc8", 8)
-	AccM := VHDL.New2DScaler(rec8, 500)
-	// AccM.GenerateVHDL(OutputPath)
-	// AccM.GenerateTestData(OutputPath)
-	// VivadoSettings.Funcsim = true
+		rec8 := VHDL.NewAccurateNumMultiplyer("recacc8_"+strconv.Itoa(i), 8)
+		AccM := VHDL.New2DScaler(rec8, 100)
 
-	// sim := Viv.CreateXSIM(OutputPath, "acctest", AccM.GenerateVHDLEntityArray())
-	// sim.SetTemplateScaler(500)
-	// sim.Exec()
+		if CurrentRun.Exists(AccM.EntityName) {
+			log.Printf(Yellow + "Warning, skipping Entity: " + AccM.EntityName + "\n" + Reset)
+			continue
+		}
 
-	// err := Viv.ParseXSIMReport(OutputPath, AccM)
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
+		AccM.GenerateVHDL(OutputPath)
+		AccM.GenerateTestData(OutputPath)
 
-	// syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", AccM, VivadoSettings)
-	// syn.Exec()
-	// sim.CreateFile(true)
-	// VHDL.RandomizeTestData(AccM, OutputPath, 100)
-	// sim.Funcsim()
-	// syn.PowerPostPlacementGeneration()
+		sim := Viv.CreateXSIM(OutputPath, AccM.EntityName+"_test", AccM.GenerateVHDLEntityArray())
+		sim.SetTemplateScaler(100)
+		sim.Exec()
 
-	// elapsed := time.Since(start)
-	// log.Printf(Yellow+"Last run took %s\n"+Reset, elapsed)
+		err := Viv.ParseXSIMReport(OutputPath, AccM)
+		if err != nil {
+			log.Fatalln(err)
+		}
 
-	Report := Viv.CreateReport(OutputPath, AccM)
-	CurrentRun.AddReport(*Report)
-	CurrentRun.AddReport(*Report)
+		syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", AccM, VivadoSettings)
+		syn.Exec()
+		sim.CreateFile(true)
+		VHDL.NormalTestData(AccM, OutputPath, uint(N))
+		sim.Funcsim()
+		syn.PowerPostPlacementGeneration()
+
+		elapsed := time.Since(start)
+		log.Printf(Yellow+"Last run took %s\n"+Reset, elapsed)
+
+		Report := Viv.CreateReport(OutputPath, AccM)
+		Report.AddData("Error", "0")
+		Report.AddData("ElapsedTime", elapsed.String())
+		CurrentRun.AddReport(*Report)
+
+		ClearPath(OutputPath)
+		CreatePath(OutputPath)
+	}
+}
+
+func Rec4Run(N int) {
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "Rec4Run")
+	CurrentRun.ClearData()
+	CurrentRun.AddData("Disc", "Full Recursive 4-bit run using M1,M2,M3,M4,Acc")
+
+	M1 = VHDL.M1().LUT2D                  //1
+	M2 = VHDL.M2().LUT2D                  //2
+	M3 = VHDL.M3().LUT2D                  //3
+	M4 = VHDL.M4().LUT2D                  //4
+	Acc = VHDL.New2DUnsignedAcc("Acc", 2) //5
+
+	options := []int{1, 2, 3, 4, 5}
+	Cartesian4 := cartN(options, options, options, options)
+
+	m := make(map[int]*VHDL.LUT2D)
+	m[1] = M1
+	m[2] = M2
+	m[3] = M3
+	m[4] = M4
+	m[5] = Acc
+
+	for i := 0; i < len(Cartesian4); i++ {
+		start := time.Now()
+
+		array := [4]VHDL.VHDLEntityMultiplier{m[Cartesian4[i][0]], m[Cartesian4[i][1]], m[Cartesian4[i][2]], m[Cartesian4[i][3]]}
+		Name := "Rec_" + strconv.Itoa(Cartesian4[i][0]) + strconv.Itoa(Cartesian4[i][1]) + strconv.Itoa(Cartesian4[i][2]) + strconv.Itoa(Cartesian4[i][3])
+		rec4 := VHDL.NewRecursive4(Name, array)
+		rec4scaler := VHDL.New2DScaler(rec4, 100)
+
+		if CurrentRun.Exists(rec4scaler.EntityName) {
+			log.Printf(Yellow + "Warning, skipping Entity: " + rec4scaler.EntityName + "\n" + Reset)
+			continue
+		}
+
+		rec4scaler.GenerateVHDL(OutputPath)
+		rec4scaler.GenerateTestData(OutputPath)
+
+		sim := Viv.CreateXSIM(OutputPath, rec4scaler.EntityName+"_test", rec4scaler.GenerateVHDLEntityArray())
+		sim.SetTemplateScaler(100)
+		sim.Exec()
+
+		err := Viv.ParseXSIMReport(OutputPath, rec4scaler)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", rec4scaler, VivadoSettings)
+		syn.Exec()
+		sim.CreateFile(true)
+		VHDL.NormalTestData(rec4scaler, OutputPath, uint(N))
+		sim.Funcsim()
+		syn.PowerPostPlacementGeneration()
+
+		elapsed := time.Since(start)
+		log.Printf(Yellow+"Last run took %s\n"+Reset, elapsed)
+
+		Report := Viv.CreateReport(OutputPath, rec4scaler)
+		Report.AddData("MeanAbsoluteError", strconv.FormatFloat(rec4.MeanAbsoluteError(), 'E', -1, 64))
+		Report.AddData("AverageRelativeError", strconv.FormatFloat(rec4.AverageRelativeError(), 'E', -1, 64))
+		Report.AddData("Overflow", strconv.FormatBool(rec4.Overflow()))
+		Report.AddData("ElapsedTime", elapsed.String())
+		CurrentRun.AddReport(*Report)
+
+		ClearPath(OutputPath)
+		CreatePath(OutputPath)
+	}
+
 }

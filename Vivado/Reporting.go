@@ -15,6 +15,7 @@ type Report struct {
 	Util       *Utilization
 	Power      *PowerReport
 	Timing     *Timing
+	Other      []Data
 }
 
 type Run struct {
@@ -22,6 +23,12 @@ type Run struct {
 	Reports    []Report
 	ResultPath string `json:"-"`
 	ReportPath string `json:"-"`
+	Other      []Data
+}
+
+type Data struct {
+	Key   string
+	Value string
 }
 
 func CreateReport(FolderPath string, Entity VHDL.VHDLEntity) *Report {
@@ -35,6 +42,13 @@ func CreateReport(FolderPath string, Entity VHDL.VHDLEntity) *Report {
 	return Report
 }
 
+func (r *Report) AddData(key string, value string) {
+	var data Data
+	data.Key = key
+	data.Value = value
+	r.Other = append(r.Other, data)
+}
+
 //Creates new run if non-existant. Opens old run if does exist based upon Name
 func StartRun(ResultPath string, ReportPath string, Name string) *Run {
 	Run := new(Run)
@@ -46,6 +60,10 @@ func StartRun(ResultPath string, ReportPath string, Name string) *Run {
 
 	if _, err := os.Stat(Filepath); err == nil {
 		//Run exists
+		Reset := "\033[0m"
+		Yellow := "\033[33m"
+		log.Printf(Yellow + "Warning, run: " + Name + " exists!\n" + Reset)
+
 		jsonFile, err := os.Open(Filepath)
 		if err != nil {
 			fmt.Println(err)
@@ -73,6 +91,15 @@ func (r *Run) AddReport(Report Report) {
 	r.updateJSON()
 }
 
+func (r *Run) Exists(EntityName string) bool {
+	for _, report := range r.Reports {
+		if report.EntityName == EntityName {
+			return true
+		}
+	}
+	return false
+}
+
 func (r *Run) updateJSON() {
 	Filepath := r.ResultPath + "/" + r.Name + ".json"
 	file, _ := json.Marshal(r)
@@ -93,4 +120,16 @@ func (r *Run) RemoveDuplicates() {
 	}
 
 	r.Reports = NewReports
+}
+
+func (r *Run) AddData(key string, value string) {
+	var data Data
+	data.Key = key
+	data.Value = value
+	r.Other = append(r.Other, data)
+	r.updateJSON()
+}
+
+func (r *Run) ClearData() {
+	r.Other = nil
 }

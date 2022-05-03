@@ -147,7 +147,7 @@ func RemoveDuplicate(Array []VHDLEntity) []VHDLEntity {
 }
 
 //For VHDLEntity recreate N random TestData in form A*B=C for Folderpath
-func RandomizeTestData(Mult VHDLEntityMultiplier, FolderPath string, N uint) {
+func UniformTestData(Mult VHDLEntityMultiplier, FolderPath string, N uint) {
 	BitSize := Mult.ReturnData().BitSize
 	OutputSize := Mult.ReturnData().OutputSize
 	TestFile := Mult.ReturnData().TestFile
@@ -182,6 +182,73 @@ func RandomizeTestData(Mult VHDLEntityMultiplier, FolderPath string, N uint) {
 
 	writer.Flush()
 
+}
+
+func NormalTestData(Mult VHDLEntityMultiplier, FolderPath string, N uint) {
+	BitSize := Mult.ReturnData().BitSize
+	OutputSize := Mult.ReturnData().OutputSize
+	TestFile := Mult.ReturnData().TestFile
+
+	fmtstr := "%0" + strconv.Itoa(int(BitSize)) + "b %0" + strconv.Itoa(int(BitSize)) + "b %0" + strconv.Itoa(int(OutputSize)) + "b\n"
+	path := FolderPath + "/" + TestFile
+
+	file, err := os.Create(path)
+	if err != nil {
+		log.Println(err)
+	}
+
+	writer := bufio.NewWriter(file)
+
+	// maxval := int(math.Exp2(4))
+
+	for i := 0; i < int(N); i++ {
+		if i == int((N - 1)) {
+			fmtstr = strings.TrimSuffix(fmtstr, "\n")
+		}
+
+		A := RandomNormalInput(int(BitSize))
+		B := RandomNormalInput(int(BitSize))
+		C := Mult.ReturnVal(uint(A), uint(B))
+
+		_, err = fmt.Fprintf(writer, fmtstr, A, B, C)
+		if err != nil {
+			log.Println(err)
+		}
+
+	}
+
+	writer.Flush()
+
+}
+
+func RandomNormalInput(size int) int {
+	var sample float64
+
+	switch size {
+	case 4:
+		sample = rand.NormFloat64()*1.5 + 8
+		if sample > (math.Exp2(4) - 1) {
+			sample = (math.Exp2(4) - 1)
+		}
+	case 8:
+		sample = rand.NormFloat64()*22.5 + 128
+		if sample > (math.Exp2(8) - 1) {
+			sample = (math.Exp2(8) - 1)
+		}
+	case 16:
+		sample = rand.NormFloat64()*6553 + 32768
+		if sample > (math.Exp2(16) - 1) {
+			sample = (math.Exp2(16) - 1)
+		}
+	default:
+		sample = 0
+	}
+
+	if sample < 0 {
+		sample = 0
+	}
+
+	return int(sample)
 }
 
 //For VHDLEntity try to create MaxSwitching N TestData in form A*B=C for Folderpath
