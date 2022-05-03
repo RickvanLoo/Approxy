@@ -13,6 +13,7 @@
 
 # Output folder
 output
+report
 
 # Vivado stuff
 *.log

@@ -28,6 +28,6 @@ begin
             when others =>
                 prod <= (others => 'X');
 		end case;
-		end process;
+    end process;
 
 end Behavioral;

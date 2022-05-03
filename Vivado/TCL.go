@@ -25,6 +25,7 @@ type VivadoTCLSettings struct {
 	Utilization     bool
 	Hierarchical    bool //Note: Setting this to false, does break utilization report parsing
 	Clk             bool //WARNING: Set only to TRUE if the design has a clock.
+	Timing          bool
 }
 
 func CreateVivadoTCL(FolderPath string, FileName string, Entity VHDL.VHDLEntity, Settings *VivadoTCLSettings) *VivadoTCL {
@@ -51,7 +52,7 @@ func (tcl *VivadoTCL) Exec() {
 	}
 }
 
-func (tcl *VivadoTCL) ReportPowerPostPlacement() {
+func (tcl *VivadoTCL) PowerPostPlacementGeneration() {
 	VHDL.CreateFile(tcl.FolderPath, "power_"+tcl.FileName, "reportpower.tcl", tcl)
 	cmd := exec.Command("vivado", "-mode", "batch", "-source", "power_"+tcl.FileName)
 	cmd.Dir = tcl.FolderPath

@@ -7,13 +7,14 @@ import (
 	"log"
 	math_rand "math/rand"
 	"os"
-	"time"
 
 	VHDL "badmath/VHDL"
 	Viv "badmath/Vivado"
 )
 
 var OutputPath string
+var ReportPath string
+
 var VivadoSettings *Viv.VivadoTCLSettings
 
 var Results []*Result
@@ -55,8 +56,10 @@ func main() {
 	fmt.Println("badmath...")
 
 	OutputPath = "output"
-	ClearPath(OutputPath)
-	CreatePath(OutputPath)
+	ReportPath = "report"
+	// ClearPath(OutputPath)
+	// CreatePath(OutputPath)
+	// CreatePath(ReportPath)
 
 	VivadoSettings = new(Viv.VivadoTCLSettings)
 	VivadoSettings.NO_DSP = true
@@ -65,10 +68,11 @@ func main() {
 	VivadoSettings.Placement = true
 	VivadoSettings.Utilization = true
 	VivadoSettings.WriteCheckpoint = true
-	VivadoSettings.Hierarchical = false
+	VivadoSettings.Hierarchical = true
 	VivadoSettings.Route = true
 	VivadoSettings.Funcsim = false
 	VivadoSettings.Clk = false //IMPORTANT
+	VivadoSettings.Timing = true
 
 	M1 = VHDL.M1().LUT2D
 	M2 = VHDL.M2().LUT2D
@@ -76,25 +80,13 @@ func main() {
 	M4 = VHDL.M4().LUT2D
 	Acc = VHDL.New2DUnsignedAcc("Acc", 2)
 
-	// for i := 1; i < 65; i++ {
-	// 	name := "Acc" + strconv.Itoa(i)
-	// 	AccM := VHDL.NewAccurateNumMultiplyer(name, uint(i))
-	// 	AccM.GenerateVHDL(OutputPath)
-	// 	tcl := Viv.CreateVivadoTCL(OutputPath, name, AccM, VivadoSettings)
-	// 	tcl.Exec()
+	// var Reset = "\033[0m"
 
-	// 	AccMDSP := VHDL.NewAccurateNumMultiplyer(name+"DSP", uint(i))
-	// 	AccMDSP.GenerateVHDL(OutputPath)
+	// var Yellow = "\033[33m"
 
-	// 	tcldsp := Viv.CreateVivadoTCL(OutputPath, name+"DSP", AccMDSP, VivadoDSPSettings)
-	// 	tcldsp.Exec()
-	// }
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "TestRun")
 
-	var Reset = "\033[0m"
-
-	var Yellow = "\033[33m"
-
-	start := time.Now()
+	// start := time.Now()
 
 	// rec6 := VHDL.NewRecursive4("rec4_6", [4]VHDL.VHDLEntityMultiplier{Acc, M1, Acc, Acc})
 	// rec1 := VHDL.NewRecursive4("rec4_1", [4]VHDL.VHDLEntityMultiplier{Acc, M4, M2, M1})
@@ -102,27 +94,30 @@ func main() {
 	// rec8 := VHDL.NewRecursive8("rec6111", [4]VHDL.VHDLEntityMultiplier{rec6, rec1, rec1, rec1})
 	rec8 := VHDL.NewAccurateNumMultiplyer("recacc8", 8)
 	AccM := VHDL.New2DScaler(rec8, 500)
-	AccM.GenerateVHDL(OutputPath)
-	AccM.GenerateTestData(OutputPath)
-	VivadoSettings.Funcsim = true
+	// AccM.GenerateVHDL(OutputPath)
+	// AccM.GenerateTestData(OutputPath)
+	// VivadoSettings.Funcsim = true
 
-	sim := Viv.CreateXSIM(OutputPath, "acctest", AccM.GenerateVHDLEntityArray())
-	sim.SetTemplateScaler(500)
-	sim.Exec()
+	// sim := Viv.CreateXSIM(OutputPath, "acctest", AccM.GenerateVHDLEntityArray())
+	// sim.SetTemplateScaler(500)
+	// sim.Exec()
 
-	err := Viv.ParseXSIMReport(OutputPath, AccM)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	// err := Viv.ParseXSIMReport(OutputPath, AccM)
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
 
-	syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", AccM, VivadoSettings)
-	syn.Exec()
-	sim.CreateFile(true)
-	VHDL.RandomizeTestData(AccM, OutputPath, 1000)
-	sim.Funcsim()
-	syn.ReportPowerPostPlacement()
+	// syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", AccM, VivadoSettings)
+	// syn.Exec()
+	// sim.CreateFile(true)
+	// VHDL.RandomizeTestData(AccM, OutputPath, 100)
+	// sim.Funcsim()
+	// syn.PowerPostPlacementGeneration()
 
-	elapsed := time.Since(start)
-	log.Printf(Yellow+"Last run took %s\n"+Reset, elapsed)
+	// elapsed := time.Since(start)
+	// log.Printf(Yellow+"Last run took %s\n"+Reset, elapsed)
 
+	Report := Viv.CreateReport(OutputPath, AccM)
+	CurrentRun.AddReport(*Report)
+	CurrentRun.AddReport(*Report)
 }

@@ -11,7 +11,7 @@ import (
 )
 
 type Utilization struct {
-	EntityName string
+	EntityName string `json:"-"`
 	TotalLUT   int
 	LogicLUT   int
 	LUTRAMs    int
@@ -20,6 +20,7 @@ type Utilization struct {
 	RAMB36     int
 	RAMB18     int
 	DSP        int
+	CARRY      int
 }
 
 //This is needed because Vivado only 'can' (I think it's more of a want here than a technical limitation) export
@@ -67,6 +68,30 @@ func ParseUtilizationReport(FolderPath string, Entity VHDL.VHDLEntity) *Utilizat
 	util.RAMB36, _ = strconv.Atoi(Results[8])
 	util.RAMB18, _ = strconv.Atoi(Results[9])
 	util.DSP, _ = strconv.Atoi(Results[10])
+
+	///Carry
+
+	filextension = "_primitive.rpt"
+
+	filename = Entity.ReturnData().EntityName + filextension
+
+	file, err = os.Open(FolderPath + "/" + filename)
+
+	if err != nil {
+		log.Fatalf("failed opening file: %s", err)
+	}
+
+	scanner = bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+
+	var primlines []string
+
+	for scanner.Scan() {
+		primlines = append(primlines, scanner.Text())
+	}
+	util.CARRY, _ = strconv.Atoi(primlines[0])
+
+	file.Close()
 
 	return util
 }

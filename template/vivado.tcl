@@ -7,5 +7,11 @@ synth_design {{if .Settings.OOC}}-mode out_of_context{{end}} {{if .Settings.NO_D
 {{if .Settings.Route}}route_design{{end}}
 {{if .Settings.Funcsim}}write_vhdl -mode funcsim {{.TopName}}_funcsim.vhd{{end}}
 {{if and .Settings.Placement .Settings.WriteCheckpoint}}write_checkpoint -force {{.TopName}}_postplace.dcp{{end}}
-{{if .Settings.Utilization}}report_utilization {{if .Settings.Hierarchical}}-hierarchical{{end}} -file {{.TopName}}_post_place_ult.rpt{{end}}
+{{if .Settings.Utilization}}report_utilization {{if .Settings.Hierarchical}}-hierarchical{{end}} -file {{.TopName}}_post_place_ult.rpt
+set fo [open {{.TopName}}_primitive.rpt a]
+puts $fo [llength [get_cells -hier -filter {PRIMITIVE_GROUP == CARRY}]]
+close $fo
+{{end}}
+{{if .Settings.Timing}}report_timing -nworst 1 -path_type end -file {{.TopName}}_post_place_time.rpt{{end}}
+
 close_project
