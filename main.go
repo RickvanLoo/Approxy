@@ -87,7 +87,7 @@ func init() {
 
 func main() {
 
-	ErrorRun(100, 1000)
+	ErrorRun(500, 1000)
 	//Rec4Run(100)
 }
 
@@ -96,31 +96,31 @@ func ErrorRun(ScaleN int, Nval int) {
 	CurrentRun.ClearData()
 	CurrentRun.AddData("Disc", "Running "+strconv.Itoa(ScaleN)+" accurate 8-bit Multipliers to determine power error, i="+strconv.Itoa(Nval))
 
-	for i := 0; i < 100; i++ {
-		start := time.Now()
+	rec8 := VHDL.NewAccurateNumMultiplyer("recacc8", 8)
+	AccM := VHDL.New2DScaler(rec8, uint(ScaleN))
 
-		rec8 := VHDL.NewAccurateNumMultiplyer("recacc8_"+strconv.Itoa(i), 8)
-		AccM := VHDL.New2DScaler(rec8, uint(ScaleN))
+	AccM.GenerateVHDL(OutputPath)
+	AccM.GenerateTestData(OutputPath)
 
-		if CurrentRun.Exists(AccM.EntityName) {
-			log.Printf(Yellow + "Warning, skipping Entity: " + AccM.EntityName + "\n" + Reset)
+	sim := Viv.CreateXSIM(OutputPath, AccM.EntityName+"_test", AccM.GenerateVHDLEntityArray())
+	sim.SetTemplateScaler(uint(ScaleN))
+	sim.Exec()
+
+	err := Viv.ParseXSIMReport(OutputPath, AccM)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", AccM, VivadoSettings)
+	syn.Exec()
+
+	for i := 0; i < 50; i++ {
+		if CurrentRun.Exists("Run" + strconv.Itoa(i)) {
+			log.Printf(Yellow + "Warning, skipping Run: " + AccM.EntityName + "\n" + Reset)
 			continue
 		}
+		start := time.Now()
 
-		AccM.GenerateVHDL(OutputPath)
-		AccM.GenerateTestData(OutputPath)
-
-		sim := Viv.CreateXSIM(OutputPath, AccM.EntityName+"_test", AccM.GenerateVHDLEntityArray())
-		sim.SetTemplateScaler(uint(ScaleN))
-		sim.Exec()
-
-		err := Viv.ParseXSIMReport(OutputPath, AccM)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", AccM, VivadoSettings)
-		syn.Exec()
 		sim.CreateFile(true)
 		VHDL.NormalTestData(AccM, OutputPath, uint(Nval))
 		sim.Funcsim()
@@ -130,12 +130,10 @@ func ErrorRun(ScaleN int, Nval int) {
 		log.Printf(Yellow+"Last run took %s\n"+Reset, elapsed)
 
 		Report := Viv.CreateReport(OutputPath, AccM)
+		Report.EntityName = "Run" + strconv.Itoa(i)
 		Report.AddData("Error", "0")
 		Report.AddData("ElapsedTime", elapsed.String())
 		CurrentRun.AddReport(*Report)
-
-		ClearPath(OutputPath)
-		CreatePath(OutputPath)
 	}
 }
 

@@ -223,7 +223,7 @@ func NormalTestData(Mult VHDLEntityMultiplier, FolderPath string, N uint) {
 
 func RandomNormalInput(size int) int {
 	var sample float64
-
+	//<div class="csl-entry">Gillani, G. A., Hanif, M. A., Verstoep, B., Gerez, S. H., Shafique, M., &#38; Kokkeler, A. B. J. (2019). MACISH: Designing Approximate MAC Accelerators With Internal-Self-Healing. <i>IEEE Access</i>, <i>7</i>, 77142–77160. https://doi.org/10.1109/ACCESS.2019.2920335</div>
 	switch size {
 	case 4:
 		sample = rand.NormFloat64()*1.5 + 8
