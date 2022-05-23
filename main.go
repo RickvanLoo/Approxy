@@ -90,16 +90,20 @@ func main() {
 	//ErrorRun(500, 1000)
 	//ErrorRun(500, 10)
 	//PowerEst()
-	Rec4Run(1000, 1000)
+	//Rec4Run(1000, 1000)
+	ErrorRun(1000, 1000)
+
+	// rec1334 := VHDL.NewRecursive4("Rec4114", [4]VHDL.VHDLEntityMultiplier{M1, M4, M4, M1})
+	// SingleRun("rec1334Run", rec1334, 1, 1000)
 
 }
 
 func ErrorRun(ScaleN int, Nval int) {
-	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "ErrorRun_"+strconv.Itoa(ScaleN)+"_"+strconv.Itoa(Nval))
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "ErrorRun4_"+strconv.Itoa(ScaleN)+"_"+strconv.Itoa(Nval))
 	CurrentRun.ClearData()
-	CurrentRun.AddData("Disc", "Running "+strconv.Itoa(ScaleN)+" accurate 8-bit Multipliers to determine power error, i="+strconv.Itoa(Nval))
+	CurrentRun.AddData("Disc", "Running "+strconv.Itoa(ScaleN)+" accurate 4-bit Multipliers to determine power error, i="+strconv.Itoa(Nval))
 
-	rec8 := VHDL.NewAccurateNumMultiplyer("recacc8", 8)
+	rec8 := VHDL.NewAccurateNumMultiplyer("recacc4", 4)
 	AccM := VHDL.New2DScaler(rec8, uint(ScaleN))
 
 	AccM.GenerateVHDL(OutputPath)
@@ -324,4 +328,41 @@ func PowerEst() {
 	CurrentRun.AddReport(*Report)
 	ClearPath(OutputPath)
 	CreatePath(OutputPath)
+}
+
+func SingleRun(name string, Entity VHDL.VHDLEntityMultiplier, scaleN int, testi int) {
+	ClearPath(OutputPath)
+	CreatePath(OutputPath)
+
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, name+strconv.Itoa(scaleN)+"_"+strconv.Itoa(testi))
+	CurrentRun.ClearData()
+	CurrentRun.AddData("Disc", "Running "+name+strconv.Itoa(scaleN)+"_"+strconv.Itoa(testi))
+
+	Entity_Scaler := VHDL.New2DScaler(Entity, uint(scaleN))
+
+	Entity_Scaler.GenerateVHDL(OutputPath)
+	Entity_Scaler.GenerateTestData(OutputPath)
+
+	sim := Viv.CreateXSIM(OutputPath, Entity_Scaler.EntityName+"_test", Entity_Scaler.GenerateVHDLEntityArray())
+	sim.SetTemplateScaler(uint(scaleN))
+	sim.Exec()
+
+	err := Viv.ParseXSIMReport(OutputPath, Entity_Scaler)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", Entity_Scaler, VivadoSettings)
+	syn.Exec()
+
+	sim.CreateFile(true)
+	VHDL.NormalTestData(Entity_Scaler, OutputPath, uint(testi))
+	sim.Funcsim()
+	syn.PowerPostPlacementGeneration()
+
+	Report := Viv.CreateReport(OutputPath, Entity_Scaler)
+	Report.AddData("MeanAbsoluteError", strconv.FormatFloat(Entity.MeanAbsoluteError(), 'E', -1, 64))
+	Report.AddData("Overflow", strconv.FormatBool(Entity.Overflow()))
+	CurrentRun.AddReport(*Report)
+
 }
