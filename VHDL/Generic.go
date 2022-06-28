@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"text/template"
@@ -66,6 +67,8 @@ func CreateFile(FolderPath string, FileName string, TemplateFile string, Data in
 	TemplatePath := "template/" + TemplateFile
 
 	path := FolderPath + "/" + FileName
+
+	TemplateFile = filepath.Base(TemplateFile)
 
 	t, err := template.New(TemplateFile).Funcs(template.FuncMap{"N": N}).ParseFiles(TemplatePath)
 	if err != nil {

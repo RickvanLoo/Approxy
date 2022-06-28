@@ -87,15 +87,44 @@ func init() {
 
 func main() {
 
-	//ErrorRun(500, 1000)
-	//ErrorRun(500, 10)
-	//PowerEst()
-	//Rec4Run(1000, 1000)
-	ErrorRun(1000, 1000)
+	// //ErrorRun(500, 1000)
+	// //ErrorRun(500, 10)
+	// //PowerEst()
+	// //Rec4Run(1000, 1000)
+	// ErrorRun(1000, 1000)
 
-	// rec1334 := VHDL.NewRecursive4("Rec4114", [4]VHDL.VHDLEntityMultiplier{M1, M4, M4, M1})
-	// SingleRun("rec1334Run", rec1334, 1, 1000)
+	// // rec1334 := VHDL.NewRecursive4("Rec4114", [4]VHDL.VHDLEntityMultiplier{M1, M4, M4, M1})
+	// // SingleRun("rec1334Run", rec1334, 1, 1000)
 
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "externalRun")
+	CurrentRun.ClearData()
+
+	ExternalMult := VHDL.NewExternalMult("multo4", 4, "mult_approx_o4.vhd")
+	ExternalMult.GenerateVHDL(OutputPath)
+	ExternalMult.GenerateTestData(OutputPath)
+
+	sim := Viv.CreateXSIM(OutputPath, ExternalMult.EntityName+"_test", ExternalMult.GenerateVHDLEntityArray())
+	sim.SetTemplateReverse()
+	sim.Exec()
+	ExternalMult.ParseXSIMOutput(OutputPath)
+
+	ExtMultScale := VHDL.New2DScaler(ExternalMult, 1000)
+	ExtMultScale.GenerateVHDL(OutputPath)
+
+	sim = Viv.CreateXSIM(OutputPath, ExtMultScale.EntityName+"_test", ExtMultScale.GenerateVHDLEntityArray())
+	sim.SetTemplateScaler(1000)
+
+	syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", ExtMultScale, VivadoSettings)
+	syn.Exec()
+	sim.CreateFile(true)
+	VHDL.NormalTestData(ExtMultScale, OutputPath, 1000)
+	sim.Funcsim()
+	syn.PowerPostPlacementGeneration()
+
+	Report := Viv.CreateReport(OutputPath, ExtMultScale)
+	Report.AddData("MeanAbsoluteError", strconv.FormatFloat(ExternalMult.MeanAbsoluteError(), 'E', -1, 64))
+	Report.AddData("AverageRelativeError", strconv.FormatFloat(ExternalMult.AverageRelativeError(), 'E', -1, 64))
+	CurrentRun.AddReport(*Report)
 }
 
 func ErrorRun(ScaleN int, Nval int) {

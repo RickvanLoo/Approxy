@@ -58,6 +58,11 @@ func (x *XSIM) SetTemplateScaler(N uint) {
 	x.ScaleN = N
 }
 
+//Set TB to not functionally verify model, but retreive data instead
+func (x *XSIM) SetTemplateReverse() {
+	x.TemplateFile = "xsim_reverse.vhd"
+}
+
 //Recreate TB File, neccesary for PostPlacement sim after behavioural analysis
 //PostSim here is a bool that switches defined pre/post blocks within TB templates
 func (x *XSIM) CreateFile(PostSim bool) {
