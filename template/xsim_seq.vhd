@@ -48,11 +48,11 @@ testbench : process
           b <= val_col2;
           test <= val_col3;
 
-          wait for 5 ns;  --  to display results for 20 ns
+          wait for 10 ns;  --  to display results for 20 ns
 
           clk <= '1';
 
-          wait for 5 ns;
+          wait for 10 ns;
           
           assert(output = test) report "!!ERROR!!PATTERN!!" severity ERROR;
         end loop;

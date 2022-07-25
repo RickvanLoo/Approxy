@@ -11,13 +11,14 @@ import (
 )
 
 type ExternalMult struct {
-	EntityName   string
-	BitSize      uint
-	OutputSize   uint
-	VHDLFile     string
-	TestFile     string
-	TemplateFile string
-	Behaviour    [][]uint
+	EntityName      string
+	BitSize         uint
+	OutputSize      uint
+	VHDLFile        string
+	TestFile        string
+	TemplateFile    string
+	Behaviour       [][]uint
+	ExtraVHDLEntity []VHDLEntity
 }
 
 func NewExternalMult(EntityName string, BitSize uint, Template string) *ExternalMult {
@@ -55,6 +56,10 @@ func (ext *ExternalMult) GenerateVHDL(FolderPath string) {
 	CreateFile(FolderPath, ext.VHDLFile, "external/"+ext.TemplateFile, ext)
 }
 
+func (ext *ExternalMult) AddVHDLEntity(Entity VHDLEntity) {
+	ext.ExtraVHDLEntity = append(ext.ExtraVHDLEntity, Entity)
+}
+
 func (ext *ExternalMult) GenerateTestData(FolderPath string) {
 	fmtstr := "%0" + strconv.Itoa(int(ext.BitSize)) + "b %0" + strconv.Itoa(int(ext.BitSize)) + "b\n"
 	path := FolderPath + "/" + ext.TestFile
@@ -89,6 +94,7 @@ func (ext *ExternalMult) GenerateTestData(FolderPath string) {
 func (ext *ExternalMult) GenerateVHDLEntityArray() []VHDLEntity {
 	var out []VHDLEntity
 	out = append(out, ext)
+	out = append(out, ext.ExtraVHDLEntity...)
 	return out
 }
 

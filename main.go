@@ -96,12 +96,25 @@ func main() {
 	// // rec1334 := VHDL.NewRecursive4("Rec4114", [4]VHDL.VHDLEntityMultiplier{M1, M4, M4, M1})
 	// // SingleRun("rec1334Run", rec1334, 1, 1000)
 
-	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "externalRun")
+	//AccurateRun()
+
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "externalRunlpACLib")
 	CurrentRun.ClearData()
 
-	ExternalMult := VHDL.NewExternalMult("multo4", 4, "mult_approx_o4.vhd")
+	ExternalMult := VHDL.NewExternalMult("XMAA_Config_Lit4x4", 4, "lpACLib/XMAA/Config4x4MultLit.vhd")
 	ExternalMult.GenerateVHDL(OutputPath)
 	ExternalMult.GenerateTestData(OutputPath)
+
+	//PortMaps
+	PortMapMult1 := VHDL.NewExternalMult("dontcare1", 4, "lpACLib/XMAA/Config2x2MultLit.vhd")
+	PortMapMult1.GenerateVHDL(OutputPath)
+	PortMapMult1.GenerateTestData(OutputPath)
+	ExternalMult.AddVHDLEntity(PortMapMult1)
+
+	PortMapMult2 := VHDL.NewExternalMult("dontcare2", 4, "lpACLib/XMAA/Approx2x2MultLit.vhd")
+	PortMapMult2.GenerateVHDL(OutputPath)
+	PortMapMult2.GenerateTestData(OutputPath)
+	ExternalMult.AddVHDLEntity(PortMapMult2)
 
 	sim := Viv.CreateXSIM(OutputPath, ExternalMult.EntityName+"_test", ExternalMult.GenerateVHDLEntityArray())
 	sim.SetTemplateReverse()
@@ -124,6 +137,31 @@ func main() {
 	Report := Viv.CreateReport(OutputPath, ExtMultScale)
 	Report.AddData("MeanAbsoluteError", strconv.FormatFloat(ExternalMult.MeanAbsoluteError(), 'E', -1, 64))
 	Report.AddData("AverageRelativeError", strconv.FormatFloat(ExternalMult.AverageRelativeError(), 'E', -1, 64))
+	CurrentRun.AddReport(*Report)
+}
+
+func AccurateRun() {
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "AccurateRunFINAL")
+	CurrentRun.ClearData()
+	CurrentRun.AddData("Disc", "AccurateRunFinal 4-bit N=1000, I=1000")
+
+	Acc4 := VHDL.NewAccurateNumMultiplyer("Acc4", 4)
+	Acc4Scale := VHDL.New2DScaler(Acc4, 1000)
+
+	Acc4Scale.GenerateVHDL(OutputPath)
+	Acc4Scale.GenerateTestData(OutputPath)
+
+	sim := Viv.CreateXSIM(OutputPath, Acc4Scale.EntityName+"_test", Acc4Scale.GenerateVHDLEntityArray())
+	sim.SetTemplateScaler(1000)
+
+	syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", Acc4Scale, VivadoSettings)
+	syn.Exec()
+	sim.CreateFile(true)
+	VHDL.NormalTestData(Acc4Scale, OutputPath, 1000)
+	sim.Funcsim()
+	syn.PowerPostPlacementGeneration()
+
+	Report := Viv.CreateReport(OutputPath, Acc4Scale)
 	CurrentRun.AddReport(*Report)
 }
 
