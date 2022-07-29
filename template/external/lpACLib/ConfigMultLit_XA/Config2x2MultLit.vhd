@@ -16,47 +16,50 @@
 -- along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 --------------------------------------------
--- Approx2x2MultV4
+-- Config2x2MultLit
 -- Author: Walaa El-Harouni  
--- Implementation for an accuracy configurale approximate multiplier (Version 1)
--- uses: Approx2x2MultV1.vhd
+-- Implementation for an accuracy configurale approximate multiplier from:
+-- "Trading Accuracy for Power with an Underdesigned Multiplier Architecture" 
+-- uses: Approx2x2MultLit.vhd
 --------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.ALL;
 use ieee.numeric_std.ALL;
 
-
-entity Config2x2MultV1 is
+entity Config2x2MultLit is
 	port (A   	 : in std_logic_vector(1 downto 0);
 		  B 	 : in std_logic_vector(1 downto 0);
 		  en	 : in std_logic;
 		  Product    : out std_logic_vector(3 downto 0) );
-end Config2x2MultV1;
+end Config2x2MultLit;
 
-architecture config2x2MultV1Arch of Config2x2MultV1 is
-	component Approx2x2MultV1 is
+architecture config2x2MultLitArch of Config2x2MultLit is
+	component Approx2x2MultLit is
 	port (A   	 : in std_logic_vector(1 downto 0);
-		  B 	 : in std_logic_vector(1 downto 0);
-		  Output : out std_logic_vector(3 downto 0) );
+	      B 	 : in std_logic_vector(1 downto 0);
+	      Output     : out std_logic_vector(2 downto 0) );
 	end component;
-
-	signal Output: std_logic_vector(3 downto 0);
-	signal error: std_logic;        
+	    
+    signal approxOut: std_logic_vector(2 downto 0);
+    
 begin
-	inaccurate: Approx2x2MultV1 port map(A => A, B => B, Output => Output);
-	
-	error <= (Not Output(3)) and (A(0) and B(0));
-	process (en, error, Output)
+	inaccurate: Approx2x2MultLit port map(A => A, B => B, Output => approxOut);
+
+	process (en, approxOut)
+
+    	variable inaccurateOut: integer;
+    	variable result: integer := 0;
+
 	begin
-		if error='1' and en='1' then
-			Product(0) <= not Output(0);
+		if en = '1' and approxOut = "111" then
+			inaccurateOut := to_integer(unsigned(approxOut));
+			result := 2 + inaccurateOut; 
+			Product <= std_logic_vector(to_unsigned(result, 4));
 		else
-			Product(0) <= Output(0);
+			Product <= std_logic_vector(resize(unsigned(approxOut), 4));
 		end if;	
-			Product(3) <= Output(3);
-			Product(2) <= Output(2);
-			Product(1) <= Output(1);
+		
 	end process;
 	
-end config2x2MultV1Arch;
+end config2x2MultLitArch;

@@ -16,47 +16,36 @@
 -- along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 --------------------------------------------
--- Approx2x2MultV4
+-- Approx2x2MultV1
 -- Author: Walaa El-Harouni  
--- Implementation for an accuracy configurale approximate multiplier (Version 1)
--- uses: Approx2x2MultV1.vhd
+-- Implementation for approximate multiplier (Version 1) 
 --------------------------------------------
+
 
 library ieee;
 use ieee.std_logic_1164.ALL;
 use ieee.numeric_std.ALL;
 
-
-entity Config2x2MultV1 is
+entity Approx2x2MultV1 is
 	port (A   	 : in std_logic_vector(1 downto 0);
 		  B 	 : in std_logic_vector(1 downto 0);
-		  en	 : in std_logic;
-		  Product    : out std_logic_vector(3 downto 0) );
-end Config2x2MultV1;
+		  Output    : out std_logic_vector(3 downto 0) );
+end Approx2x2MultV1;
 
-architecture config2x2MultV1Arch of Config2x2MultV1 is
-	component Approx2x2MultV1 is
-	port (A   	 : in std_logic_vector(1 downto 0);
-		  B 	 : in std_logic_vector(1 downto 0);
-		  Output : out std_logic_vector(3 downto 0) );
-	end component;
+architecture approx2x2MultV1Arch of Approx2x2MultV1 is
 
-	signal Output: std_logic_vector(3 downto 0);
-	signal error: std_logic;        
+	signal a1b1, a1b0, a0b1, a0a1b0b1: std_logic;
+    
 begin
-	inaccurate: Approx2x2MultV1 port map(A => A, B => B, Output => Output);
+	a1b1 <= A(1) and B(1);
+	a1b0 <= A(1) and B(0);
+	a0b1 <= A(0) and B(1);
 	
-	error <= (Not Output(3)) and (A(0) and B(0));
-	process (en, error, Output)
-	begin
-		if error='1' and en='1' then
-			Product(0) <= not Output(0);
-		else
-			Product(0) <= Output(0);
-		end if;	
-			Product(3) <= Output(3);
-			Product(2) <= Output(2);
-			Product(1) <= Output(1);
-	end process;
+	a0a1b0b1 <= a0b1 and a1b0;
 	
-end config2x2MultV1Arch;
+	Output(3) <= a0a1b0b1;
+	Output(2) <= a1b1 xor a0a1b0b1;
+	Output(1) <= a0b1 xor a1b0;
+	Output(0) <= a0a1b0b1;
+	
+end approx2x2MultV1Arch;

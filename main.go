@@ -98,23 +98,51 @@ func main() {
 
 	//AccurateRun()
 
-	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "externalRunlpACLib")
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "externalRun_configXA")
 	CurrentRun.ClearData()
 
-	ExternalMult := VHDL.NewExternalMult("XMAA_Config_Lit4x4", 4, "lpACLib/XMAA/Config4x4MultLit.vhd")
+	ExternalMult := VHDL.NewExternalMult("Lit_Third_TEST", 4, "lpACLib/ConfigMultLit_XA/Config4x4MultLitThirdTEST.vhd")
 	ExternalMult.GenerateVHDL(OutputPath)
 	ExternalMult.GenerateTestData(OutputPath)
 
 	//PortMaps
-	PortMapMult1 := VHDL.NewExternalMult("dontcare1", 4, "lpACLib/XMAA/Config2x2MultLit.vhd")
-	PortMapMult1.GenerateVHDL(OutputPath)
-	PortMapMult1.GenerateTestData(OutputPath)
-	ExternalMult.AddVHDLEntity(PortMapMult1)
+	// PortMapMult1 := VHDL.NewExternalMult("dontcare1", 4, "lpACLib/ConfigMultLit_XA/Config2x2MultLit.vhd")
+	// PortMapMult1.GenerateVHDL(OutputPath)
+	// PortMapMult1.GenerateTestData(OutputPath)
+	// ExternalMult.AddVHDLEntity(PortMapMult1)
 
-	PortMapMult2 := VHDL.NewExternalMult("dontcare2", 4, "lpACLib/XMAA/Approx2x2MultLit.vhd")
-	PortMapMult2.GenerateVHDL(OutputPath)
-	PortMapMult2.GenerateTestData(OutputPath)
-	ExternalMult.AddVHDLEntity(PortMapMult2)
+	// PortMapMult2 := VHDL.NewExternalMult("dontcare2", 4, "lpACLib/ConfigMultLit_XA/Approx2x2MultLit.vhd")
+	// PortMapMult2.GenerateVHDL(OutputPath)
+	// PortMapMult2.GenerateTestData(OutputPath)
+	// ExternalMult.AddVHDLEntity(PortMapMult2)
+
+	PortMapMult3 := VHDL.NewExternalMult("dontcare3", 4, "lpACLib/ConfigMultLit_XA/AdderIMPACTThirdApproxMultiBit.vhd")
+	PortMapMult3.GenerateVHDL(OutputPath)
+	PortMapMult3.GenerateTestData(OutputPath)
+	ExternalMult.AddVHDLEntity(PortMapMult3)
+
+	PortMapMult4 := VHDL.NewExternalMult("dontcare4", 4, "lpACLib/ConfigMultLit_XA/AdderAccurateOneBit.vhd")
+	PortMapMult4.GenerateVHDL(OutputPath)
+	PortMapMult4.GenerateTestData(OutputPath)
+	ExternalMult.AddVHDLEntity(PortMapMult4)
+
+	PortMapMult5 := VHDL.NewExternalMult("dontcare5", 4, "lpACLib/ConfigMultLit_XA/AdderIMPACTThirdApproxOneBit.vhd")
+	PortMapMult5.GenerateVHDL(OutputPath)
+	PortMapMult5.GenerateTestData(OutputPath)
+	ExternalMult.AddVHDLEntity(PortMapMult5)
+
+	M1 = VHDL.M1().LUT2D //1
+	M3 = VHDL.M3().LUT2D //3
+	M4 = VHDL.M4().LUT2D //4
+	M1.GenerateVHDL(OutputPath)
+	M1.GenerateTestData(OutputPath)
+	ExternalMult.AddVHDLEntity(M1)
+	M3.GenerateVHDL(OutputPath)
+	M3.GenerateTestData(OutputPath)
+	ExternalMult.AddVHDLEntity(M3)
+	M4.GenerateVHDL(OutputPath)
+	M4.GenerateTestData(OutputPath)
+	ExternalMult.AddVHDLEntity(M4)
 
 	sim := Viv.CreateXSIM(OutputPath, ExternalMult.EntityName+"_test", ExternalMult.GenerateVHDLEntityArray())
 	sim.SetTemplateReverse()
