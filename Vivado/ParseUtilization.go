@@ -34,7 +34,8 @@ func ParseUtilizationReport(FolderPath string, Entity VHDL.VHDLEntity) *Utilizat
 	file, err := os.Open(FolderPath + "/" + filename)
 
 	if err != nil {
-		log.Fatalf("failed opening file: %s", err)
+		log.Printf("Warning, Returning ZERO: failed opening file: %s", err)
+		return util
 	}
 
 	scanner := bufio.NewScanner(file)

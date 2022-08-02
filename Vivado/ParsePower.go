@@ -102,7 +102,9 @@ func ParsePowerReport(FolderPath string, Entity VHDL.VHDLEntity) *PowerReport {
 	file, err := os.Open(FolderPath + "/" + filename)
 
 	if err != nil {
-		log.Fatalf("failed opening file: %s", err)
+		log.Printf("Warning, Returning ZERO: failed opening file: %s", err)
+		Report := new(PowerReport)
+		return Report
 	}
 
 	defer file.Close()

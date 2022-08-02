@@ -24,7 +24,8 @@ func ParseTimingReport(FolderPath string, Entity VHDL.VHDLEntity) *Timing {
 	file, err := os.Open(FolderPath + "/" + filename)
 
 	if err != nil {
-		log.Fatalf("failed opening file: %s", err)
+		log.Printf("Warning, Returning ZERO: failed opening file: %s", err)
+		return time
 	}
 
 	scanner := bufio.NewScanner(file)
