@@ -180,6 +180,20 @@ func (r4 *Recursive4) MeanAbsoluteError() float64 {
 
 }
 
+func (r4 *Recursive4) MeanAbsoluteErrorNormalDist(N int) float64 {
+	accum := float64(0)
+
+	for i := 0; i < N; i++ {
+		a := RandomNormalInput(4)
+		b := RandomNormalInput(4)
+		accResult := float64(a * b)
+		r4Result := r4.ReturnVal(uint(a), uint(b))
+		accum += math.Abs(float64(r4Result) - accResult)
+	}
+
+	return float64(1.0/float64(N)) * accum
+}
+
 func (r4 *Recursive4) AverageRelativeError() float64 {
 	maxval := int(math.Exp2(4))
 	accum := float64(0)

@@ -150,6 +150,20 @@ func (ext *ExternalMult) MeanAbsoluteError() float64 {
 	return float64(1.0/math.Exp2(float64(ext.OutputSize))) * accum
 }
 
+func (ext *ExternalMult) MeanAbsoluteErrorNormalDist(N int) float64 {
+	accum := float64(0)
+
+	for i := 0; i < N; i++ {
+		a := RandomNormalInput(int(ext.BitSize))
+		b := RandomNormalInput(int(ext.BitSize))
+		accResult := float64(a * b)
+		r4Result := ext.ReturnVal(uint(a), uint(b))
+		accum += math.Abs(float64(r4Result) - accResult)
+	}
+
+	return float64(1.0/float64(N)) * accum
+}
+
 func (ext *ExternalMult) AverageRelativeError() float64 {
 	maxval := int(math.Exp2(float64(ext.BitSize)))
 	accum := float64(0)
