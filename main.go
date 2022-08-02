@@ -87,85 +87,82 @@ func init() {
 
 func main() {
 
-	// //ErrorRun(500, 1000)
-	// //ErrorRun(500, 10)
-	// //PowerEst()
-	// //Rec4Run(1000, 1000)
-	// ErrorRun(1000, 1000)
+	RedoExtSMApproxLib()
 
-	// // rec1334 := VHDL.NewRecursive4("Rec4114", [4]VHDL.VHDLEntityMultiplier{M1, M4, M4, M1})
-	// // SingleRun("rec1334Run", rec1334, 1, 1000)
+}
 
-	//AccurateRun()
-
-	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "externalRun_configXA")
+func RedoExtSMApproxLib() {
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "REDO_External_SMApproxLib4x4")
 	CurrentRun.ClearData()
 
-	ExternalMult := VHDL.NewExternalMult("Lit_Third_TEST", 4, "lpACLib/ConfigMultLit_XA/Config4x4MultLitThirdTEST.vhd")
+	ExternalMult := VHDL.NewExternalMult("mult_4x4", 4, "mult_4x4_approx.vhd")
 	ExternalMult.GenerateVHDL(OutputPath)
 	ExternalMult.GenerateTestData(OutputPath)
 
-	//PortMaps
-	// PortMapMult1 := VHDL.NewExternalMult("dontcare1", 4, "lpACLib/ConfigMultLit_XA/Config2x2MultLit.vhd")
-	// PortMapMult1.GenerateVHDL(OutputPath)
-	// PortMapMult1.GenerateTestData(OutputPath)
-	// ExternalMult.AddVHDLEntity(PortMapMult1)
-
-	// PortMapMult2 := VHDL.NewExternalMult("dontcare2", 4, "lpACLib/ConfigMultLit_XA/Approx2x2MultLit.vhd")
-	// PortMapMult2.GenerateVHDL(OutputPath)
-	// PortMapMult2.GenerateTestData(OutputPath)
-	// ExternalMult.AddVHDLEntity(PortMapMult2)
-
-	PortMapMult3 := VHDL.NewExternalMult("dontcare3", 4, "lpACLib/ConfigMultLit_XA/AdderIMPACTThirdApproxMultiBit.vhd")
-	PortMapMult3.GenerateVHDL(OutputPath)
-	PortMapMult3.GenerateTestData(OutputPath)
-	ExternalMult.AddVHDLEntity(PortMapMult3)
-
-	PortMapMult4 := VHDL.NewExternalMult("dontcare4", 4, "lpACLib/ConfigMultLit_XA/AdderAccurateOneBit.vhd")
-	PortMapMult4.GenerateVHDL(OutputPath)
-	PortMapMult4.GenerateTestData(OutputPath)
-	ExternalMult.AddVHDLEntity(PortMapMult4)
-
-	PortMapMult5 := VHDL.NewExternalMult("dontcare5", 4, "lpACLib/ConfigMultLit_XA/AdderIMPACTThirdApproxOneBit.vhd")
-	PortMapMult5.GenerateVHDL(OutputPath)
-	PortMapMult5.GenerateTestData(OutputPath)
-	ExternalMult.AddVHDLEntity(PortMapMult5)
-
-	M1 = VHDL.M1().LUT2D //1
-	M3 = VHDL.M3().LUT2D //3
-	M4 = VHDL.M4().LUT2D //4
-	M1.GenerateVHDL(OutputPath)
-	M1.GenerateTestData(OutputPath)
-	ExternalMult.AddVHDLEntity(M1)
-	M3.GenerateVHDL(OutputPath)
-	M3.GenerateTestData(OutputPath)
-	ExternalMult.AddVHDLEntity(M3)
-	M4.GenerateVHDL(OutputPath)
-	M4.GenerateTestData(OutputPath)
-	ExternalMult.AddVHDLEntity(M4)
-
-	sim := Viv.CreateXSIM(OutputPath, ExternalMult.EntityName+"_test", ExternalMult.GenerateVHDLEntityArray())
-	sim.SetTemplateReverse()
-	sim.Exec()
+	sim_single := Viv.CreateXSIM(OutputPath, ExternalMult.EntityName+"_test", ExternalMult.GenerateVHDLEntityArray())
+	sim_single.SetTemplateReverse()
+	sim_single.Exec()
 	ExternalMult.ParseXSIMOutput(OutputPath)
 
-	ExtMultScale := VHDL.New2DScaler(ExternalMult, 1000)
-	ExtMultScale.GenerateVHDL(OutputPath)
+	Ext_scaler := VHDL.New2DScaler(ExternalMult, 1000)
+	Ext_scaler.GenerateVHDL(OutputPath)
 
-	sim = Viv.CreateXSIM(OutputPath, ExtMultScale.EntityName+"_test", ExtMultScale.GenerateVHDLEntityArray())
-	sim.SetTemplateScaler(1000)
+	sim_scaler := Viv.CreateXSIM(OutputPath, Ext_scaler.EntityName+"_test", Ext_scaler.GenerateVHDLEntityArray())
+	sim_scaler.SetTemplateScaler(1000)
 
-	syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", ExtMultScale, VivadoSettings)
+	syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", Ext_scaler, VivadoSettings)
 	syn.Exec()
-	sim.CreateFile(true)
-	VHDL.NormalTestData(ExtMultScale, OutputPath, 1000)
-	sim.Funcsim()
+	sim_scaler.CreateFile(true)
+	VHDL.NormalTestData(Ext_scaler, OutputPath, 1000)
+	sim_scaler.Funcsim()
 	syn.PowerPostPlacementGeneration()
 
-	Report := Viv.CreateReport(OutputPath, ExtMultScale)
-	Report.AddData("MeanAbsoluteError", strconv.FormatFloat(ExternalMult.MeanAbsoluteError(), 'E', -1, 64))
-	Report.AddData("AverageRelativeError", strconv.FormatFloat(ExternalMult.AverageRelativeError(), 'E', -1, 64))
+	Report := Viv.CreateReport(OutputPath, Ext_scaler)
+	Report.AddData("MAE_Uniform", strconv.FormatFloat(ExternalMult.MeanAbsoluteError(), 'E', -1, 64))
+	Report.AddData("MAE_Normal_1000", strconv.FormatFloat(ExternalMult.MeanAbsoluteErrorNormalDist(1000), 'E', -1, 64))
+	Report.AddData("ARE", strconv.FormatFloat(ExternalMult.AverageRelativeError(), 'E', -1, 64))
 	CurrentRun.AddReport(*Report)
+}
+
+func RedoRec4Error(ScaleN int, Nval int) {
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "REDO_Rec4Run_"+strconv.Itoa(ScaleN)+"_"+strconv.Itoa(Nval))
+	CurrentRun.ClearData()
+	CurrentRun.AddData("Disc", "Full Recursive 4-bit run using M1,M2,M3,M4,Acc, N="+strconv.Itoa(ScaleN)+" i="+strconv.Itoa(Nval))
+
+	M1 = VHDL.M1().LUT2D                  //1
+	M2 = VHDL.M2().LUT2D                  //2
+	M3 = VHDL.M3().LUT2D                  //3
+	M4 = VHDL.M4().LUT2D                  //4
+	Acc = VHDL.New2DUnsignedAcc("Acc", 2) //5
+
+	options := []int{1, 2, 3, 4, 5}
+	Cartesian4 := cartN(options, options, options, options)
+
+	m := make(map[int]*VHDL.LUT2D)
+	m[1] = M1
+	m[2] = M2
+	m[3] = M3
+	m[4] = M4
+	m[5] = Acc
+
+	for i := 0; i < len(Cartesian4); i++ {
+
+		array := [4]VHDL.VHDLEntityMultiplier{m[Cartesian4[i][0]], m[Cartesian4[i][1]], m[Cartesian4[i][2]], m[Cartesian4[i][3]]}
+		Name := "Rec_" + strconv.Itoa(Cartesian4[i][0]) + strconv.Itoa(Cartesian4[i][1]) + strconv.Itoa(Cartesian4[i][2]) + strconv.Itoa(Cartesian4[i][3])
+		rec4 := VHDL.NewRecursive4(Name, array)
+		rec4scaler := VHDL.New2DScaler(rec4, uint(ScaleN))
+
+		rec4scaler.GenerateVHDL(OutputPath)
+		rec4scaler.GenerateTestData(OutputPath)
+
+		Report := Viv.CreateReport(OutputPath, rec4scaler)
+		Report.AddData("MeanAbsoluteErrorNORM", strconv.FormatFloat(rec4.MeanAbsoluteErrorNormalDist(Nval), 'E', -1, 64))
+		Report.AddData("Overflow", strconv.FormatBool(rec4.Overflow()))
+		CurrentRun.AddReport(*Report)
+
+		ClearPath(OutputPath)
+		CreatePath(OutputPath)
+	}
 }
 
 func AccurateRun() {
@@ -311,81 +308,6 @@ func Rec4Run(ScaleN int, Nval int) {
 		CreatePath(OutputPath)
 	}
 
-}
-
-func BigRun() {
-	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "SmallBigRun")
-	CurrentRun.ClearData()
-	CurrentRun.AddData("Disc", "Running SmallBigRun")
-
-	rec4BIG := VHDL.NewRecursive4("opt_Rec4Big", [4]VHDL.VHDLEntityMultiplier{M1, M2, M2, M2})
-	rec4BIG_scaler := VHDL.New2DScaler(rec4BIG, 1000)
-
-	rec4BIG_scaler.GenerateVHDL(OutputPath)
-	rec4BIG_scaler.GenerateTestData(OutputPath)
-
-	sim := Viv.CreateXSIM(OutputPath, rec4BIG_scaler.EntityName+"_test", rec4BIG_scaler.GenerateVHDLEntityArray())
-	sim.SetTemplateScaler(1000)
-	sim.Exec()
-
-	err := Viv.ParseXSIMReport(OutputPath, rec4BIG_scaler)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", rec4BIG_scaler, VivadoSettings)
-	syn.Exec()
-
-	sim.CreateFile(true)
-	VHDL.NormalTestData(rec4BIG_scaler, OutputPath, 1000)
-	sim.Funcsim()
-	syn.PowerPostPlacementGeneration()
-
-	Report := Viv.CreateReport(OutputPath, rec4BIG_scaler)
-	Report.AddData("MeanAbsoluteError", strconv.FormatFloat(rec4BIG.MeanAbsoluteError(), 'E', -1, 64))
-	Report.AddData("AverageRelativeError", strconv.FormatFloat(rec4BIG.AverageRelativeError(), 'E', -1, 64))
-	Report.AddData("Overflow", strconv.FormatBool(rec4BIG.Overflow()))
-	CurrentRun.AddReport(*Report)
-	ClearPath(OutputPath)
-	CreatePath(OutputPath)
-
-}
-
-func SmallRun() {
-	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "SmallBigRun")
-	CurrentRun.ClearData()
-	CurrentRun.AddData("Disc", "Running SmallBigRun")
-
-	rec4BIG := VHDL.NewRecursive4("opt_Rec4Small", [4]VHDL.VHDLEntityMultiplier{Acc, M4, M2, M1})
-	rec4BIG_scaler := VHDL.New2DScaler(rec4BIG, 1000)
-
-	rec4BIG_scaler.GenerateVHDL(OutputPath)
-	rec4BIG_scaler.GenerateTestData(OutputPath)
-
-	sim := Viv.CreateXSIM(OutputPath, rec4BIG_scaler.EntityName+"_test", rec4BIG_scaler.GenerateVHDLEntityArray())
-	sim.SetTemplateScaler(1000)
-	sim.Exec()
-
-	err := Viv.ParseXSIMReport(OutputPath, rec4BIG_scaler)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", rec4BIG_scaler, VivadoSettings)
-	syn.Exec()
-
-	sim.CreateFile(true)
-	VHDL.NormalTestData(rec4BIG_scaler, OutputPath, 1000)
-	sim.Funcsim()
-	syn.PowerPostPlacementGeneration()
-
-	Report := Viv.CreateReport(OutputPath, rec4BIG_scaler)
-	Report.AddData("MeanAbsoluteError", strconv.FormatFloat(rec4BIG.MeanAbsoluteError(), 'E', -1, 64))
-	Report.AddData("AverageRelativeError", strconv.FormatFloat(rec4BIG.AverageRelativeError(), 'E', -1, 64))
-	Report.AddData("Overflow", strconv.FormatBool(rec4BIG.Overflow()))
-	CurrentRun.AddReport(*Report)
-	ClearPath(OutputPath)
-	CreatePath(OutputPath)
 }
 
 func PowerEst() {
