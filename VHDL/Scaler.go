@@ -13,6 +13,8 @@ type Scaler struct {
 	ScaleN     uint
 	VHDLFile   string
 	TestFile   string
+	MAC        bool
+	OutputSize uint
 }
 
 func New2DScaler(Entity VHDLEntityMultiplier, N uint) *Scaler {
@@ -23,11 +25,18 @@ func New2DScaler(Entity VHDLEntityMultiplier, N uint) *Scaler {
 	scl.EntityName = scl.LUTName + "_scaler"
 	scl.ScaleN = N
 	scl.VHDLFile = scl.LUTName + "_scaler.vhd"
+	scl.MAC = false
+	scl.OutputSize = scl.BitSize * 2
 
 	scl.VHDLFile, scl.TestFile = FileNameGen(scl.EntityName)
 	scl.TestFile = scl.Entity.ReturnData().TestFile //hacky
 
 	return scl
+}
+
+func (scl *Scaler) SetMAC(b bool, OutputSize uint) {
+	scl.MAC = b
+	scl.OutputSize = OutputSize
 }
 
 func (scl *Scaler) GenerateTestData(FolderPath string) {

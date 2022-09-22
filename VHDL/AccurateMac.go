@@ -111,6 +111,16 @@ func (mac *UnsignedNumericAccurateMAC) GenerateVHDLEntityArray() []VHDLEntity {
 	return out
 }
 
+func (mac *UnsignedNumericAccurateMAC) MeanAbsoluteError() float64 {
+	log.Println("ERROR, MAC MAE NOT IMPLEMENTED")
+	return 0
+}
+
+func (mac *UnsignedNumericAccurateMAC) Overflow() bool {
+	log.Println("ERROR, MAC OVERFLOW CHECK NOT IMPLEMENTED")
+	return false
+}
+
 // ReturnData() *EntityData
 // GenerateVHDL(string)
 // GenerateTestData(string)

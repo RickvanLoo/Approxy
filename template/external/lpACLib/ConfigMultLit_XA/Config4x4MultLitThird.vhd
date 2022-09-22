@@ -70,10 +70,10 @@ architecture config4x4MultLitThirdArch of {{.EntityName}} is
 	
 	begin
 	
-	LxL: Config2x2MultLit port map(A => A(MAX2 downto MIN2) , B => B(MAX2 downto MIN2) , en => '1', Product => LL);	
-	HxL: Config2x2MultLit port map(A => A(MAX1 downto MIN1) , B => B(MAX2 downto MIN2) , en => '1', Product => HL);
-	LxH: Config2x2MultLit port map(A => A(MAX2 downto MIN2) , B => B(MAX1 downto MIN1) , en => '1', Product => LH);
-	HxH: Config2x2MultLit port map(A => A(MAX1 downto MIN1) , B => B(MAX1 downto MIN1) , en => '1', Product => HH);
+	LxL: Config2x2MultLit port map(A => A(MAX2 downto MIN2) , B => B(MAX2 downto MIN2) , en => '0', Product => LL);	
+	HxL: Config2x2MultLit port map(A => A(MAX1 downto MIN1) , B => B(MAX2 downto MIN2) , en => '0', Product => HL);
+	LxH: Config2x2MultLit port map(A => A(MAX2 downto MIN2) , B => B(MAX1 downto MIN1) , en => '0', Product => LH);
+	HxH: Config2x2MultLit port map(A => A(MAX1 downto MIN1) , B => B(MAX1 downto MIN1) , en => '0', Product => HH);
 	
 	-- shifting
 	shifted_LL <= resize(unsigned(LL), EIGHT);

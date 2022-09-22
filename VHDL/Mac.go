@@ -61,6 +61,7 @@ func (mac *MAC) GenerateVHDL(FolderPath string) {
 }
 
 func (mac *MAC) GenerateTestData(FolderPath string) {
+	mac.Multiplier.GenerateTestData(FolderPath)
 	fmtstr := "%0" + strconv.Itoa(int(mac.BitSize)) + "b %0" + strconv.Itoa(int(mac.BitSize)) + "b %0" + strconv.Itoa(int(mac.OutputSize)) + "b\n"
 	path := FolderPath + "/" + mac.TestFile
 
@@ -135,6 +136,16 @@ func (mac *MAC) GenerateVHDLEntityArray() []VHDLEntity {
 	out = append([]VHDLEntity{mac}, out...)
 
 	return out
+}
+
+func (mac *MAC) MeanAbsoluteError() float64 {
+	log.Println("ERROR, MAC MAE NOT IMPLEMENTED")
+	return 0
+}
+
+func (mac *MAC) Overflow() bool {
+	log.Println("ERROR, MAC OVERFLOW CHECK NOT IMPLEMENTED")
+	return false
 }
 
 // ReturnData() *EntityData

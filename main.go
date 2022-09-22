@@ -86,18 +86,157 @@ func init() {
 }
 
 func main() {
+	//CreateSingleVHDL()
+	//RedoExternal()
+	PaperExample()
+}
 
-	RedoExtSMApproxLib()
+func PaperExample() {
+	//Start of BadMath Run
+	start := time.Now()
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "Rec_1234")
+	CurrentRun.ClearData()
+
+	//Generation of Recursive Multipler
+	Rec_1234 := VHDL.NewRecursive4("Rec1234", [4]VHDL.VHDLEntityMultiplier{M1, M2, M3, M4})
+	Rec_1234.GenerateTestData(OutputPath)
+	Rec_1234.GenerateVHDL(OutputPath)
+
+	//Optional Verification of Recursive4
+	verify := Viv.CreateXSIM(OutputPath, "prePR", Rec_1234.GenerateVHDLEntityArray())
+	verify.SetTemplateMultiplier()
+	time_till_analysis := time.Since(start)
+	start = time.Now()
+
+	verify.Exec()
+	time_analysis := time.Since(start)
+	start = time.Now()
+
+	err := Viv.ParseXSIMReport(OutputPath, Rec_1234)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	//Generation of N=1000 Scaler of Rec1234
+	Rec_1234_scaler := VHDL.New2DScaler(Rec_1234, 1000)
+	Rec_1234_scaler.GenerateTestData(OutputPath)
+	Rec_1234_scaler.GenerateVHDL(OutputPath)
+
+	//Synth + Place + Route
+	viv := Viv.CreateVivadoTCL(OutputPath, "main.tcl", Rec_1234_scaler, VivadoSettings)
+	time_till_synth := time.Since(start)
+	start = time.Now()
+
+	viv.Exec()
+	time_spr := time.Since(start)
+	start = time.Now()
+
+	//PostSynthesisAnalysis
+	post_analysis := Viv.CreateXSIM(OutputPath, "postPR", Rec_1234_scaler.GenerateVHDLEntityArray())
+	post_analysis.SetTemplateScaler(1000)
+	post_analysis.CreateFile(true)                         //Create PostPR Testbench
+	VHDL.NormalTestData(Rec_1234_scaler, OutputPath, 1000) //Create i=1000 Normal Test Data for 4-bit
+	time_beforefunc := time.Since(start)
+	start = time.Now()
+
+	post_analysis.Funcsim()
+	time_func := time.Since(start) //Funcsim
+	start = time.Now()
+
+	viv.PowerPostPlacementGeneration() //Export PostPR data
+
+	//Create Report
+	Report := Viv.CreateReport(OutputPath, Rec_1234_scaler)
+	Report.AddData("MAE_Uniform", strconv.FormatFloat(Rec_1234.MeanAbsoluteError(), 'E', -1, 64))
+	Report.AddData("MAE_Normal_1000", strconv.FormatFloat(Rec_1234.MeanAbsoluteErrorNormalDist(1000), 'E', -1, 64))
+	Report.AddData("Overflow", strconv.FormatBool(Rec_1234.Overflow()))
+	Report.AddData("time_till_analysis", time_till_analysis.String())
+	Report.AddData("time_analysis", time_analysis.String())
+	Report.AddData("time_till_synth", time_till_synth.String())
+	Report.AddData("time_synthpr", time_spr.String())
+	Report.AddData("time_beforefunc", time_beforefunc.String())
+	Report.AddData("time_func", time_func.String())
+
+	CurrentRun.AddReport(*Report)
+
+	time_reportgen := time.Since(start)
+	log.Println(time_reportgen)
+}
+
+func CreateSingleVHDL() {
+	// Rec1311 := VHDL.NewRecursive4("Rec1311", [4]VHDL.VHDLEntityMultiplier{M1, M3, M1, M1})
+	// Rec1311.GenerateTestData(OutputPath)
+	// Rec1311.GenerateVHDL(OutputPath)
+
+	// MAC_1311 := VHDL.NewMAC(Rec1311, 64)
+	// MAC_1311.GenerateTestData(OutputPath)
+	// MAC_1311.GenerateVHDL(OutputPath)
+	// MAC_1311 := VHDL.NewUnsignedAccurateMAC(4, 64)
+	// MAC_1311.GenerateTestData(OutputPath)
+	// MAC_1311.GenerateVHDL(OutputPath)
+
+	approx1 := VHDL.NewExternalMult("approx1", 4, "mult_approx_a4.vhd")
+	approx1.GenerateVHDL(OutputPath)
+	approx1.GenerateTestData(OutputPath)
+	sim_behav := Viv.CreateXSIM(OutputPath, "behavcheck", approx1.GenerateVHDLEntityArray())
+	sim_behav.SetTemplateReverse()
+	sim_behav.Exec()
+	approx1.ParseXSIMOutput(OutputPath)
+
+	MAC_approx1 := VHDL.NewMAC(approx1, 64)
+	MAC_approx1.GenerateTestData(OutputPath)
+	MAC_approx1.GenerateVHDL(OutputPath)
+
+	approx1_scaler := VHDL.New2DScaler(MAC_approx1, 1000)
+	approx1_scaler.SetMAC(true, MAC_approx1.OutputSize)
+	approx1_scaler.GenerateTestData(OutputPath)
+	approx1_scaler.GenerateVHDL(OutputPath)
+
+	sim_scaler := Viv.CreateXSIM(OutputPath, approx1_scaler.EntityName+"_test", approx1_scaler.GenerateVHDLEntityArray())
+	sim_scaler.SetTemplateSequentialScaler(1000, MAC_approx1.OutputSize)
+
+	syn := Viv.CreateVivadoTCL(OutputPath, "main.tcl", approx1_scaler, VivadoSettings)
+	syn.Exec()
+	sim_scaler.CreateFile(true)
+	MAC_approx1.ResetVal()
+	VHDL.NormalTestData(approx1_scaler, OutputPath, 1000)
+	sim_scaler.Funcsim()
+	syn.PowerPostPlacementGeneration()
 
 }
 
-func RedoExtSMApproxLib() {
-	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "REDO_External_SMApproxLib4x4")
+func RedoExternal() {
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "REDO_External_XMAA")
 	CurrentRun.ClearData()
 
-	ExternalMult := VHDL.NewExternalMult("mult_4x4", 4, "mult_4x4_approx.vhd")
+	ExternalMult := VHDL.NewExternalMult("XA_Config_V1_First_0000", 4, "lpACLib/ConfigMultV1_XA/Config4x4MultV1First.vhd")
 	ExternalMult.GenerateVHDL(OutputPath)
 	ExternalMult.GenerateTestData(OutputPath)
+
+	ExtraFile0 := VHDL.NewExternalMult("dontcare0", 4, "lpACLib/ConfigMultV1_XA/Config2x2MultV1.vhd")
+	ExtraFile0.GenerateVHDL(OutputPath)
+	ExtraFile0.GenerateTestData(OutputPath)
+	ExternalMult.AddVHDLEntity(ExtraFile0)
+
+	ExtraFile1 := VHDL.NewExternalMult("dontcare1", 4, "lpACLib/ConfigMultV1_XA/Approx2x2MultV1.vhd")
+	ExtraFile1.GenerateVHDL(OutputPath)
+	ExtraFile1.GenerateTestData(OutputPath)
+	ExternalMult.AddVHDLEntity(ExtraFile1)
+
+	ExtraFile2 := VHDL.NewExternalMult("dontcare2", 4, "lpACLib/ConfigMultV1_XA/AdderIMPACTFirstApproxMultiBit.vhd")
+	ExtraFile2.GenerateVHDL(OutputPath)
+	ExtraFile2.GenerateTestData(OutputPath)
+	ExternalMult.AddVHDLEntity(ExtraFile2)
+
+	ExtraFile3 := VHDL.NewExternalMult("dontcare3", 4, "lpACLib/ConfigMultV1_XA/AdderAccurateOneBit.vhd")
+	ExtraFile3.GenerateVHDL(OutputPath)
+	ExtraFile3.GenerateTestData(OutputPath)
+	ExternalMult.AddVHDLEntity(ExtraFile3)
+
+	ExtraFile4 := VHDL.NewExternalMult("dontcare4", 4, "lpACLib/ConfigMultV1_XA/AdderIMPACTFirstApproxOneBit.vhd")
+	ExtraFile4.GenerateVHDL(OutputPath)
+	ExtraFile4.GenerateTestData(OutputPath)
+	ExternalMult.AddVHDLEntity(ExtraFile4)
 
 	sim_single := Viv.CreateXSIM(OutputPath, ExternalMult.EntityName+"_test", ExternalMult.GenerateVHDLEntityArray())
 	sim_single.SetTemplateReverse()
