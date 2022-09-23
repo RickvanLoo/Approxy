@@ -1,8 +1,8 @@
 package main
 
 import (
-	VHDL "badmath/VHDL"
-	Viv "badmath/Vivado"
+	VHDL "approxy/VHDL"
+	Viv "approxy/Vivado"
 	"testing"
 )
 

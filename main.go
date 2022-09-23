@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"time"
 
-	VHDL "badmath/VHDL"
-	Viv "badmath/Vivado"
+	VHDL "approxy/VHDL"
+	Viv "approxy/Vivado"
 )
 
 var OutputPath string
@@ -54,7 +54,7 @@ func init() {
 	}
 	math_rand.Seed(int64(binary.LittleEndian.Uint64(b[:])))
 
-	fmt.Println("badmath...")
+	fmt.Println("approxy...")
 
 	OutputPath = "output"
 	ReportPath = "report"
@@ -92,13 +92,14 @@ func main() {
 }
 
 func PaperExample() {
-	//Start of BadMath Run
+	//Start of Approxy Run
 	start := time.Now()
-	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "Rec_1234")
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "Rec_1311")
 	CurrentRun.ClearData()
 
 	//Generation of Recursive Multipler
-	Rec_1234 := VHDL.NewRecursive4("Rec1234", [4]VHDL.VHDLEntityMultiplier{M1, M2, M3, M4})
+	//Rec_1234 := VHDL.NewRecursive4("Rec1234", [4]VHDL.VHDLEntityMultiplier{M1, M3, M1, M1})
+	Rec_1234 := VHDL.NewAccurateNumMultiplyer("RecAcc", 4)
 	Rec_1234.GenerateTestData(OutputPath)
 	Rec_1234.GenerateVHDL(OutputPath)
 
@@ -118,12 +119,12 @@ func PaperExample() {
 	}
 
 	//Generation of N=1000 Scaler of Rec1234
-	Rec_1234_scaler := VHDL.New2DScaler(Rec_1234, 1000)
-	Rec_1234_scaler.GenerateTestData(OutputPath)
-	Rec_1234_scaler.GenerateVHDL(OutputPath)
+	// Rec_1234_scaler := VHDL.New2DScaler(Rec_1234, 1000)
+	// Rec_1234_scaler.GenerateTestData(OutputPath)
+	// Rec_1234_scaler.GenerateVHDL(OutputPath)
 
 	//Synth + Place + Route
-	viv := Viv.CreateVivadoTCL(OutputPath, "main.tcl", Rec_1234_scaler, VivadoSettings)
+	viv := Viv.CreateVivadoTCL(OutputPath, "main.tcl", Rec_1234, VivadoSettings)
 	time_till_synth := time.Since(start)
 	start = time.Now()
 
@@ -132,10 +133,10 @@ func PaperExample() {
 	start = time.Now()
 
 	//PostSynthesisAnalysis
-	post_analysis := Viv.CreateXSIM(OutputPath, "postPR", Rec_1234_scaler.GenerateVHDLEntityArray())
-	post_analysis.SetTemplateScaler(1000)
-	post_analysis.CreateFile(true)                         //Create PostPR Testbench
-	VHDL.NormalTestData(Rec_1234_scaler, OutputPath, 1000) //Create i=1000 Normal Test Data for 4-bit
+	post_analysis := Viv.CreateXSIM(OutputPath, "postPR", Rec_1234.GenerateVHDLEntityArray())
+	//post_analysis.SetTemplateScaler(1000)
+	post_analysis.CreateFile(true)                  //Create PostPR Testbench
+	VHDL.NormalTestData(Rec_1234, OutputPath, 1000) //Create i=1000 Normal Test Data for 4-bit
 	time_beforefunc := time.Since(start)
 	start = time.Now()
 
@@ -146,9 +147,9 @@ func PaperExample() {
 	viv.PowerPostPlacementGeneration() //Export PostPR data
 
 	//Create Report
-	Report := Viv.CreateReport(OutputPath, Rec_1234_scaler)
+	Report := Viv.CreateReport(OutputPath, Rec_1234)
 	Report.AddData("MAE_Uniform", strconv.FormatFloat(Rec_1234.MeanAbsoluteError(), 'E', -1, 64))
-	Report.AddData("MAE_Normal_1000", strconv.FormatFloat(Rec_1234.MeanAbsoluteErrorNormalDist(1000), 'E', -1, 64))
+	//Report.AddData("MAE_Normal_1000", strconv.FormatFloat(Rec_1234.MeanAbsoluteErrorNormalDist(1000), 'E', -1, 64))
 	Report.AddData("Overflow", strconv.FormatBool(Rec_1234.Overflow()))
 	Report.AddData("time_till_analysis", time_till_analysis.String())
 	Report.AddData("time_analysis", time_analysis.String())

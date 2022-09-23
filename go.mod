@@ -1,7 +1,3 @@
-module badmath
+module approxy
 
 go 1.17
-
-require (
-
-)

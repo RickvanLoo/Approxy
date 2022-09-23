@@ -1,7 +1,7 @@
 package Vivado
 
 import (
-	"badmath/VHDL"
+	"approxy/VHDL"
 	"encoding/xml"
 	"io/ioutil"
 	"log"

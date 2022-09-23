@@ -1,8 +1,8 @@
 package main
 
 import (
-	"badmath/VHDL"
-	"badmath/Vivado"
+	"approxy/VHDL"
+	"approxy/Vivado"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
@@ -19,7 +19,7 @@ type Result struct {
 	MAE          float64
 }
 
-//TODO: Redo VHDL.VHDLEntity.String(), make it part of UnsignedMultiplication!!!
+// TODO: Redo VHDL.VHDLEntity.String(), make it part of UnsignedMultiplication!!!
 func NewResult(Entity VHDL.VHDLEntity, Utilization *Vivado.Utilization, Overflow bool, MAE float64) *Result {
 	R := new(Result)
 	R.EntityString = Entity.String()
@@ -30,7 +30,7 @@ func NewResult(Entity VHDL.VHDLEntity, Utilization *Vivado.Utilization, Overflow
 	return R
 }
 
-//Only for identifier purposes, do not use this for crypto purposes
+// Only for identifier purposes, do not use this for crypto purposes
 func toHash(EntityString string) string {
 	hash := md5.Sum([]byte(EntityString))
 	return hex.EncodeToString(hash[:])

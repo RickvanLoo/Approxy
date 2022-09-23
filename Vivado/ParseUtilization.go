@@ -1,7 +1,7 @@
 package Vivado
 
 import (
-	"badmath/VHDL"
+	"approxy/VHDL"
 	"bufio"
 	"errors"
 	"log"
@@ -23,9 +23,9 @@ type Utilization struct {
 	CARRY      int
 }
 
-//This is needed because Vivado only 'can' (I think it's more of a want here than a technical limitation) export
-//Utilization as a proper spreadsheet, which can be easily parsed, in GUI-mode.
-//Heavy usage of horrible string manipulation in the next function
+// This is needed because Vivado only 'can' (I think it's more of a want here than a technical limitation) export
+// Utilization as a proper spreadsheet, which can be easily parsed, in GUI-mode.
+// Heavy usage of horrible string manipulation in the next function
 func ParseUtilizationReport(FolderPath string, Entity VHDL.VHDLEntity) *Utilization {
 	util := new(Utilization)
 	filextension := "_post_place_ult.rpt"

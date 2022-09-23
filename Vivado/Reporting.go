@@ -1,7 +1,7 @@
 package Vivado
 
 import (
-	"badmath/VHDL"
+	"approxy/VHDL"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -49,7 +49,7 @@ func (r *Report) AddData(key string, value string) {
 	r.Other = append(r.Other, data)
 }
 
-//Creates new run if non-existant. Opens old run if does exist based upon Name
+// Creates new run if non-existant. Opens old run if does exist based upon Name
 func StartRun(ResultPath string, ReportPath string, Name string) *Run {
 	Run := new(Run)
 	Run.ResultPath = ResultPath
