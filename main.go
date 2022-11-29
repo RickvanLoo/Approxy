@@ -94,7 +94,7 @@ func main() {
 func PaperExample() {
 	//Start of Approxy Run
 	start := time.Now()
-	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "Rec_1311")
+	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "Rec_1234")
 	CurrentRun.ClearData()
 
 	//Generation of Recursive Multipler
