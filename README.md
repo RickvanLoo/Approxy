@@ -27,3 +27,13 @@ Golang tool generating VHDL multipliers using approximate computing.
 
 ## :warning: Warning: 
 By default Approxy clears the OutputPath folder before executing the main() function. Make sure to back up useful files (VHDL, TCL logs, Vivado reports, etc.) from the previous execution, before running 'Approxy' again. Clearing functionality can naturally be removed in the init() function, but might interfere with Vivado synthesis.
+
+## Recreating VHDL models
+If simply wanting to recreate the VHDL multipliers as discussed in the thesis the following code example is enough, and will output a synthesizable VHDL file and file containing all input/output combinations. 
+
+E.g. a Recursive 4-bit multiplier using M1, M2, M3, and M4 (Within thesis described as R<sub>1234</sub>)
+
+    Rec_1234 := VHDL.NewRecursive4("Rec1234", [4]VHDL.VHDLEntityMultiplier{M1, M2, M3, M4})
+    Rec_1234.GenerateTestData(OutputPath)
+    Rec_1234.GenerateVHDL(OutputPath)
+

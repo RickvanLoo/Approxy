@@ -98,7 +98,7 @@ func PaperExample() {
 	CurrentRun.ClearData()
 
 	//Generation of Recursive Multipler
-	Rec_1234 := VHDL.NewRecursive4("Rec1234", [4]VHDL.VHDLEntityMultiplier{M1, M3, M1, M1})
+	Rec_1234 := VHDL.NewRecursive4("Rec1234", [4]VHDL.VHDLEntityMultiplier{M1, M2, M3, M4})
 	Rec_1234.GenerateTestData(OutputPath)
 	Rec_1234.GenerateVHDL(OutputPath)
 
