@@ -3,7 +3,6 @@ package Vivado
 import (
 	"approxy/VHDL"
 	"bufio"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -24,7 +23,7 @@ func ParseTimingReport(FolderPath string, Entity VHDL.VHDLEntity) *Timing {
 	file, err := os.Open(FolderPath + "/" + filename)
 
 	if err != nil {
-		log.Printf("Warning, Returning ZERO: failed opening file: %s", err)
+		//log.Printf("Warning, Returning ZERO: failed opening file: %s", err)
 		return time
 	}
 

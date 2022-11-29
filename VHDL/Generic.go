@@ -21,7 +21,7 @@ type VHDLEntityMultiplier interface {
 	Multiplier
 }
 
-//VHDLEntity describes an interface for testable and synthesizable VHDL structures
+// VHDLEntity describes an interface for testable and synthesizable VHDL structures
 type VHDLEntity interface {
 	ReturnData() *EntityData
 	GenerateVHDL(string)
@@ -30,14 +30,14 @@ type VHDLEntity interface {
 	String() string //MSB -> LSB
 }
 
-//Multiplier describes an interface for generic Multipliers
+// Multiplier describes an interface for generic Multipliers
 type Multiplier interface {
 	ReturnVal(uint, uint) uint
 	Overflow() bool
 	MeanAbsoluteError() float64
 }
 
-//EntityData encapsulates basic data for a VHDL structure
+// EntityData encapsulates basic data for a VHDL structure
 type EntityData struct {
 	EntityName string
 	BitSize    uint
@@ -46,9 +46,9 @@ type EntityData struct {
 	TestFile   string
 }
 
-//https://stackoverflow.com/questions/22713500/iterating-a-range-of-integers-in-go-templates
-//If it works, it works.
-//N 100 => Iters from 0 to 99(!)
+// https://stackoverflow.com/questions/22713500/iterating-a-range-of-integers-in-go-templates
+// If it works, it works.
+// N 100 => Iters from 0 to 99(!)
 func N(stop uint) (stream chan uint) {
 	start := uint(0)
 	end := stop - 1
@@ -62,7 +62,7 @@ func N(stop uint) (stream chan uint) {
 	return
 }
 
-//TODO: Add funcmap support
+// TODO: Add funcmap support
 func CreateFile(FolderPath string, FileName string, TemplateFile string, Data interface{}) {
 	TemplatePath := "template/" + TemplateFile
 
@@ -149,7 +149,7 @@ func RemoveDuplicate(Array []VHDLEntity) []VHDLEntity {
 	return v
 }
 
-//For VHDLEntity recreate N random TestData in form A*B=C for Folderpath
+// For VHDLEntity recreate N random TestData in form A*B=C for Folderpath
 func UniformTestData(Mult VHDLEntityMultiplier, FolderPath string, N uint) {
 	BitSize := Mult.ReturnData().BitSize
 	OutputSize := Mult.ReturnData().OutputSize
@@ -228,6 +228,11 @@ func RandomNormalInput(size int) int {
 	var sample float64
 	//<div class="csl-entry">Gillani, G. A., Hanif, M. A., Verstoep, B., Gerez, S. H., Shafique, M., &#38; Kokkeler, A. B. J. (2019). MACISH: Designing Approximate MAC Accelerators With Internal-Self-Healing. <i>IEEE Access</i>, <i>7</i>, 77142–77160. https://doi.org/10.1109/ACCESS.2019.2920335</div>
 	switch size {
+	case 2:
+		sample = rand.NormFloat64()*0.4 + 2 //Added ourselves
+		if sample > (math.Exp2(2) - 1) {
+			sample = (math.Exp2(2) - 1)
+		}
 	case 4:
 		sample = rand.NormFloat64()*1.5 + 8
 		if sample > (math.Exp2(4) - 1) {
@@ -254,7 +259,7 @@ func RandomNormalInput(size int) int {
 	return int(sample)
 }
 
-//For VHDLEntity try to create MaxSwitching N TestData in form A*B=C for Folderpath
+// For VHDLEntity try to create MaxSwitching N TestData in form A*B=C for Folderpath
 func MaxSwitchingTestData(Mult VHDLEntityMultiplier, FolderPath string, N uint) {
 	BitSize := Mult.ReturnData().BitSize
 	OutputSize := Mult.ReturnData().OutputSize
