@@ -87,7 +87,7 @@ func init() {
 }
 
 func main() {
-	AnalysisBehav()
+	PaperExample()
 }
 
 // Listing A.1 of Appendix within thesis + added timing reporting
