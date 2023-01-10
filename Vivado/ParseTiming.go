@@ -1,11 +1,12 @@
 package Vivado
 
 import (
-	VHDL "approxy/vhdl"
 	"bufio"
 	"os"
 	"strconv"
 	"strings"
+
+	VHDL "github.com/RickvanLoo/Approxy/vhdl"
 )
 
 type Timing struct {

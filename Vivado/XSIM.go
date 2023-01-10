@@ -1,11 +1,12 @@
 package Vivado
 
 import (
-	VHDL "approxy/vhdl"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
+
+	VHDL "github.com/RickvanLoo/Approxy/vhdl"
 )
 
 type XSIM struct {

@@ -1,14 +1,15 @@
 package main
 
 import (
-	"approxy/Vivado"
-	VHDL "approxy/vhdl"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
 	"os"
 	"strconv"
 	"text/tabwriter"
+
+	"github.com/RickvanLoo/Approxy/Vivado"
+	VHDL "github.com/RickvanLoo/Approxy/vhdl"
 )
 
 type Result struct {

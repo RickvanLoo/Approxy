@@ -1,9 +1,10 @@
 package main
 
 import (
-	Viv "approxy/Vivado"
-	VHDL "approxy/vhdl"
 	"testing"
+
+	Viv "github.com/RickvanLoo/Approxy/Vivado"
+	VHDL "github.com/RickvanLoo/Approxy/vhdl"
 )
 
 func startBench(b *testing.B) {

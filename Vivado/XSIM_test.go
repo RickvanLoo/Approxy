@@ -1,8 +1,9 @@
 package Vivado
 
 import (
-	VHDL "approxy/vhdl"
 	"testing"
+
+	VHDL "github.com/RickvanLoo/Approxy/vhdl"
 )
 
 func TestXSIMDuplicate2(t *testing.T) {

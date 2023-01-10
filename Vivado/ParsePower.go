@@ -1,11 +1,12 @@
 package Vivado
 
 import (
-	"approxy/vhdl"
 	"encoding/xml"
 	"io/ioutil"
 	"os"
 	"strconv"
+
+	"github.com/RickvanLoo/Approxy/vhdl"
 )
 
 // RptDoc was generated 2022-05-03 14:57:01 by rick on rivalo.

@@ -1,13 +1,14 @@
 package Vivado
 
 import (
-	VHDL "approxy/vhdl"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+
+	VHDL "github.com/RickvanLoo/Approxy/vhdl"
 )
 
 type Report struct {

@@ -1,13 +1,14 @@
 package main
 
 import (
-	Viv "approxy/Vivado"
-	VHDL "approxy/vhdl"
 	"log"
 	"math"
 	"sort"
 	"strconv"
 	"time"
+
+	Viv "github.com/RickvanLoo/Approxy/Vivado"
+	VHDL "github.com/RickvanLoo/Approxy/vhdl"
 )
 
 //Here go Approxy functions/runs that I've used during the thesis for testing that can be used as examples

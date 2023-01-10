@@ -1,10 +1,11 @@
 package Vivado
 
 import (
-	VHDL "approxy/vhdl"
 	"log"
 	"os"
 	"os/exec"
+
+	VHDL "github.com/RickvanLoo/Approxy/vhdl"
 )
 
 type VivadoTCL struct {

@@ -1,13 +1,14 @@
 package Vivado
 
 import (
-	VHDL "approxy/vhdl"
 	"bufio"
 	"errors"
 	"log"
 	"os"
 	"strconv"
 	"strings"
+
+	VHDL "github.com/RickvanLoo/Approxy/vhdl"
 )
 
 type Utilization struct {
