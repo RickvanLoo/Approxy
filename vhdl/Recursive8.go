@@ -10,11 +10,6 @@ import (
 	"strings"
 )
 
-//LUTArray[0] = AH*BH
-//LUTArray[1] = AH*BL
-//LUTArray[2] = AL*BH
-//LUTArray[3] = AL*BL
-
 // type VHDLEntity interface {
 // 	ReturnData() *EntityData -- Done
 // 	GenerateVHDL(string) -- Done
@@ -28,6 +23,7 @@ import (
 // 	MeanAbsoluteError() float64
 // }
 
+// Recursive8 creates a 8-bit recursive multiplier on basis of four 4-bit VHDLEntityMultipliers, addition is accurate.
 type Recursive8 struct {
 	EntityName    string
 	BitSize       uint                    //Default to 8
@@ -38,6 +34,11 @@ type Recursive8 struct {
 	OverflowError bool
 }
 
+// NewRecursive8 creates a Recursive8 struct
+// LUTArray[0] = AH*BH
+// LUTArray[1] = AH*BL
+// LUTArray[2] = AL*BH
+// LUTArray[3] = AL*BL
 func NewRecursive8(EntityName string, Rec4Array [4]VHDLEntityMultiplier) *Recursive8 {
 	r8 := new(Recursive8)
 	r8.BitSize = 8
@@ -60,34 +61,35 @@ func NewRecursive8(EntityName string, Rec4Array [4]VHDLEntityMultiplier) *Recurs
 	return r8
 }
 
+// ReturnVal returns the output of the multiplier
 func (r8 *Recursive8) ReturnVal(a uint, b uint) uint {
-	AHBH_LUT := r8.Rec4Array[0]
-	AHBL_LUT := r8.Rec4Array[1]
-	ALBH_LUT := r8.Rec4Array[2]
-	ALBL_LUT := r8.Rec4Array[3]
+	AHBHLUT := r8.Rec4Array[0]
+	AHBLLUT := r8.Rec4Array[1]
+	ALBHLUT := r8.Rec4Array[2]
+	ALBLLUT := r8.Rec4Array[3]
 
-	bin_input := make([]uint8, 2)
-	bin_input[0] = uint8(a)
-	bin_input[1] = uint8(b)
+	bininput := make([]uint8, 2)
+	bininput[0] = uint8(a)
+	bininput[1] = uint8(b)
 
 	maskH := byte(0b11110000)
 	maskL := byte(0b00001111)
 
 	AHALBHBL := make([]uint8, 4)
-	AHALBHBL[0] = (bin_input[0] & maskH) >> 4 //AH
-	AHALBHBL[1] = bin_input[0] & maskL        //AL
-	AHALBHBL[2] = (bin_input[1] & maskH) >> 4 //BH
-	AHALBHBL[3] = bin_input[1] & maskL        //BL
+	AHALBHBL[0] = (bininput[0] & maskH) >> 4 //AH
+	AHALBHBL[1] = bininput[0] & maskL        //AL
+	AHALBHBL[2] = (bininput[1] & maskH) >> 4 //BH
+	AHALBHBL[3] = bininput[1] & maskL        //BL
 
 	AH := uint(AHALBHBL[0])
 	AL := uint(AHALBHBL[1])
 	BH := uint(AHALBHBL[2])
 	BL := uint(AHALBHBL[3])
 
-	AHBH := AHBH_LUT.ReturnVal(AH, BH)
-	AHBL := AHBL_LUT.ReturnVal(AH, BL)
-	ALBH := ALBH_LUT.ReturnVal(AL, BH)
-	ALBL := ALBL_LUT.ReturnVal(AL, BL)
+	AHBH := AHBHLUT.ReturnVal(AH, BH)
+	AHBL := AHBLLUT.ReturnVal(AH, BL)
+	ALBH := ALBHLUT.ReturnVal(AL, BH)
+	ALBL := ALBLLUT.ReturnVal(AL, BL)
 
 	output := ALBL + (ALBH << 4) + (AHBL << 4) + (AHBH << 8)
 	//Next function masks the output in 8-bit, like VHDL/Vivado would do.
@@ -103,6 +105,7 @@ func (r8 *Recursive8) flagOverflow(input bool) {
 	}
 }
 
+// ReturnData returns a struct containing metadata of the multiplier
 func (r8 *Recursive8) ReturnData() *EntityData {
 	d := new(EntityData)
 	d.BitSize = r8.BitSize
@@ -113,6 +116,7 @@ func (r8 *Recursive8) ReturnData() *EntityData {
 	return d
 }
 
+// GenerateVHDL creates the VHDL file in FolderPath
 func (r8 *Recursive8) GenerateVHDL(FolderPath string) {
 	for _, rec4 := range r8.Rec4Array {
 		rec4.GenerateVHDL(FolderPath)
@@ -121,6 +125,7 @@ func (r8 *Recursive8) GenerateVHDL(FolderPath string) {
 	CreateFile(FolderPath, r8.VHDLFile, "rec8behav.vhd", r8)
 }
 
+// GenerateTestData creates a plaintext testdata file containing both inputs and the output in binary seperated by \t
 func (r8 *Recursive8) GenerateTestData(FolderPath string) {
 	fmtstr := "%0" + strconv.Itoa(int(r8.BitSize)) + "b %0" + strconv.Itoa(int(r8.BitSize)) + "b %0" + strconv.Itoa(int(r8.OutputSize)) + "b\n"
 	path := FolderPath + "/" + r8.TestFile
@@ -164,6 +169,8 @@ func (r8 *Recursive8) String() string {
 	return str
 }
 
+// GenerateVHDLEntityArray creates an array of potentially multiple VHDLEntities, sorted by priority for synthesizing
+// For example: Multiplier A uses a VHDL portmap for the smaller Multiplier B & C. B & C need to be synthesized first, hence A will be last in the array
 func (r8 *Recursive8) GenerateVHDLEntityArray() []VHDLEntity {
 
 	var out []VHDLEntity
@@ -185,10 +192,12 @@ func (r8 *Recursive8) GenerateVHDLEntityArray() []VHDLEntity {
 	return out
 }
 
+// Overflow returns a boolean if any internal overflow has occured
 func (r8 *Recursive8) Overflow() bool {
 	return r8.OverflowError
 }
 
+// MeanAbsoluteError returns the MeanAbsoluteError of the multiplier in float64
 func (r8 *Recursive8) MeanAbsoluteError() float64 {
 	maxval := int(math.Exp2(8))
 	accum := float64(0)
@@ -203,6 +212,7 @@ func (r8 *Recursive8) MeanAbsoluteError() float64 {
 	return float64(1.0/65536.0) * accum
 }
 
+// AverageRelativeError returns the AverageRelativeError of the multiplier in float64
 func (r8 *Recursive8) AverageRelativeError() float64 {
 	maxval := int(math.Exp2(8))
 	accum := float64(0)

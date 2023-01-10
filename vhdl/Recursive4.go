@@ -10,10 +10,9 @@ import (
 	"strings"
 )
 
-// LUTArray[0] = AH*BH
-// LUTArray[1] = AH*BL
-// LUTArray[2] = AL*BH
-// LUTArray[3] = AL*BL
+//TODO: Recursive4 and Recursive8 show identical behaviour for different bitsizes => MERGE
+
+// Recursive4 creates a 4-bit recursive multiplier on basis of four 2-bit VHDLEntityMultipliers, addition is accurate.
 type Recursive4 struct {
 	EntityName    string
 	BitSize       uint                    //Default to 4
@@ -24,6 +23,11 @@ type Recursive4 struct {
 	OverflowError bool
 }
 
+// NewRecursive4 creates a Recursive4 struct
+// LUTArray[0] = AH*BH
+// LUTArray[1] = AH*BL
+// LUTArray[2] = AL*BH
+// LUTArray[3] = AL*BL
 func NewRecursive4(EntityName string, LUTArray [4]VHDLEntityMultiplier) *Recursive4 {
 	r4 := new(Recursive4)
 	r4.BitSize = 4
@@ -47,34 +51,35 @@ func NewRecursive4(EntityName string, LUTArray [4]VHDLEntityMultiplier) *Recursi
 	return r4
 }
 
+// ReturnVal returns the output of the multiplier
 func (r4 *Recursive4) ReturnVal(a uint, b uint) uint {
-	AHBH_LUT := r4.LUTArray[0]
-	AHBL_LUT := r4.LUTArray[1]
-	ALBH_LUT := r4.LUTArray[2]
-	ALBL_LUT := r4.LUTArray[3]
+	AHBHLUT := r4.LUTArray[0]
+	AHBLLUT := r4.LUTArray[1]
+	ALBHLUT := r4.LUTArray[2]
+	ALBLLUT := r4.LUTArray[3]
 
-	bin_input := make([]byte, 2)
-	bin_input[0] = byte(a)
-	bin_input[1] = byte(b)
+	bininput := make([]byte, 2)
+	bininput[0] = byte(a)
+	bininput[1] = byte(b)
 
 	maskH := byte(0b00001100)
 	maskL := byte(0b00000011)
 
 	AHALBHBL := make([]byte, 4)
-	AHALBHBL[0] = (bin_input[0] & maskH) >> 2 //AH
-	AHALBHBL[1] = bin_input[0] & maskL        //AL
-	AHALBHBL[2] = (bin_input[1] & maskH) >> 2 //BH
-	AHALBHBL[3] = bin_input[1] & maskL        //BL
+	AHALBHBL[0] = (bininput[0] & maskH) >> 2 //AH
+	AHALBHBL[1] = bininput[0] & maskL        //AL
+	AHALBHBL[2] = (bininput[1] & maskH) >> 2 //BH
+	AHALBHBL[3] = bininput[1] & maskL        //BL
 
 	AH := uint(AHALBHBL[0])
 	AL := uint(AHALBHBL[1])
 	BH := uint(AHALBHBL[2])
 	BL := uint(AHALBHBL[3])
 
-	AHBH := AHBH_LUT.ReturnVal(AH, BH)
-	AHBL := AHBL_LUT.ReturnVal(AH, BL)
-	ALBH := ALBH_LUT.ReturnVal(AL, BH)
-	ALBL := ALBL_LUT.ReturnVal(AL, BL)
+	AHBH := AHBHLUT.ReturnVal(AH, BH)
+	AHBL := AHBLLUT.ReturnVal(AH, BL)
+	ALBH := ALBHLUT.ReturnVal(AL, BH)
+	ALBL := ALBLLUT.ReturnVal(AL, BL)
 
 	output := ALBL + (ALBH << 2) + (AHBL << 2) + (AHBH << 4)
 	//Next function masks the output in 8-bit, like VHDL/Vivado would do.
@@ -90,6 +95,7 @@ func (r4 *Recursive4) flagOverflow(input bool) {
 	}
 }
 
+// GenerateTestData creates a plaintext testdata file containing both inputs and the output in binary seperated by \t
 func (r4 *Recursive4) GenerateTestData(FolderPath string) {
 	fmtstr := "%0" + strconv.Itoa(int(r4.BitSize)) + "b %0" + strconv.Itoa(int(r4.BitSize)) + "b %0" + strconv.Itoa(int(r4.OutputSize)) + "b\n"
 	path := FolderPath + "/" + r4.TestFile
@@ -124,6 +130,7 @@ func (r4 *Recursive4) GenerateTestData(FolderPath string) {
 
 }
 
+// GenerateVHDL creates the VHDL files in FolderPath
 func (r4 *Recursive4) GenerateVHDL(FolderPath string) {
 	for _, mult := range r4.LUTArray {
 		mult.GenerateVHDL(FolderPath)
@@ -132,6 +139,7 @@ func (r4 *Recursive4) GenerateVHDL(FolderPath string) {
 	CreateFile(FolderPath, r4.VHDLFile, "rec4behav.vhd", r4)
 }
 
+// ReturnData returns a struct containing metadata of the multiplier
 func (r4 *Recursive4) ReturnData() *EntityData {
 	// EntityName string
 	// BitSize    uint
@@ -146,6 +154,8 @@ func (r4 *Recursive4) ReturnData() *EntityData {
 	return d
 }
 
+// GenerateVHDLEntityArray creates an array of potentially multiple VHDLEntities, sorted by priority for synthesizing
+// For example: Multiplier A uses a VHDL portmap for the smaller Multiplier B & C. B & C need to be synthesized first, hence A will be last in the array
 func (r4 *Recursive4) GenerateVHDLEntityArray() []VHDLEntity {
 
 	var out []VHDLEntity
@@ -161,10 +171,12 @@ func (r4 *Recursive4) GenerateVHDLEntityArray() []VHDLEntity {
 	return out
 }
 
+// Overflow returns a boolean if any internal overflow has occured
 func (r4 *Recursive4) Overflow() bool {
 	return r4.OverflowError
 }
 
+// MeanAbsoluteError returns the MeanAbsoluteError of the multiplier in float64
 func (r4 *Recursive4) MeanAbsoluteError() float64 {
 	maxval := int(math.Exp2(4))
 	accum := float64(0)
@@ -180,6 +192,7 @@ func (r4 *Recursive4) MeanAbsoluteError() float64 {
 
 }
 
+// MeanAbsoluteErrorNormalDist returns the MeanAbsoluteError of the multiplier in float64, using N random normal distributed inputs
 func (r4 *Recursive4) MeanAbsoluteErrorNormalDist(N int) float64 {
 	accum := float64(0)
 
@@ -194,6 +207,7 @@ func (r4 *Recursive4) MeanAbsoluteErrorNormalDist(N int) float64 {
 	return float64(1.0/float64(N)) * accum
 }
 
+// AverageRelativeError returns the AverageRelativeError of the multiplier in float64
 func (r4 *Recursive4) AverageRelativeError() float64 {
 	maxval := int(math.Exp2(4))
 	accum := float64(0)

@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+// UnsignedNumericAccurateMAC is an Accurate Multiply-Accumulator on basis of template "macaccurate.vhd"
 type UnsignedNumericAccurateMAC struct {
 	EntityName   string
 	BitSize      uint
@@ -21,6 +22,9 @@ type UnsignedNumericAccurateMAC struct {
 	MaximumValue uint
 }
 
+// NewUnsignedAccurateMAC creates the struct NewUnsignedAccurateMAC
+// BitSize: Bit-length of Multiplier inputs
+// T: N-amount of Accumulation guaranteed before overflow
 func NewUnsignedAccurateMAC(BitSize uint, T uint) *UnsignedNumericAccurateMAC {
 	mac := new(UnsignedNumericAccurateMAC)
 	mac.EntityName = "UAMAC_" + strconv.Itoa(int(BitSize)) + "b" + strconv.Itoa(int(T)) + "T"
@@ -39,6 +43,7 @@ func NewUnsignedAccurateMAC(BitSize uint, T uint) *UnsignedNumericAccurateMAC {
 	return mac
 }
 
+// ReturnData returns a struct containing metadata of the multiplier
 func (mac *UnsignedNumericAccurateMAC) ReturnData() *EntityData {
 	d := new(EntityData)
 	d.BitSize = mac.BitSize
@@ -50,10 +55,13 @@ func (mac *UnsignedNumericAccurateMAC) ReturnData() *EntityData {
 	return d
 }
 
+// GenerateVHDL creates the VHDL file in FolderPath
 func (mac *UnsignedNumericAccurateMAC) GenerateVHDL(FolderPath string) {
 	CreateFile(FolderPath, mac.VHDLFile, "macaccurate.vhd", mac)
 }
 
+// GenerateTestData creates MAC testing data in plain text. Two inputs and outputs, seperated by \t
+// Note that MAC testing data is different, instead of applying an exhaustive test over the full range on inputs, inputs are kept static and overflow behaviour is verified
 func (mac *UnsignedNumericAccurateMAC) GenerateTestData(FolderPath string) {
 	fmtstr := "%0" + strconv.Itoa(int(mac.BitSize)) + "b %0" + strconv.Itoa(int(mac.BitSize)) + "b %0" + strconv.Itoa(int(mac.OutputSize)) + "b\n"
 	path := FolderPath + "/" + mac.TestFile
@@ -91,6 +99,7 @@ func (mac *UnsignedNumericAccurateMAC) String() string {
 	return mac.EntityName
 }
 
+// ReturnVal outputs the current value of the Multiply-Accumulator on basis of input A and B
 func (mac *UnsignedNumericAccurateMAC) ReturnVal(a uint, b uint) uint {
 	c := a * b
 	mac.CurrentValue = mac.CurrentValue + c
@@ -98,10 +107,13 @@ func (mac *UnsignedNumericAccurateMAC) ReturnVal(a uint, b uint) uint {
 	return mac.CurrentValue
 }
 
+// ResetVal resets the accumulator to 0
 func (mac *UnsignedNumericAccurateMAC) ResetVal() {
 	mac.CurrentValue = 0
 }
 
+// GenerateVHDLEntityArray creates an array of potentially multiple VHDLEntities, sorted by priority for synthesizing
+// For example: Multiplier A uses a VHDL portmap for the smaller Multiplier B & C. B & C need to be synthesized first, hence A will be last in the array
 func (mac *UnsignedNumericAccurateMAC) GenerateVHDLEntityArray() []VHDLEntity {
 	//fix me
 	var out []VHDLEntity
@@ -111,11 +123,15 @@ func (mac *UnsignedNumericAccurateMAC) GenerateVHDLEntityArray() []VHDLEntity {
 	return out
 }
 
+// MeanAbsoluteError returns the MeanAbsoluteError of the multiplier in float64
+// FIX ME: NOT IMPLEMENTED
 func (mac *UnsignedNumericAccurateMAC) MeanAbsoluteError() float64 {
 	log.Println("ERROR, MAC MAE NOT IMPLEMENTED")
 	return 0
 }
 
+// Overflow returns a boolean if any internal overflow has occured
+// FIX ME: NOT IMPLEMENTED
 func (mac *UnsignedNumericAccurateMAC) Overflow() bool {
 	log.Println("ERROR, MAC OVERFLOW CHECK NOT IMPLEMENTED")
 	return false

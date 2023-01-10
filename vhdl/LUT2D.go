@@ -22,11 +22,12 @@ type LUT2D struct {
 	TestFile   string
 }
 
+// Print pretty prints the LUT2D struct
 func (m *LUT2D) Print() {
 	fmt.Printf("%+v\n", m)
 }
 
-// returnVal, returns output for two inputs
+// ReturnVal returns the output of the multiplier
 func (m *LUT2D) ReturnVal(a, b uint) uint {
 	return m.LUT[a][b]
 }
@@ -47,6 +48,7 @@ func (m *LUT2D) convertval(value interface{}) string {
 	return fmt.Sprintf(format, value)
 }
 
+// New2DLUT creates a multiplier based around a two dimensonal array
 func New2DLUT(EntityName string, BitSize uint) *LUT2D {
 	m := new(LUT2D)
 	m.BitSize = BitSize
@@ -56,7 +58,7 @@ func New2DLUT(EntityName string, BitSize uint) *LUT2D {
 	return m
 }
 
-// Outputs VHDL code for generated multiplier to path file
+// GenerateVHDL creates the VHDL file in FolderPath
 // TODO: Make VHDLtoFile call the Generic function
 func (m *LUT2D) GenerateVHDL(FolderPath string) {
 	funcMap := template.FuncMap{"indexconv": m.convertindex, "valconv": m.convertval}
@@ -85,6 +87,7 @@ func (m *LUT2D) GenerateVHDL(FolderPath string) {
 	}
 }
 
+// GenerateTestData creates testing data in plain text. Two inputs and outputs, seperated by \t
 func (m *LUT2D) GenerateTestData(FolderPath string) {
 	fmtstr := "%0" + strconv.Itoa(int(m.BitSize)) + "b %0" + strconv.Itoa(int(m.BitSize)) + "b %0" + strconv.Itoa(int(m.OutputSize)) + "b\n"
 	path := FolderPath + "/" + m.TestFile
@@ -114,6 +117,7 @@ func (m *LUT2D) GenerateTestData(FolderPath string) {
 
 }
 
+// ReturnData returns a struct containing metadata of the multiplier
 func (m *LUT2D) ReturnData() *EntityData {
 	// EntityName string
 	// BitSize    uint
@@ -128,6 +132,7 @@ func (m *LUT2D) ReturnData() *EntityData {
 	return d
 }
 
+// Overflow returns a boolean if any internal overflow has occured
 func (m *LUT2D) Overflow() bool {
 	maxval := int(math.Exp2(float64(m.BitSize)))
 	overflowval := int(math.Exp2(float64(m.OutputSize)))
@@ -145,6 +150,7 @@ func (m *LUT2D) Overflow() bool {
 	return false
 }
 
+// MeanAbsoluteError returns the MeanAbsoluteError of the multiplier in float64
 func (m *LUT2D) MeanAbsoluteError() float64 {
 	maxval := int(math.Exp2(float64(m.BitSize)))
 	accum := float64(0)
@@ -164,6 +170,8 @@ func (m *LUT2D) String() string {
 	return m.EntityName
 }
 
+// GenerateVHDLEntityArray creates an array of potentially multiple VHDLEntities, sorted by priority for synthesizing
+// LUT2D returns a single entity
 func (m *LUT2D) GenerateVHDLEntityArray() []VHDLEntity {
 	var out []VHDLEntity
 	out = append(out, m)

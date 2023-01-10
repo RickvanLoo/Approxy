@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+// MAC creates a Multiply-Accumulator on basis of a VHDLEntityMultiplier, the accumulation is accurate
 type MAC struct {
 	EntityName   string
 	BitSize      uint
@@ -24,6 +25,7 @@ type MAC struct {
 
 //TODO : Make it the same as Rec4, where GenerateVHDL generates the preceding VHDL files as well.
 
+// NewMAC creates the MAC struct, on basis of Multiplier and T amount of guaranteed accumulations without overflow
 func NewMAC(Multiplier VHDLEntityMultiplier, T uint) *MAC {
 	mac := new(MAC)
 	mac.Multiplier = Multiplier
@@ -44,6 +46,7 @@ func NewMAC(Multiplier VHDLEntityMultiplier, T uint) *MAC {
 	return mac
 }
 
+// ReturnData returns a struct containing metadata of the multiplier
 func (mac *MAC) ReturnData() *EntityData {
 	d := new(EntityData)
 	d.BitSize = mac.BitSize
@@ -55,11 +58,13 @@ func (mac *MAC) ReturnData() *EntityData {
 	return d
 }
 
+// GenerateVHDL creates the VHDL file in FolderPath
 func (mac *MAC) GenerateVHDL(FolderPath string) {
 	mac.Multiplier.GenerateVHDL(FolderPath)
 	CreateFile(FolderPath, mac.VHDLFile, "macbehav.vhd", mac)
 }
 
+// GenerateTestData creates testing data in plain text. Two inputs and outputs, seperated by \t
 func (mac *MAC) GenerateTestData(FolderPath string) {
 	mac.Multiplier.GenerateTestData(FolderPath)
 	fmtstr := "%0" + strconv.Itoa(int(mac.BitSize)) + "b %0" + strconv.Itoa(int(mac.BitSize)) + "b %0" + strconv.Itoa(int(mac.OutputSize)) + "b\n"
@@ -116,6 +121,7 @@ func (mac *MAC) String() string {
 	return "MAC -> " + mac.Multiplier.ReturnData().EntityName
 }
 
+// ReturnVal returns the output of the multiplier
 func (mac *MAC) ReturnVal(a uint, b uint) uint {
 	c := mac.Multiplier.ReturnVal(a, b)
 	mac.CurrentValue = mac.CurrentValue + c
@@ -123,10 +129,13 @@ func (mac *MAC) ReturnVal(a uint, b uint) uint {
 	return mac.CurrentValue
 }
 
+// ResetVal resets the accumulator to 0
 func (mac *MAC) ResetVal() {
 	mac.CurrentValue = 0
 }
 
+// GenerateVHDLEntityArray creates an array of potentially multiple VHDLEntities, sorted by priority for synthesizing
+// For example: Multiplier A uses a VHDL portmap for the smaller Multiplier B & C. B & C need to be synthesized first, hence A will be last in the array
 func (mac *MAC) GenerateVHDLEntityArray() []VHDLEntity {
 	//fix me
 	var out []VHDLEntity
@@ -138,11 +147,15 @@ func (mac *MAC) GenerateVHDLEntityArray() []VHDLEntity {
 	return out
 }
 
+// MeanAbsoluteError returns the MeanAbsoluteError of the multiplier in float64
+// FIX ME: NOT IMPLEMENTED
 func (mac *MAC) MeanAbsoluteError() float64 {
 	log.Println("ERROR, MAC MAE NOT IMPLEMENTED")
 	return 0
 }
 
+// Overflow returns a boolean if any internal overflow has occured
+// FIX ME: NOT IMPLEMENTED
 func (mac *MAC) Overflow() bool {
 	log.Println("ERROR, MAC OVERFLOW CHECK NOT IMPLEMENTED")
 	return false

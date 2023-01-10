@@ -16,6 +16,7 @@ import (
 
 // Generic functions for badmath/VHDL
 
+// VHDLEntityMultiplier is an interface that both implements the functions for VHDLEntity and the Multiplier methods
 type VHDLEntityMultiplier interface {
 	VHDLEntity
 	Multiplier
@@ -46,6 +47,7 @@ type EntityData struct {
 	TestFile   string
 }
 
+// N is a helper function used in templates to iterate from 0 to N-1
 // https://stackoverflow.com/questions/22713500/iterating-a-range-of-integers-in-go-templates
 // If it works, it works.
 // N 100 => Iters from 0 to 99(!)
@@ -62,6 +64,7 @@ func N(stop uint) (stream chan uint) {
 	return
 }
 
+// CreateFile is a helper function used for the generation of VHDL templates
 // TODO: Add funcmap support
 func CreateFile(FolderPath string, FileName string, TemplateFile string, Data interface{}) {
 	TemplatePath := "template/" + TemplateFile
@@ -90,12 +93,14 @@ func CreateFile(FolderPath string, FileName string, TemplateFile string, Data in
 	}
 }
 
+// FileNameGen is a helper function, used to standardize filenames within VHDLEntity interfaces to avoid a bit of boilerplate code
 func FileNameGen(EntityName string) (VHDLFile string, TestFile string) {
 	VHDLFile = EntityName + ".vhd"
 	TestFile = "test_" + EntityName + ".txt"
 	return VHDLFile, TestFile
 }
 
+// OverflowCheck8bit returns OverflowCheckGeneric(input, 8)
 func OverflowCheck8bit(input uint) (output uint, overflow bool) {
 	// OverflowMask := byte(0b11111111)
 	// byte_input := byte(input)
@@ -106,6 +111,7 @@ func OverflowCheck8bit(input uint) (output uint, overflow bool) {
 	return OverflowCheckGeneric(input, 8)
 }
 
+// OverflowCheck16bit returns OverflowCheckGeneric(input, 16)
 func OverflowCheck16bit(input uint) (output uint, overflow bool) {
 	// OverflowMask := uint16(65535)
 	// uint16_input := uint16(input)
@@ -116,6 +122,9 @@ func OverflowCheck16bit(input uint) (output uint, overflow bool) {
 	return OverflowCheckGeneric(input, 16)
 }
 
+// OverflowCheckGeneric checks if an input value of uint would overflow in a smaller bit representation N.
+// Output returns the output value after applying the smaller bit representation
+// Overflow returns a boolean if overflow has occured, and thus output and input are not equal
 func OverflowCheckGeneric(input uint, n uint) (output uint, overflow bool) {
 	if n > 64 {
 		log.Fatalln("OverflowCheckGeneric not specified for numbers above 64-bit")
@@ -126,13 +135,14 @@ func OverflowCheckGeneric(input uint, n uint) (output uint, overflow bool) {
 	Maxnumber := expo.Uint64()
 
 	OverflowMask := uint64(Maxnumber - 1)
-	uint64_input := uint64(input)
-	uint64_output := uint64_input & OverflowMask
-	output = uint(uint64_output)
+	uint64input := uint64(input)
+	uint64output := uint64input & OverflowMask
+	output = uint(uint64output)
 	booloutput := !(output == input)
 	return output, booloutput
 }
 
+// RemoveDuplicate is an helper function that removes duplicate VHDLEntity entries from an []VHDLEntity array
 func RemoveDuplicate(Array []VHDLEntity) []VHDLEntity {
 	VHDLEntityMap := make(map[string]VHDLEntity)
 
@@ -149,7 +159,7 @@ func RemoveDuplicate(Array []VHDLEntity) []VHDLEntity {
 	return v
 }
 
-// For VHDLEntity recreate N random TestData in form A*B=C for Folderpath
+// UniformTestData creates N random uniform Testdata for Mult, within Folderpath
 func UniformTestData(Mult VHDLEntityMultiplier, FolderPath string, N uint) {
 	BitSize := Mult.ReturnData().BitSize
 	OutputSize := Mult.ReturnData().OutputSize
@@ -187,6 +197,7 @@ func UniformTestData(Mult VHDLEntityMultiplier, FolderPath string, N uint) {
 
 }
 
+// NormalTestData creates N random normal distributed Testdata for Mult, within Folderpath
 func NormalTestData(Mult VHDLEntityMultiplier, FolderPath string, N uint) {
 	BitSize := Mult.ReturnData().BitSize
 	OutputSize := Mult.ReturnData().OutputSize
@@ -224,12 +235,13 @@ func NormalTestData(Mult VHDLEntityMultiplier, FolderPath string, N uint) {
 
 }
 
+// RandomNormalInput creates a random input value on basis of bitsize, according to the distributions described in the MACISH paper
 func RandomNormalInput(size int) int {
 	var sample float64
 	//<div class="csl-entry">Gillani, G. A., Hanif, M. A., Verstoep, B., Gerez, S. H., Shafique, M., &#38; Kokkeler, A. B. J. (2019). MACISH: Designing Approximate MAC Accelerators With Internal-Self-Healing. <i>IEEE Access</i>, <i>7</i>, 77142–77160. https://doi.org/10.1109/ACCESS.2019.2920335</div>
 	switch size {
 	case 2:
-		sample = rand.NormFloat64()*0.4 + 2 //Added ourselves
+		sample = rand.NormFloat64()*0.4 + 2 //Not part of source
 		if sample > (math.Exp2(2) - 1) {
 			sample = (math.Exp2(2) - 1)
 		}
@@ -259,7 +271,8 @@ func RandomNormalInput(size int) int {
 	return int(sample)
 }
 
-// For VHDLEntity try to create MaxSwitching N TestData in form A*B=C for Folderpath
+// MaxSwitchingTestData creates testdata that should create the highest switching behaviour
+// NOTE: This function has not been tested
 func MaxSwitchingTestData(Mult VHDLEntityMultiplier, FolderPath string, N uint) {
 	BitSize := Mult.ReturnData().BitSize
 	OutputSize := Mult.ReturnData().OutputSize
