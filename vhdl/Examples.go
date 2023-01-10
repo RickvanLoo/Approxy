@@ -1,6 +1,6 @@
-package VHDL
+package vhdl
 
-///M1-M4 are 2-bit Unsigned Approximate Multiplayers defined by Gillani et al.
+// /M1-M4 are 2-bit Unsigned Approximate Multiplayers defined by Gillani et al.
 func M1() *UnsignedApproxMultiplyer {
 	m := NewUnsignedApprox("M1", 2)
 	e7 := Modification{3, 3, 7}

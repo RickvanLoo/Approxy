@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"time"
 
-	VHDL "approxy/VHDL"
 	Viv "approxy/Vivado"
+	VHDL "approxy/vhdl"
 )
 
 var OutputPath string

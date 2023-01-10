@@ -1,8 +1,8 @@
 package main
 
 import (
-	"approxy/VHDL"
 	"approxy/Vivado"
+	VHDL "approxy/vhdl"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"

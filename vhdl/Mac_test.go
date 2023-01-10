@@ -1,4 +1,4 @@
-package VHDL
+package vhdl
 
 import (
 	"testing"

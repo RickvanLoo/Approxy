@@ -1,7 +1,7 @@
 package Vivado
 
 import (
-	"approxy/VHDL"
+	VHDL "approxy/vhdl"
 	"encoding/json"
 	"errors"
 	"fmt"

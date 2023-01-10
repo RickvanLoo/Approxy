@@ -1,4 +1,4 @@
-package VHDL
+package vhdl
 
 import (
 	"bufio"
@@ -10,10 +10,10 @@ import (
 	"strings"
 )
 
-//LUTArray[0] = AH*BH
-//LUTArray[1] = AH*BL
-//LUTArray[2] = AL*BH
-//LUTArray[3] = AL*BL
+// LUTArray[0] = AH*BH
+// LUTArray[1] = AH*BL
+// LUTArray[2] = AL*BH
+// LUTArray[3] = AL*BL
 type Recursive4 struct {
 	EntityName    string
 	BitSize       uint                    //Default to 4

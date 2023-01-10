@@ -1,7 +1,7 @@
 package Vivado
 
 import (
-	"approxy/VHDL"
+	"approxy/vhdl"
 	"encoding/xml"
 	"io/ioutil"
 	"os"
@@ -93,7 +93,7 @@ type PowerReport struct {
 	Confidence_Level string
 }
 
-func ParsePowerReport(FolderPath string, Entity VHDL.VHDLEntity) *PowerReport {
+func ParsePowerReport(FolderPath string, Entity vhdl.VHDLEntity) *PowerReport {
 
 	filextension := "_post_place_power.rpt"
 	filename := Entity.ReturnData().EntityName + filextension

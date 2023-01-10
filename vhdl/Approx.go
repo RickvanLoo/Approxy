@@ -1,4 +1,4 @@
-package VHDL
+package vhdl
 
 import (
 	"math"
@@ -15,7 +15,7 @@ type Modification struct {
 	O uint
 }
 
-//New2DUnsignedAcc creates a 2D LUT structure, containing the LUT of an accurate Bitsize multiplyer.
+// New2DUnsignedAcc creates a 2D LUT structure, containing the LUT of an accurate Bitsize multiplyer.
 func New2DUnsignedAcc(EntityName string, BitSize uint) *LUT2D {
 	m := New2DLUT(EntityName, BitSize)
 
@@ -35,9 +35,9 @@ func New2DUnsignedAcc(EntityName string, BitSize uint) *LUT2D {
 	return m
 }
 
-//NewUnsignedApprox creates a UnsignedApproxMultiplayer based upon a 2D LUT structure
-//Using New2DUnsignedAcc to create an accurate multiplyer, but adds the option to add modification
-//Modification are used to change values within the 2D LUT
+// NewUnsignedApprox creates a UnsignedApproxMultiplayer based upon a 2D LUT structure
+// Using New2DUnsignedAcc to create an accurate multiplyer, but adds the option to add modification
+// Modification are used to change values within the 2D LUT
 func NewUnsignedApprox(EntityName string, BitSize uint) *UnsignedApproxMultiplyer {
 	m := new(UnsignedApproxMultiplyer)
 	m.LUT2D = New2DUnsignedAcc(EntityName, BitSize)

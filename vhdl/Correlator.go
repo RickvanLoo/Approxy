@@ -1,11 +1,11 @@
-package VHDL
+package vhdl
 
 import "log"
 
-//MACArray[0] = ReYReS
-//MACArray[1] = ImYImS
-//MACArray[2] = ReYImS
-//MACArray[3] = ImYReS
+// MACArray[0] = ReYReS
+// MACArray[1] = ImYImS
+// MACArray[2] = ReYImS
+// MACArray[3] = ImYReS
 type Correlator struct {
 	EntityName string
 	BitSize    uint
