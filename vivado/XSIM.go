@@ -1,4 +1,4 @@
-package Vivado
+package vivado
 
 import (
 	"log"

@@ -3,8 +3,8 @@ package main
 import (
 	"testing"
 
-	Viv "github.com/RickvanLoo/Approxy/Vivado"
 	VHDL "github.com/RickvanLoo/Approxy/vhdl"
+	Viv "github.com/RickvanLoo/Approxy/vivado"
 )
 
 func startBench(b *testing.B) {

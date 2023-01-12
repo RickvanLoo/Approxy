@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	Viv "github.com/RickvanLoo/Approxy/Vivado"
 	VHDL "github.com/RickvanLoo/Approxy/vhdl"
+	Viv "github.com/RickvanLoo/Approxy/vivado"
 )
 
 //Here go Approxy functions/runs that I've used during the thesis for testing that can be used as examples

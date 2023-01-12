@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"time"
 
-	Viv "github.com/RickvanLoo/Approxy/Vivado"
 	VHDL "github.com/RickvanLoo/Approxy/vhdl"
+	Viv "github.com/RickvanLoo/Approxy/vivado"
 )
 
 var OutputPath string

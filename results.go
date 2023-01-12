@@ -8,20 +8,20 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	"github.com/RickvanLoo/Approxy/Vivado"
 	VHDL "github.com/RickvanLoo/Approxy/vhdl"
+	"github.com/RickvanLoo/Approxy/vivado"
 )
 
 type Result struct {
 	EntityString string
 	EntityHash   string
-	Utilization  *Vivado.Utilization
+	Utilization  *vivado.Utilization
 	Overflow     bool
 	MAE          float64
 }
 
 // TODO: Redo VHDL.VHDLEntity.String(), make it part of UnsignedMultiplication!!!
-func NewResult(Entity VHDL.VHDLEntity, Utilization *Vivado.Utilization, Overflow bool, MAE float64) *Result {
+func NewResult(Entity VHDL.VHDLEntity, Utilization *vivado.Utilization, Overflow bool, MAE float64) *Result {
 	R := new(Result)
 	R.EntityString = Entity.String()
 	R.EntityHash = toHash(R.EntityString)
