@@ -13,7 +13,7 @@ func startBench(b *testing.B) {
 	CreatePath(OutputPath)
 
 	VivadoSettings = new(Viv.VivadoTCLSettings)
-	VivadoSettings.NO_DSP = true
+	VivadoSettings.NODSP = true
 	VivadoSettings.OOC = true
 	VivadoSettings.PartName = "Xc7z030fbg676-3"
 	VivadoSettings.Placement = true

@@ -9,6 +9,7 @@ import (
 	"github.com/RickvanLoo/Approxy/vhdl"
 )
 
+// RptDoc encapsulates the power report XML exported by Vivado
 // RptDoc was generated 2022-05-03 14:57:01 by rick on rivalo.
 // Using 'zek' to convert XML to Golang
 // This needs refactoring into a readable XML struct
@@ -86,14 +87,17 @@ type RptDoc struct {
 	} `xml:"section"`
 }
 
+// PowerReport is a struct containing power results for a single design
 type PowerReport struct {
-	EntityName       string `json:"-"`
-	Total_Power      float64
-	Dynamic_Power    float64
-	Static_Power     float64
-	Confidence_Level string
+	EntityName      string  `json:"-"` //For identification, ignored when unmarshaling to JSON file
+	TotalPower      float64 //W
+	DynamicPower    float64 //W
+	StaticPower     float64 //W
+	ConfidenceLevel string  //High required
 }
 
+// ParsePowerReport parses an Vivado XML power report, ignores irrelevant info and export data in the PowerReport struct
+// The power report is named EntityName + "_post_place_power.rpt"
 func ParsePowerReport(FolderPath string, Entity vhdl.VHDLEntity) *PowerReport {
 
 	filextension := "_post_place_power.rpt"
@@ -115,19 +119,19 @@ func ParsePowerReport(FolderPath string, Entity vhdl.VHDLEntity) *PowerReport {
 
 	Report := new(PowerReport)
 	//https://jsonformatter.org/xml-viewer
-	TotalOnChipW_contents := PowerXML.Section[0].Table.Tablerow[0].Tablecell[1].Contents
-	DynamicW_contents := PowerXML.Section[0].Table.Tablerow[3].Tablecell[1].Contents
-	StaticW_contents := PowerXML.Section[0].Table.Tablerow[4].Tablecell[1].Contents
-	ConfidenceLevel_contents := PowerXML.Section[0].Table.Tablerow[8].Tablecell[1].Contents
+	TotalOnChipWcontents := PowerXML.Section[0].Table.Tablerow[0].Tablecell[1].Contents
+	DynamicWcontents := PowerXML.Section[0].Table.Tablerow[3].Tablecell[1].Contents
+	StaticWcontents := PowerXML.Section[0].Table.Tablerow[4].Tablecell[1].Contents
+	ConfidenceLevelcontents := PowerXML.Section[0].Table.Tablerow[8].Tablecell[1].Contents
 
-	TotalOnChipW_float, _ := strconv.ParseFloat(TotalOnChipW_contents, 64)
-	DynamicW_float, _ := strconv.ParseFloat(DynamicW_contents, 64)
-	StaticW_float, _ := strconv.ParseFloat(StaticW_contents, 64)
+	TotalOnChipWfloat, _ := strconv.ParseFloat(TotalOnChipWcontents, 64)
+	DynamicWfloat, _ := strconv.ParseFloat(DynamicWcontents, 64)
+	StaticWfloat, _ := strconv.ParseFloat(StaticWcontents, 64)
 
-	Report.Confidence_Level = ConfidenceLevel_contents
-	Report.Dynamic_Power = DynamicW_float
-	Report.Total_Power = TotalOnChipW_float
-	Report.Static_Power = StaticW_float
+	Report.ConfidenceLevel = ConfidenceLevelcontents
+	Report.DynamicPower = DynamicWfloat
+	Report.TotalPower = TotalOnChipWfloat
+	Report.StaticPower = StaticWfloat
 	Report.EntityName = Entity.ReturnData().EntityName
 
 	return Report

@@ -9,13 +9,16 @@ import (
 	VHDL "github.com/RickvanLoo/Approxy/vhdl"
 )
 
+// Timing is a struct that contains timing information for a single design, only the worst or critical path is reported.
 type Timing struct {
-	EntityName string `json:"-"`
+	EntityName string `json:"-"` //For identification, ignored when unmarshaling to JSON file
 	EndPoint   string
 	WorstPath  float64 //ns
 	MaxFreq    float64 //MHz
 }
 
+// ParseTimingReport parses the timing report exported by Vivado, it uses a hacky approach of string manipulation
+// The timing report is named EntityName + "_post_place_time.rpt"
 func ParseTimingReport(FolderPath string, Entity VHDL.VHDLEntity) *Timing {
 	time := new(Timing)
 	filextension := "_post_place_time.rpt"

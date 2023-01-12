@@ -21,7 +21,6 @@ var Yellow string
 
 var VivadoSettings *Viv.VivadoTCLSettings
 
-var Results []*Result
 var M1 *VHDL.LUT2D
 var M2 *VHDL.LUT2D
 var M3 *VHDL.LUT2D
@@ -64,7 +63,7 @@ func init() {
 	CreatePath(ReportPath)
 
 	VivadoSettings = new(Viv.VivadoTCLSettings)
-	VivadoSettings.NO_DSP = true
+	VivadoSettings.NODSP = true
 	VivadoSettings.OOC = true
 	VivadoSettings.PartName = "Xc7z030fbg676-3"
 	VivadoSettings.Placement = true

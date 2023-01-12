@@ -11,10 +11,10 @@ func TestXSIMDuplicate2(t *testing.T) {
 	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]VHDL.VHDLEntityMultiplier{m1, m1, m1, m1})
 
 	xsim := CreateXSIM("Output", "TestName", rec4.GenerateVHDLEntityArray())
-	length_vhdlentityXSIM := len(xsim.VHDLEntities)
+	lengthvhdlentityXSIM := len(xsim.VHDLEntities)
 
-	if length_vhdlentityXSIM != 2 {
-		t.Errorf("Duplication Issue!, l=%d, expect=2", length_vhdlentityXSIM)
+	if lengthvhdlentityXSIM != 2 {
+		t.Errorf("Duplication Issue!, l=%d, expect=2", lengthvhdlentityXSIM)
 	}
 
 	topEntityName := xsim.VHDLEntities[0].ReturnData().EntityName
@@ -31,10 +31,10 @@ func TestXSIMDuplicate3(t *testing.T) {
 	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]VHDL.VHDLEntityMultiplier{m1, m2, m1, m2})
 
 	xsim := CreateXSIM("Output", "TestName", rec4.GenerateVHDLEntityArray())
-	length_vhdlentityXSIM := len(xsim.VHDLEntities)
+	lengthvhdlentityXSIM := len(xsim.VHDLEntities)
 
-	if length_vhdlentityXSIM != 3 {
-		t.Errorf("Duplication Issue!, l=%d, expect=3", length_vhdlentityXSIM)
+	if lengthvhdlentityXSIM != 3 {
+		t.Errorf("Duplication Issue!, l=%d, expect=3", lengthvhdlentityXSIM)
 	}
 
 	topEntityName := xsim.VHDLEntities[0].ReturnData().EntityName
@@ -51,10 +51,10 @@ func TestXSIMDuplicate4(t *testing.T) {
 	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]VHDL.VHDLEntityMultiplier{m1, m2, m3, m2})
 
 	xsim := CreateXSIM("Output", "TestName", rec4.GenerateVHDLEntityArray())
-	length_vhdlentityXSIM := len(xsim.VHDLEntities)
+	lengthvhdlentityXSIM := len(xsim.VHDLEntities)
 
-	if length_vhdlentityXSIM != 4 {
-		t.Errorf("Duplication Issue!, l=%d, expect=4", length_vhdlentityXSIM)
+	if lengthvhdlentityXSIM != 4 {
+		t.Errorf("Duplication Issue!, l=%d, expect=4", lengthvhdlentityXSIM)
 	}
 
 	topEntityName := xsim.VHDLEntities[0].ReturnData().EntityName
@@ -72,10 +72,10 @@ func TestXSIMDuplicate5(t *testing.T) {
 	rec4 := VHDL.NewRecursive4("ApproxRec4", [4]VHDL.VHDLEntityMultiplier{m1, m2, m3, m4})
 
 	xsim := CreateXSIM("Output", "TestName", rec4.GenerateVHDLEntityArray())
-	length_vhdlentityXSIM := len(xsim.VHDLEntities)
+	lengthvhdlentityXSIM := len(xsim.VHDLEntities)
 
-	if length_vhdlentityXSIM != 5 {
-		t.Errorf("Duplication Issue!, l=%d, expect=5", length_vhdlentityXSIM)
+	if lengthvhdlentityXSIM != 5 {
+		t.Errorf("Duplication Issue!, l=%d, expect=5", lengthvhdlentityXSIM)
 	}
 
 	topEntityName := xsim.VHDLEntities[0].ReturnData().EntityName
@@ -95,10 +95,10 @@ func TestXSIMDuplicate7(t *testing.T) {
 	rec8 := VHDL.NewRecursive8("ApproxRec8", [4]VHDL.VHDLEntityMultiplier{rec4_1, rec4_2, rec4_1, rec4_2})
 
 	xsim := CreateXSIM("Output", "TestName", rec8.GenerateVHDLEntityArray())
-	length_vhdlentityXSIM := len(xsim.VHDLEntities)
+	lengthvhdlentityXSIM := len(xsim.VHDLEntities)
 
-	if length_vhdlentityXSIM != 7 {
-		t.Errorf("Duplication Issue!, l=%d, expect=7", length_vhdlentityXSIM)
+	if lengthvhdlentityXSIM != 7 {
+		t.Errorf("Duplication Issue!, l=%d, expect=7", lengthvhdlentityXSIM)
 	}
 
 	topEntityName := xsim.VHDLEntities[0].ReturnData().EntityName
@@ -128,10 +128,10 @@ func TestXSIMRec8(t *testing.T) {
 	rec8 := VHDL.NewRecursive8("ApproxRec8", [4]VHDL.VHDLEntityMultiplier{rec4_1, rec4_2, rec4_1, rec4_2})
 
 	xsim := CreateXSIM("Output", "TestName", rec8.GenerateVHDLEntityArray())
-	length_vhdlentityXSIM := len(xsim.VHDLEntities)
+	lengthvhdlentityXSIM := len(xsim.VHDLEntities)
 
-	if length_vhdlentityXSIM != 3 {
-		t.Errorf("Duplication Issue!, l=%d, expect=3", length_vhdlentityXSIM)
+	if lengthvhdlentityXSIM != 3 {
+		t.Errorf("Duplication Issue!, l=%d, expect=3", lengthvhdlentityXSIM)
 	}
 
 	topEntityName := xsim.VHDLEntities[0].ReturnData().EntityName

@@ -1,3 +1,7 @@
+//go:build exclude
+
+//THIS FILE IS NOT BEING BUILD
+
 package main
 
 import (
@@ -12,8 +16,9 @@ import (
 )
 
 //Here go Approxy functions/runs that I've used during the thesis for testing that can be used as examples
+//Might be depricated, and the code is not up to Go community standards
 
-func AnalysisBehav() {
+func analysisBehav() {
 	Mult := Acc
 	Mult_Scaler := VHDL.New2DScaler(Mult, 10000)
 	Mult_Scaler.GenerateTestData(OutputPath)
@@ -38,7 +43,7 @@ func AnalysisBehav() {
 	viv.PowerPostPlacementGeneration()
 }
 
-func AnalysisRec1311() {
+func analysisRec1311() {
 	Rec1311 := VHDL.NewRecursive4("Rec1311", [4]VHDL.VHDLEntityMultiplier{M1, M3, M1, M1})
 
 	log.Println(Rec1311.MeanAbsoluteError() / 256)
@@ -90,7 +95,7 @@ func AnalysisRec1311() {
 
 }
 
-func CreateSingleVHDL() {
+func createSingleVHDL() {
 	// Rec1311 := VHDL.NewRecursive4("Rec1311", [4]VHDL.VHDLEntityMultiplier{M1, M3, M1, M1})
 	// Rec1311.GenerateTestData(OutputPath)
 	// Rec1311.GenerateVHDL(OutputPath)
@@ -132,7 +137,7 @@ func CreateSingleVHDL() {
 
 }
 
-func RedoExternal() {
+func redoExternal() {
 	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "REDO_External_XMAA")
 	CurrentRun.ClearData()
 
@@ -190,7 +195,7 @@ func RedoExternal() {
 	CurrentRun.AddReport(*Report)
 }
 
-func RedoRec4Error(ScaleN int, Nval int) {
+func redoRec4Error(ScaleN int, Nval int) {
 	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "NEW_REDO_Rec4Run_"+strconv.Itoa(ScaleN)+"_"+strconv.Itoa(Nval))
 	CurrentRun.ClearData()
 	CurrentRun.AddData("Disc", "Full Recursive 4-bit run using M1,M2,M3,M4,Acc, N="+strconv.Itoa(ScaleN)+" i="+strconv.Itoa(Nval))
@@ -231,7 +236,7 @@ func RedoRec4Error(ScaleN int, Nval int) {
 	}
 }
 
-func AccurateRun() {
+func accurateRun() {
 	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "AccurateRunFINAL")
 	CurrentRun.ClearData()
 	CurrentRun.AddData("Disc", "AccurateRunFinal 4-bit N=1000, I=1000")
@@ -256,7 +261,7 @@ func AccurateRun() {
 	CurrentRun.AddReport(*Report)
 }
 
-func ErrorRun(ScaleN int, Nval int) {
+func errorRun(ScaleN int, Nval int) {
 	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "ErrorRun4_"+strconv.Itoa(ScaleN)+"_"+strconv.Itoa(Nval))
 	CurrentRun.ClearData()
 	CurrentRun.AddData("Disc", "Running "+strconv.Itoa(ScaleN)+" accurate 4-bit Multipliers to determine power error, i="+strconv.Itoa(Nval))
@@ -302,7 +307,7 @@ func ErrorRun(ScaleN int, Nval int) {
 	}
 }
 
-func Rec4Run(ScaleN int, Nval int) {
+func rec4Run(ScaleN int, Nval int) {
 	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "Rec4Run_"+strconv.Itoa(ScaleN)+"_"+strconv.Itoa(Nval))
 	CurrentRun.ClearData()
 	CurrentRun.AddData("Disc", "Full Recursive 4-bit run using M1,M2,M3,M4,Acc, N="+strconv.Itoa(ScaleN)+" i="+strconv.Itoa(Nval))
@@ -376,7 +381,7 @@ func Rec4Run(ScaleN int, Nval int) {
 
 }
 
-func PowerEst() {
+func powerEst() {
 	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "PowerEst")
 	CurrentRun.ClearData()
 	CurrentRun.AddData("Disc", "Running PowerEst")
@@ -413,7 +418,7 @@ func PowerEst() {
 	CreatePath(OutputPath)
 }
 
-func SingleRun(name string, Entity VHDL.VHDLEntityMultiplier, scaleN int, testi int) {
+func singleRun(name string, Entity VHDL.VHDLEntityMultiplier, scaleN int, testi int) {
 	ClearPath(OutputPath)
 	CreatePath(OutputPath)
 

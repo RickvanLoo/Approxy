@@ -2,7 +2,6 @@ package vivado
 
 import (
 	"bufio"
-	"errors"
 	"log"
 	"os"
 	"strconv"
@@ -11,8 +10,9 @@ import (
 	VHDL "github.com/RickvanLoo/Approxy/vhdl"
 )
 
+// Utilization is struct describing the physicial element utilization for a design
 type Utilization struct {
-	EntityName string `json:"-"`
+	EntityName string `json:"-"` //For identification, ignored when unmarshaling to JSON file
 	TotalLUT   int
 	LogicLUT   int
 	LUTRAMs    int
@@ -24,9 +24,9 @@ type Utilization struct {
 	CARRY      int
 }
 
-// This is needed because Vivado only 'can' (I think it's more of a want here than a technical limitation) export
-// Utilization as a proper spreadsheet, which can be easily parsed, in GUI-mode.
-// Heavy usage of horrible string manipulation in the next function
+// ParseUtilizationReport parses the exported Vivado utilization report using hacky string manipulation
+// This is needed because Vivado can only report a spreadsheet report in GUI mode, not in batch mode (?)
+// Heavy usage of horrible string manipulation in the next function, try to touch as little as possible
 func ParseUtilizationReport(FolderPath string, Entity VHDL.VHDLEntity) *Utilization {
 	util := new(Utilization)
 	filextension := "_post_place_ult.rpt"
@@ -96,32 +96,4 @@ func ParseUtilizationReport(FolderPath string, Entity VHDL.VHDLEntity) *Utilizat
 	file.Close()
 
 	return util
-}
-
-func ParseXSIMReport(FolderPath string, Entity VHDL.VHDLEntity) error {
-	fileext := "_xsimlog"
-	filename := Entity.ReturnData().EntityName + fileext
-
-	file, err := os.Open(FolderPath + "/" + filename)
-
-	if err != nil {
-		log.Fatalf("failed opening file: %s", err)
-	}
-
-	scanner := bufio.NewScanner(file)
-	scanner.Split(bufio.ScanLines)
-	var txtlines []string
-
-	for scanner.Scan() {
-		txtlines = append(txtlines, scanner.Text())
-	}
-
-	file.Close()
-
-	for _, line := range txtlines {
-		if strings.Contains(line, "!!ERROR!!PATTERN!!") {
-			return errors.New("XSIM Error Detected")
-		}
-	}
-	return nil
 }

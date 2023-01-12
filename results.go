@@ -1,4 +1,10 @@
+//go:build exclude
+
+//THIS FILE IS NOT BEING BUILD
+
 package main
+
+//This file is depricated, please use reporting/result functionality within package Approxy/vivado
 
 import (
 	"crypto/md5"
