@@ -8,25 +8,42 @@ import (
 	math_rand "math/rand"
 	"os"
 	"strconv"
-	"time"
 
 	VHDL "github.com/RickvanLoo/Approxy/vhdl"
 	Viv "github.com/RickvanLoo/Approxy/vivado"
 )
 
+// OutputPath points to the path that is used as temp folder for exported VHDL, testdata, checkpoints and Vivado report
 var OutputPath string
+
+// ReportPath point to the path that is used for Approxy Reports
 var ReportPath string
+
+// Reset clears stdout formatting
 var Reset string
+
+// Yellow adds yellow colour formatting to stdout
 var Yellow string
 
+// VivadoSettings used globally
 var VivadoSettings *Viv.VivadoTCLSettings
 
+// M1 Multiplier available globally
 var M1 *VHDL.LUT2D
+
+// M2 Multiplier available globally
 var M2 *VHDL.LUT2D
+
+// M3 Multiplier available globally
 var M3 *VHDL.LUT2D
+
+// M4 Multiplier available globally
 var M4 *VHDL.LUT2D
+
+// Acc Multiplier available globally
 var Acc *VHDL.LUT2D
 
+// ClearPath completely removes a path folder with all its contents
 // Be careful with this one
 func ClearPath(path string) {
 	err := os.RemoveAll(path)
@@ -35,6 +52,7 @@ func ClearPath(path string) {
 	}
 }
 
+// CreatePath creates the path folder described in path
 func CreatePath(path string) {
 	err := os.MkdirAll(path, os.ModePerm)
 	if err != nil {
@@ -58,9 +76,9 @@ func init() {
 
 	OutputPath = "output"
 	ReportPath = "report"
-	ClearPath(OutputPath)
-	CreatePath(OutputPath)
-	CreatePath(ReportPath)
+	// ClearPath(OutputPath)
+	// CreatePath(OutputPath)
+	// CreatePath(ReportPath)
 
 	VivadoSettings = new(Viv.VivadoTCLSettings)
 	VivadoSettings.NODSP = true
@@ -89,75 +107,61 @@ func main() {
 	PaperExample()
 }
 
-// Listing A.1 of Appendix within thesis + added timing reporting
+// PaperExample starts an Approxy Run
+// First a 4-bit Recursive Multiplier, Rec_1234, is created on basis of {M1,M2,M3,M4}
+// This Multiplier is verified using XSIM, the report is parsed, and execution of this function will fail if the design does not verify
+// A Scaler is created to be able to design and simulate 1000 times Rec_1234
+// This scaled design is synthesized, placed and routed using Vivado
+// A new XSIM environment is created for the Scaled design for PostPR analysis
+// The simulation is executed and fed i=1000 normally distributed input values
+// A report is created for this N=1000 scaled Rec_1234 and added to the Run
+// Listing A.1 of Appendix within thesis
 func PaperExample() {
 	//Start of Approxy Run
-	start := time.Now()
 	CurrentRun := Viv.StartRun(ReportPath, OutputPath, "Rec_1234")
 	CurrentRun.ClearData()
 
 	//Generation of Recursive Multipler
-	Rec_1234 := VHDL.NewRecursive4("Rec1234", [4]VHDL.VHDLEntityMultiplier{M1, M2, M3, M4})
-	Rec_1234.GenerateTestData(OutputPath)
-	Rec_1234.GenerateVHDL(OutputPath)
+	Rec1234 := VHDL.NewRecursive4("Rec1234", [4]VHDL.VHDLEntityMultiplier{M1, M2, M3, M4})
+	Rec1234.GenerateTestData(OutputPath)
+	Rec1234.GenerateVHDL(OutputPath)
 
 	//Optional Verification of Recursive4
-	verify := Viv.CreateXSIM(OutputPath, "prePR", Rec_1234.GenerateVHDLEntityArray())
+	verify := Viv.CreateXSIM(OutputPath, "prePR", Rec1234.GenerateVHDLEntityArray())
 	verify.SetTemplateMultiplier()
-	time_till_analysis := time.Since(start)
-	start = time.Now()
 
 	verify.Exec()
-	time_analysis := time.Since(start)
-	start = time.Now()
 
-	err := Viv.ParseXSIMReport(OutputPath, Rec_1234)
+	err := Viv.ParseXSIMReport(OutputPath, Rec1234)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	//Generation of N=1000 Scaler of Rec1234
-	Rec_1234_scaler := VHDL.New2DScaler(Rec_1234, 1000)
-	Rec_1234_scaler.GenerateTestData(OutputPath)
-	Rec_1234_scaler.GenerateVHDL(OutputPath)
+	Rec1234scaler := VHDL.New2DScaler(Rec1234, 1000)
+	Rec1234scaler.GenerateTestData(OutputPath)
+	Rec1234scaler.GenerateVHDL(OutputPath)
 
 	//Synth + Place + Route
-	viv := Viv.CreateVivadoTCL(OutputPath, "main.tcl", Rec_1234_scaler, VivadoSettings)
-	time_till_synth := time.Since(start)
-	start = time.Now()
+	viv := Viv.CreateVivadoTCL(OutputPath, "main.tcl", Rec1234scaler, VivadoSettings)
 
 	viv.Exec()
-	time_spr := time.Since(start)
-	start = time.Now()
 
 	//PostSynthesisAnalysis
-	post_analysis := Viv.CreateXSIM(OutputPath, "postPR", Rec_1234_scaler.GenerateVHDLEntityArray())
-	post_analysis.SetTemplateScaler(1000)
-	post_analysis.CreateFile(true)                         //Create PostPR Testbench
-	VHDL.NormalTestData(Rec_1234_scaler, OutputPath, 1000) //Create i=1000 Normal Test Data for 4-bit
-	time_beforefunc := time.Since(start)
-	start = time.Now()
+	postanalysis := Viv.CreateXSIM(OutputPath, "postPR", Rec1234scaler.GenerateVHDLEntityArray())
+	postanalysis.SetTemplateScaler(1000)
+	postanalysis.CreateFile(true)                        //Create PostPR Testbench
+	VHDL.NormalTestData(Rec1234scaler, OutputPath, 1000) //Create i=1000 Normal Test Data for 4-bit
 
-	post_analysis.Funcsim()
-	time_func := time.Since(start) //Funcsim
-	start = time.Now()
+	postanalysis.Funcsim()
 
 	viv.PowerPostPlacementGeneration() //Export PostPR data
 
 	//Create Report
-	Report := Viv.CreateReport(OutputPath, Rec_1234)
-	Report.AddData("MAE_Uniform", strconv.FormatFloat(Rec_1234.MeanAbsoluteError(), 'E', -1, 64))
-	Report.AddData("MAE_Normal_1000", strconv.FormatFloat(Rec_1234.MeanAbsoluteErrorNormalDist(1000), 'E', -1, 64))
-	Report.AddData("Overflow", strconv.FormatBool(Rec_1234.Overflow()))
-	Report.AddData("time_till_analysis", time_till_analysis.String())
-	Report.AddData("time_analysis", time_analysis.String())
-	Report.AddData("time_till_synth", time_till_synth.String())
-	Report.AddData("time_synthpr", time_spr.String())
-	Report.AddData("time_beforefunc", time_beforefunc.String())
-	Report.AddData("time_func", time_func.String())
+	Report := Viv.CreateReport(OutputPath, Rec1234scaler)
+	Report.AddData("MAE_Uniform", strconv.FormatFloat(Rec1234.MeanAbsoluteError(), 'E', -1, 64))
+	Report.AddData("MAE_Normal_1000", strconv.FormatFloat(Rec1234.MeanAbsoluteErrorNormalDist(1000), 'E', -1, 64))
+	Report.AddData("Overflow", strconv.FormatBool(Rec1234.Overflow()))
 
 	CurrentRun.AddReport(*Report)
-
-	time_reportgen := time.Since(start)
-	log.Println(time_reportgen)
 }

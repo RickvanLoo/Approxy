@@ -28,29 +28,29 @@ func startBench(b *testing.B) {
 	Acc = VHDL.New2DUnsignedAcc("Acc", 2)
 }
 
-func run2bit_N(N uint, b *testing.B) {
+func run2bitN(N uint, b *testing.B) {
 	startBench(b)
 	for i := 0; i < b.N; i++ {
 		M1.GenerateVHDL(OutputPath)
 		M1.GenerateTestData(OutputPath)
-		M1_Scaler := VHDL.New2DScaler(M1, N)
-		M1_Scaler.GenerateVHDL(OutputPath)
+		M1Scaler := VHDL.New2DScaler(M1, N)
+		M1Scaler.GenerateVHDL(OutputPath)
 		test := Viv.CreateXSIM(OutputPath, "SimBenchMarkM1", M1.GenerateVHDLEntityArray())
 		test.Exec()
 		err := Viv.ParseXSIMReport(OutputPath, M1)
 		if err != nil {
 			b.Fail()
 		}
-		synthplace := Viv.CreateVivadoTCL(OutputPath, "ExecBenchM1", M1_Scaler, VivadoSettings)
+		synthplace := Viv.CreateVivadoTCL(OutputPath, "ExecBenchM1", M1Scaler, VivadoSettings)
 		synthplace.Exec()
-		util := Viv.ParseUtilizationReport(OutputPath, M1_Scaler)
+		util := Viv.ParseUtilizationReport(OutputPath, M1Scaler)
 		if util.TotalLUT == 0 {
 			b.Fail()
 		}
 	}
 }
 
-func run4bit_N(N uint, b *testing.B) {
+func run4bitN(N uint, b *testing.B) {
 	startBench(b)
 
 	for i := 0; i < b.N; i++ {
@@ -76,7 +76,7 @@ func run4bit_N(N uint, b *testing.B) {
 	}
 }
 
-func run2bit_1(b *testing.B) {
+func run2bit1(b *testing.B) {
 	startBench(b)
 	for i := 0; i < b.N; i++ {
 		M1.GenerateVHDL(OutputPath)
@@ -96,7 +96,7 @@ func run2bit_1(b *testing.B) {
 	}
 }
 
-func run4bit_1(b *testing.B) {
+func run4bit1(b *testing.B) {
 	startBench(b)
 	for i := 0; i < b.N; i++ {
 		rec4test := VHDL.NewRecursive4("rec4bench", [4]VHDL.VHDLEntityMultiplier{M1, M1, M1, M1})
@@ -120,14 +120,14 @@ func run4bit_1(b *testing.B) {
 
 func Benchmark2bit(b *testing.B) {
 	b.Run("group", func(b *testing.B) {
-		b.Run("N=1", run2bit_1)
-		b.Run("N=10", func(b *testing.B) { run2bit_N(10, b) })
-		b.Run("N=100", func(b *testing.B) { run2bit_N(100, b) })
+		b.Run("N=1", run2bit1)
+		b.Run("N=10", func(b *testing.B) { run2bitN(10, b) })
+		b.Run("N=100", func(b *testing.B) { run2bitN(100, b) })
 	})
 }
 
 func Benchmark4bit(b *testing.B) {
-	b.Run("N=1", run4bit_1)
-	b.Run("N=10", func(b *testing.B) { run4bit_N(10, b) })
-	b.Run("N=100", func(b *testing.B) { run4bit_N(100, b) })
+	b.Run("N=1", run4bit1)
+	b.Run("N=10", func(b *testing.B) { run4bitN(10, b) })
+	b.Run("N=100", func(b *testing.B) { run4bitN(100, b) })
 }
