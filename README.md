@@ -2,6 +2,9 @@
 Golang tool generating VHDL multipliers using approximate computing. 
 
 ![Go Build](https://github.com/RickvanLoo/approxy/actions/workflows/go.yml/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/RickvanLoo/Approxy?style=flat-square)](https://goreportcard.com/report/github.com/RickvanLoo/Approxy)
+[![Go Reference](https://pkg.go.dev/badge/github.com/RickvanLoo/Approxy.svg)](https://pkg.go.dev/github.com/RickvanLoo/Approxy)
+[![Coverage Status](https://coveralls.io/repos/github/RickvanLoo/Approxy/badge.svg)](https://coveralls.io/github/RickvanLoo/Approxy)
 ![Approxy Workflow](approxy.png)
 
 ## Requirements
