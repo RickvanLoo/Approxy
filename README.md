@@ -1,6 +1,9 @@
 # Approxy
 Golang tool generating VHDL multipliers using approximate computing. 
 
+This tooling can be used to investigate various approximate computing design for (Xilinx) FPGAs, by generating VHDL and automating its analysis. 
+The final result is the best found 4-bit multiplier, using a set of referenced techniques for my Master's Thesis, but the tool is not limited to this. 
+
 ![Go Build](https://github.com/RickvanLoo/approxy/actions/workflows/go.yml/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/RickvanLoo/Approxy?style=flat-square)](https://goreportcard.com/report/github.com/RickvanLoo/Approxy)
 [![Go Reference](https://pkg.go.dev/badge/github.com/RickvanLoo/Approxy.svg)](https://pkg.go.dev/github.com/RickvanLoo/Approxy)
