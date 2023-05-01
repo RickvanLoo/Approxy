@@ -7,6 +7,8 @@ Golang tool generating VHDL multipliers using approximate computing.
 [![Coverage Status](https://coveralls.io/repos/github/RickvanLoo/Approxy/badge.svg)](https://coveralls.io/github/RickvanLoo/Approxy)
 ![Approxy Workflow](approxy.png)
 
+View the accompanied MSc Thesis here: http://essay.utwente.nl/93756/1/van%20Loo_MA_EEMSC.pdf
+
 ## Requirements
 - Go 1.17
 - "vivado", "xvhdl", "xelab" and "xsim" within $PATH
