@@ -9,6 +9,17 @@ Golang tool generating VHDL multipliers using approximate computing.
 
 View the accompanied MSc Thesis here: http://essay.utwente.nl/93756/1/van%20Loo_MA_EEMSC.pdf
 
+## Final Result
+- R1311: 4-bit, optimized for power consumption & MAE for normally distributed inputs
+- LUT/multiplier: 22.792
+- Power/multiplier: 129uW
+- MaxFreq: 817.322MHz
+- CARRY4: 0
+- Mean Absolute Error (Uniform Distributed Input): 0.01104736328125
+- Error Rate (Uniform): 49
+- Error Magnitude (Uniform): 40
+- Mean Absolute Error (Normally Distributed Input): 0.000515625
+
 ## Requirements
 - Go 1.17
 - "vivado", "xvhdl", "xelab" and "xsim" within $PATH
